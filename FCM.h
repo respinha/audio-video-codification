@@ -12,4 +12,5 @@ class FCM {
 	private:
 		int lut[][];	
 		buildLUT();
+
 }
