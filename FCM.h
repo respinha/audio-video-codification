@@ -1,17 +1,21 @@
-#include <cstring.h>
+#include <cstring>
+#include <map>
+#include <utility>
 
+using namespace std;
 class FCM {
 
 	public:
 		FCM(int order, string srcText);
-		void updateContext(int order);
+		/*void updateContext(int order);
 		void updateSrcText(string srcText);
 		void printResult();
-		void printTable();
+		void printTable();*/
 
 	private:
-		int lut[][];	
-		static int N_ALPHABET;
-		buildLUT();
+		typedef pair<string, char> Key;
+		typedef map<Key, int> LUT;
+		LUT lut;
+		int alphabetArray[27] = {};	// for zero-order case; includes whitespace ' '
 
 }
