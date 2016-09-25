@@ -31,7 +31,7 @@ FCM::FCM(unsigned int order, string srcText) {
 				alphabetArray[0]++;
 
 		} else if(i >= order)  {
-			
+
 			Key key = Key(approximation,srcText[i]);
 			if(lut.find(key) == lut.end()) 	{// key combination doesn't exist
 				pair<Key,int> keyPair = make_pair(key,1);
@@ -39,10 +39,13 @@ FCM::FCM(unsigned int order, string srcText) {
 			}
 			else 
 				lut[key]++;	
-
+			
+			// move on
 			n++;
-			if(n == order) n = 0;
-			approximation.erase(0,1);
+			if(n == order) {
+				n = 0;
+				approximation.erase(0,1);
+			}
 		}
 	}
 
