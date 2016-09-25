@@ -18,3 +18,7 @@
 *.so
 *.dylib
 *.dll
+
+### OTHERS ###
+# Glue terminal (Sublime)
+*.glue
