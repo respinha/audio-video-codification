@@ -1,12 +1,13 @@
-#include <cstring>
+#include <string>
 #include <map>
 #include <utility>
 
 using namespace std;
+
 class FCM {
 
 	public:
-		FCM(int order, string srcText);
+		FCM(unsigned int order,	 string srcText);
 		/*void updateContext(int order);
 		void updateSrcText(string srcText);
 		void printResult();
@@ -16,6 +17,6 @@ class FCM {
 		typedef pair<string, char> Key;
 		typedef map<Key, int> LUT;
 		LUT lut;
-		int alphabetArray[27] = {};	// for zero-order case; includes whitespace ' '
+		int alphabetArray[27];	// for zero-order case; includes whitespace ' '
 
-}
+};

@@ -4,45 +4,56 @@
 #include <iostream>
 #include <ctype.h>
 
-class FCM
-{
-	public:
-		// build LUT
-		FCM(unsigned int order, string srcText) {
+FCM::FCM(unsigned int order, string srcText) {
 
-			string approximation;			
-			int n = 0;
+	// build LUT
+	string approximation;			
+	int n = 0;
 
-			// iterate over source text
-			for(int i = 0; i < srcText.size()+1; i++) {
-				// first operation: save the previous character
-				if(i >= 0) 
-					approximation[n] = srcText[i-1];
-				if(order == 0) {	
-					// zero-order
-					// only alphabetical unidimensional array is needed
+	// iterate over source text
+	for(int i = 0; i < srcText.size(); i++) {
+		// first operation: save the previous character
 
-					if(!isspace(srcText[i])) 
-					{
-						int alphabetPosition = srcText[i] - 'a' + 1;
-						alphabetArray[alphabetPosition]++;				
-					} else // whitespace
-						alphabetArray[0]++;
+		if(i >= 1) 
+			approximation += srcText[i-1];
 
-				} else if(i >= order)  {
+		cout << "I'm here! " << approximation << "\n";
+		
+		if(order == 0) {	
+			// zero-order
+			// only alphabetical unidimensional array is needed
 
-					Key key = Key(approximation,srcText[i]);
-					if(lut.find(key) == lut.end()) 	// key combination doesn't exist
-						lut.insert(key, 1);
-					else 
-						lut[key]++;	
+			if(!isspace(srcText[i])) 
+			{
+				int alphabetPosition = srcText[i] - 'a' + 1;
+				alphabetArray[alphabetPosition]++;				
+			} else // whitespace
+				alphabetArray[0]++;
 
-				}
+		} else if(i >= order)  {
+			
+			Key key = Key(approximation,srcText[i]);
+			if(lut.find(key) == lut.end()) 	{// key combination doesn't exist
+				pair<Key,int> keyPair = make_pair(key,1);
+				lut.insert(keyPair	);
 			}
-		}		
+			else 
+				lut[key]++;	
 
-		~FCM();
+			n++;
+			if(n == order) n = 0;
+			approximation.erase(0,1);
+		}
+	}
 
-	private:
+	if(order > 0) {
+		typedef LUT::iterator it_type;
 
-};		
+		for(it_type it = lut.begin(); it != lut.end(); it++) {
+			Key key = it->first;
+			cout << "Key first: " << key.first << "\n"; 
+			cout << "Keysecond: " << key.second << "\n";
+			cout << "Value: " << it->second << "\n";
+		}
+	}
+}		
