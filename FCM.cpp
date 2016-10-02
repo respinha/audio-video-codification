@@ -3,12 +3,21 @@
 #include <cmath>
 #include <iostream>
 #include <ctype.h>
+#include <vector>
 
 FCM::FCM(unsigned int order, string srcText) {
+
+	if(order > srcText.size()) {
+		cout << "No can do\n";
+		return;
+	}
+
 
 	// build LUT
 	string approximation;			
 	unsigned int n = 0;
+
+	map<string, float> counters;
 
 	// iterate over source text
 	for(int i = 0; i < srcText.size(); i++) 
@@ -18,10 +27,9 @@ FCM::FCM(unsigned int order, string srcText) {
 		if(i >= 1) 
 			approximation += srcText[i-1];
 
-		
 		if(order == 0) 
 		{	
-			// zero-order
+			// zero-order -> no context                                                              		
 			// only alphabetical unidimensional array is needed
 
 			if(!isspace(srcText[i])) 
@@ -34,47 +42,68 @@ FCM::FCM(unsigned int order, string srcText) {
 		} else if(i >= order)  
 		{
 
-			Key key = Key(approximation,srcText[i]);
-			
-			typedef LUT::iterator it_lut;
 			bool found = false;
-			
+			typedef LUT::iterator it_lut;
+
 			for(it_lut it = lut.begin(); it != lut.end(); it++) 
 			{
-				// cout << "approximation: " << approximation << "\n";
-				// cout << "first: " << it->first.first << "\n";
-				// cout << "second: " << it->first.second << "\n";
-				if(it->first.first.compare(approximation) == 0 && it->first.second == (char) srcText[i])
+				if(it->first.compare(approximation) == 0)
 				{
+					if(it->second.find(srcText[i]) != it->second.end()) {
+						it->second[srcText[i]]++;
+					} else {
+						it->second.insert(make_pair(srcText[i], 1));
+					}
 
 					found = true;
-	
 					break;
-				}
-				cout << "Found: " << found << "\n";			 
+				} 
+
 			}
 
-			if(!found) 	{// key combination doesn't exist
-				pair<Key,int> keyPair = make_pair(key,1);
-				lut.insert(keyPair);
-			}
-			else 
-				lut[key]++;	
 
+			if(!found) {
+				map<char, float> values;
+				values.insert(make_pair((char)srcText[i], 1));
+				lut.insert(make_pair(approximation, values));
+			}
+
+
+			counters[approximation]++;	
 			// move on
-			approximation.erase(0,1);		
+			approximation.erase(0,1);	
+		}
+
+	}
+
+	/*if(order > 0) {
+
+		for(it_lut it = lut.begin(); it != lut.end(); it++) {
+			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
+			}
+		}
+	}
+
+	for(it_lut it = lut.begin(); it != lut.end(); it++) {
+		int total = counters[it->first];
+
+		float accumulated = 0;
+		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+
+			accumulated += (float) ((it2->second)/total);
+			it2->second = accumulated;
 		}
 
 	}
 
 	if(order > 0) {
-		typedef LUT::iterator it_type;
 
-		for(it_type it = lut.begin(); it != lut.end(); it++) {
-			Key key = it->first;
-			cout << "Key first: " << key.first << "\n"; 
-			cout << "Keysecond: " << key.second << "\n";
-			cout << "Value: " << it->second << "\n";
+		for(it_lut it = lut.begin(); it != lut.end(); it++) {
+			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
+			}
 		}
-	}
+	}*/
+
 }		
