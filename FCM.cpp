@@ -3,7 +3,6 @@
 #include <cmath>
 #include <iostream>
 #include <ctype.h>
-#include <vector>
 
 FCM::FCM(unsigned int order, string srcText) {
 
@@ -61,7 +60,6 @@ FCM::FCM(unsigned int order, string srcText) {
 
 			}
 
-
 			if(!found) {
 				map<char, float> values;
 				values.insert(make_pair((char)srcText[i], 1));
@@ -76,27 +74,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 	}
 
-	/*if(order > 0) {
-
-		for(it_lut it = lut.begin(); it != lut.end(); it++) {
-			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
-			}
-		}
-	}
-
-	for(it_lut it = lut.begin(); it != lut.end(); it++) {
-		int total = counters[it->first];
-
-		float accumulated = 0;
-		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-
-			accumulated += (float) ((it2->second)/total);
-			it2->second = accumulated;
-		}
-
-	}
-
+	cout << "###### COUNTS ######\n";
 	if(order > 0) {
 
 		for(it_lut it = lut.begin(); it != lut.end(); it++) {
@@ -104,6 +82,30 @@ FCM::FCM(unsigned int order, string srcText) {
 				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
 			}
 		}
-	}*/
+	}
+
+
+
+	for(it_lut it = lut.begin(); it != lut.end(); it++) {
+		float total = counters[it->first];
+
+		float accumulated = 0;
+		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+
+			accumulated += ((it2->second)/total);
+			it2->second = accumulated;
+		}
+
+	}
+
+	cout << "###### ACCUMULATED ######\n";
+		if(order > 0) {
+
+		for(it_lut it = lut.begin(); it != lut.end(); it++) {
+			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
+			}
+		}
+	}
 
 }		

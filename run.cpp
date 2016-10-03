@@ -1,11 +1,12 @@
 #include "FCM.cpp"
 #include <iostream>
 #include <string>
-int main() {
 
-	string str = "o balao do joao";
+int main(int argc, 	char** argv) {
 
-	FCM test(2, str);
+	string text(argv[1]);
+
+	FCM test(2, text);
 
 	return 0;
 }

@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 
+
 using namespace std;
 
 class FCM {
@@ -10,10 +11,10 @@ class FCM {
 	public:	
 		FCM(unsigned int order,	 string srcText);
 
-		/*void updateContext(int order);
-		void updateSrcText(string srcText);
-		void printResult();
-		void printTable();*/
+		/*void saveTable(LUT lut);
+		void loadTable(string fileName)
+		void loadTextFile(string srcText);
+		void genText(LUT lut, int len);*/
 
 	private:		
 		typedef map<string, map<char,float> > LUT;	// <context, array of values>
