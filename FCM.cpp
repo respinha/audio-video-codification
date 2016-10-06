@@ -3,8 +3,13 @@
 #include <cmath>
 #include <iostream>
 #include <ctype.h>
+#include <fstream>
+#include <stdio.h>
 
+const string FCM::TEXT_SEPARATOR = "\n////////_________\n";
 FCM::FCM(unsigned int order, string srcText) {
+
+	
 
 	if(order > srcText.size()) {
 		cout << "No can do\n";
@@ -74,15 +79,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 	}
 
-	cout << "###### COUNTS ######\n";
-	if(order > 0) {
-
-		for(it_lut it = lut.begin(); it != lut.end(); it++) {
-			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
-			}
-		}
-	}
+	
 
 
 
@@ -98,14 +95,38 @@ FCM::FCM(unsigned int order, string srcText) {
 
 	}
 
-	cout << "###### ACCUMULATED ######\n";
-		if(order > 0) {
+	
 
-		for(it_lut it = lut.begin(); it != lut.end(); it++) {
-			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-				cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
-			}
+	saveTable();
+	//loadTable("saved_LUT");
+}		
+
+void FCM::saveTable() {
+
+
+	fstream myfile("saved_LUT", ios::out | ios::binary);
+
+	string output;
+	for(it_lut it = lut.begin(); it != lut.end(); it++) {
+		string context = it->first;
+		myfile.write(reinterpret_cast<const char*>( &context ), sizeof(string));
+		char n = '\n';
+		myfile.write(reinterpret_cast<const char*>(&n), sizeof(char));
+		
+		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+			char c = it2->first;
+			myfile.write(reinterpret_cast<const char*>( &c ),sizeof(char));
+			float f = it2->second;
+			myfile.write(reinterpret_cast<const char*>(&f),sizeof(float));
+
+			myfile.write(reinterpret_cast<const char*>( &FCM::TEXT_SEPARATOR ), sizeof(string));	
 		}
 	}
 
-}		
+	myfile.close();
+}
+
+void FCM::loadTable(string fileName) {
+
+	/* */
+}
