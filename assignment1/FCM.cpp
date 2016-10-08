@@ -172,7 +172,8 @@ void FCM::genText(int len) {
 		approximation.erase(0,1);
 		i++;
 	}	
+	
+
 
 	cout << text << "\n";
-
 }
