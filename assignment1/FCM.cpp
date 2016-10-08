@@ -1,10 +1,12 @@
-// todo
 #include "FCM.h"
 #include <cmath>
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
 #include <stdio.h>
+#include <cstdlib>
+
+#include <ctime>       /* time */
 
 const string FCM::TEXT_SEPARATOR = "\n////////_________\n";
 FCM::FCM(unsigned int order, string srcText) {
@@ -30,6 +32,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 		if(i >= 1) 
 			approximation += srcText[i-1];
+		
 
 		if(order == 0) 
 		{	
@@ -45,6 +48,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 		} else if(i >= order)  
 		{
+			if(i == order) firstWord = approximation;
 
 			bool found = false;
 			typedef LUT::iterator it_lut;
@@ -95,12 +99,20 @@ FCM::FCM(unsigned int order, string srcText) {
 
 	}
 
+	//printLUT();
 	
-
-	saveTable();
+	//saveTable();
 	//loadTable("saved_LUT");
 }		
 
+void FCM::printLUT() {
+	for(it_lut it = lut.begin(); it != lut.end(); it++) {
+		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+			cout << it->first << ": " << it2->first << ": " << it2->second << "\n";
+		}
+	}
+
+}
 void FCM::saveTable() {
 
 
@@ -123,10 +135,44 @@ void FCM::saveTable() {
 		}
 	}
 
+	
 	myfile.close();
 }
 
 void FCM::loadTable(string fileName) {
 
 	/* */
+}
+
+void FCM::genText(int len) {
+
+	
+	string text(firstWord);
+	string approximation(firstWord);
+	int i = approximation.size()-1;
+
+	srand(time(NULL));
+	while(i < len) {
+
+		map<char,float> contextMap = lut[approximation];
+
+		
+		float r = ((float) rand() / (RAND_MAX));
+		cout << r << "\n";
+		for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
+
+			if(r <= it->second) {				
+				text.push_back(it->first);
+				approximation.push_back(it->first);
+				break;
+			}
+		}
+
+
+		approximation.erase(0,1);
+		i++;
+	}	
+
+	cout << text << "\n";
+
 }

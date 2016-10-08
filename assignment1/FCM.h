@@ -12,14 +12,16 @@ class FCM {
 		FCM(unsigned int order,	 string srcText);
 		void saveTable();
 		void loadTable(string fileName);
-		typedef map<string, map<char,float> > LUT;	// <context, array of values>
+		void genText(int len);
 
+		typedef map<string, map<char,float> > LUT;	// <context, array of values>
 		/*
 		
 		void loadTextFile(string srcText);
-		void genText(LUT lut, int len);*/
+		*/
 
 	private:		
+		void printLUT();
 		
 		LUT lut;
 		typedef LUT::iterator it_lut;
@@ -27,5 +29,5 @@ class FCM {
 
 		int alphabetArray[27];	// for zero-order case; includes whitespace ' '
 		static const string TEXT_SEPARATOR;
-
+		string firstWord;
 };
