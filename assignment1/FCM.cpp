@@ -5,13 +5,14 @@
 #include <fstream>
 #include <stdio.h>
 #include <cstdlib>
-
+#include <sstream>
 #include <ctime>       
 
 const string FCM::TEXT_SEPARATOR = "\n////////_________\n";
 FCM::FCM(unsigned int order, string srcText) {
 
 	initDict();
+
 	if(order > srcText.size()) {
 		cout << "No can do\n";
 		return;
@@ -28,9 +29,11 @@ FCM::FCM(unsigned int order, string srcText) {
 	for(int i = 0; i < srcText.size(); i++) 
 	{
 		// first operation: save the previous character
+		if(i >= 1) approximation += srcText[i-1];
 
-		if(i >= 1) 
-			approximation += srcText[i-1];
+
+		if(dict.find(srcText[i]) != dict.end()) 
+			srcText[i] = dict[srcText[i]];	
 		
 
 		if(order == 0) 
@@ -47,6 +50,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 		} else if(i >= order)  
 		{
+
 			if(i == order) firstWord = approximation;
 
 			bool found = false;
@@ -79,8 +83,7 @@ FCM::FCM(unsigned int order, string srcText) {
 			// move on
 			approximation.erase(0,1);	
 		}
-
-	}
+	} 
 
 	for(it_lut it = lut.begin(); it != lut.end(); it++) {
 		float total = counters[it->first];
@@ -94,6 +97,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 	}
 
+	//printLUT();
 
 }		
 
@@ -125,7 +129,7 @@ void FCM::genText(int len) {
 
 		
 		float r = ((float) rand() / (RAND_MAX));
-		cout << r << "\n";
+		//cout << r << "\n";
 		for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
 
 			if(r <= it->second) {				
@@ -140,8 +144,7 @@ void FCM::genText(int len) {
 		i++;
 	}	
 	
-
-
+	cout << "$$$$$$$\n";
 	cout << text << "\n";
 }
 
@@ -153,3 +156,4 @@ float FCM::calcEntropy(LUT l) {
 		}
 	}
 }
+
