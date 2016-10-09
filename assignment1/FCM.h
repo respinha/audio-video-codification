@@ -12,7 +12,7 @@ class FCM {
 		FCM(unsigned int order,	 string srcText);
 		
 		void loadTable(string fileName);
-		void genText(int len);
+		void genText(int len, int order);
 
 		typedef map<string, map<char,float> > LUT;	// <context, array of values>
 		void loadTextFile(string srcText);

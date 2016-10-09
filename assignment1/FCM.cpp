@@ -47,7 +47,9 @@ FCM::FCM(unsigned int order, string srcText) {
 
 					map<char, float> values;
 					values.insert(make_pair((char)srcText[i], 1));
-					lut.insert(make_pair("key", values));	
+					firstWord = "key";
+					counters.insert(make_pair(firstWord, 1));
+					lut.insert(make_pair(firstWord, values));	
 				
 				}
 				else {
@@ -56,6 +58,8 @@ FCM::FCM(unsigned int order, string srcText) {
 					} else {
 							lut.begin()->second.insert(make_pair(srcText[i], 1));
 					}
+
+					counters[firstWord]++;
 				}
 
 				
@@ -98,19 +102,22 @@ FCM::FCM(unsigned int order, string srcText) {
 	} 
 
 	cout << calcEntropy(lut, counters, total, order) << "\n";
+
+
 	for(it_lut it = lut.begin(); it != lut.end(); it++) {
-		float total = counters[it->first];
+		float contextTotal = counters[it->first];
 
 		float accumulated = 0;
 		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
 
-			accumulated += ((it2->second)/total);
+			accumulated += ((it2->second)/contextTotal);
 			it2->second = accumulated;
 		}
 
 	}
 
-	//printLUT();
+
+	printLUT();
 
 }		
 
@@ -127,37 +134,52 @@ void FCM::loadTable(string fileName) {
 
 }
 
-void FCM::genText(int len) {
+void FCM::genText(int len, int order) {
 
 
-	string text(firstWord);
-	string approximation(firstWord);
-	int i = approximation.size()-1;
+	string text((order != 0) ? firstWord : "");
+	string approximation(text);
+	int i = (order != 0) ? approximation.size()-1 : 0;
 
 	srand(time(NULL));
 	while(i < len) {
 
-		map<char,float> contextMap = lut[approximation];
-
-		
 		float r = ((float) rand() / (RAND_MAX));
-		//cout << r << "\n";
-		for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
 
-			if(r <= it->second) {				
-				text.push_back(it->first);
-				approximation.push_back(it->first);
-				break;
+		if(order == 0) {
+			for(it_map it = lut.begin()->second.begin(); it != lut.begin()->second.end(); it++) {
+				if(r <= it->second) {				
+					text.push_back(it->first);
+					break;
+				}
+
 			}
+
+			i++;
+			continue;
 		}
+		else {
+			map<char,float> contextMap = lut[approximation];
+
+			
+			//cout << r << "\n";
+			for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
+
+				if(r <= it->second) {				
+					text.push_back(it->first);
+					approximation.push_back(it->first);
+					break;
+				}
+			}
 
 
-		approximation.erase(0,1);
-		i++;
+			approximation.erase(0,1);
+			i++;
+		}
 	}	
 	
-	//cout << "$$$$$$$\n";
-	//cout << text << "\n";
+	cout << "$$$$$$$\n";
+	cout << text << "\n";
 }
 
 float FCM::calcEntropy(LUT l, map<string, float> counters, float total, int order) {
