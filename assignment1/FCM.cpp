@@ -23,6 +23,7 @@ FCM::FCM(unsigned int order, string srcText) {
 	string approximation;			
 	unsigned int n = 0;
 
+	float total = 0;
 	map<string, float> counters;
 
 	// iterate over source text
@@ -50,7 +51,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 		} else if(i >= order)  
 		{
-
+			total++;
 			if(i == order) firstWord = approximation;
 
 			bool found = false;
@@ -85,6 +86,7 @@ FCM::FCM(unsigned int order, string srcText) {
 		}
 	} 
 
+	calcEntropy(lut, counters, total);
 	for(it_lut it = lut.begin(); it != lut.end(); it++) {
 		float total = counters[it->first];
 
@@ -144,16 +146,32 @@ void FCM::genText(int len) {
 		i++;
 	}	
 	
-	cout << "$$$$$$$\n";
-	cout << text << "\n";
+	//cout << "$$$$$$$\n";
+	//cout << text << "\n";
 }
 
-float FCM::calcEntropy(LUT l) {
+float FCM::calcEntropy(LUT l, map<string, float> counters, float total) {
 
+
+    float totalEntropy = 0;
 	for(it_lut it = l.begin(); it != l.end(); it++) {
+		// context
+
+		float sumLine = counters[it->first];
+		float localEntropy = 0;	
+
 		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
 
+			// 
+
+			float prob = it2->second/sumLine;
+			localEntropy += -(prob * log2(prob));
 		}
+
+		totalEntropy += (localEntropy * (sumLine/total));
+		
 	}
+
+	return totalEntropy;
 }
 

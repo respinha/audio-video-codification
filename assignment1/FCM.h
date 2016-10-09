@@ -28,7 +28,7 @@ class FCM {
 		int alphabetArray[ALPHABET_SIZE];	// for zero-order case; includes whitespace ' '
 		static const string TEXT_SEPARATOR;
 		string firstWord;
-		float calcEntropy(LUT l);
+		float calcEntropy(LUT l, map<string, float> counters, float total);
 
 		map<char, char> dict;
 		void initDict() {
