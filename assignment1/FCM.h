@@ -25,10 +25,12 @@ class FCM {
 		typedef LUT::iterator it_lut;
 		typedef map<char,float>::iterator it_map;	
 
+		string firstWord;
+
 		int alphabetArray[ALPHABET_SIZE];	// for zero-order case; includes whitespace ' '
 		static const string TEXT_SEPARATOR;
-		string firstWord;
-		float calcEntropy(LUT l, map<string, float> counters, float total);
+		
+		float calcEntropy(LUT l, map<string, float> counters, float total, int order);
 
 		map<char, char> dict;
 		void initDict() {
@@ -62,5 +64,5 @@ class FCM {
 
 			dict.insert(make_pair('ñ', 'n'));
 		}
-		
+
 };

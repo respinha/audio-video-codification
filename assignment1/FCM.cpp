@@ -18,75 +18,86 @@ FCM::FCM(unsigned int order, string srcText) {
 		return;
 	}
 
-
-	// build LUT
 	string approximation;			
 	unsigned int n = 0;
 
 	float total = 0;
 	map<string, float> counters;
 
+	
+
 	// iterate over source text
 	for(int i = 0; i < srcText.size(); i++) 
 	{
 		// first operation: save the previous character
-		if(i >= 1) approximation += srcText[i-1];
+		if(i >= 1  && order != 0) approximation += srcText[i-1];
 
 
 		if(dict.find(srcText[i]) != dict.end()) 
 			srcText[i] = dict[srcText[i]];	
 		
-
-		if(order == 0) 
-		{	
-			// zero-order -> no context                                                              		
-			// only alphabetical unidimensional array is needed
-
-			if(!isspace(srcText[i])) 
-			{
-				int alphabetPosition = srcText[i] - 'a' + 1;
-				alphabetArray[alphabetPosition]++;				
-			} else // whitespace
-				alphabetArray[0]++;
-
-		} else if(i >= order)  
+		if(i >= order)  
 		{
 			total++;
-			if(i == order) firstWord = approximation;
 
 			bool found = false;
-			typedef LUT::iterator it_lut;
+			if(order == 0) {
 
-			for(it_lut it = lut.begin(); it != lut.end(); it++) 
-			{
-				if(it->first.compare(approximation) == 0)
-				{
-					if(it->second.find(srcText[i]) != it->second.end()) {
-						it->second[srcText[i]]++;
+				if(lut.size() == 0) {
+
+					map<char, float> values;
+					values.insert(make_pair((char)srcText[i], 1));
+					lut.insert(make_pair("key", values));	
+				
+				}
+				else {
+					if(lut.begin()->second.find(srcText[i]) != lut.begin()->second.end()) {
+						lut.begin()->second[srcText[i]]++;
 					} else {
-						it->second.insert(make_pair(srcText[i], 1));
+							lut.begin()->second.insert(make_pair(srcText[i], 1));
 					}
+				}
 
-					found = true;
-					break;
-				} 
+				
 
 			}
+			else {
+				if(i == order) firstWord = approximation;
 
-			if(!found) {
-				map<char, float> values;
-				values.insert(make_pair((char)srcText[i], 1));
-				lut.insert(make_pair(approximation, values));
-			}	
+				
+				typedef LUT::iterator it_lut;
+
+				for(it_lut it = lut.begin(); it != lut.end(); it++) 
+				{
+					if(it->first.compare(approximation) == 0)
+					{
+						if(it->second.find(srcText[i]) != it->second.end()) {
+							it->second[srcText[i]]++;
+						} else {
+							it->second.insert(make_pair(srcText[i], 1));
+						}
+
+						found = true;
+						break;
+					} 
+
+				}
+
+				if(!found) {
+					map<char, float> values;
+					values.insert(make_pair((char)srcText[i], 1));
+					lut.insert(make_pair(approximation, values));
+				}	
 
 
-			counters[approximation]++;	
-			// move on
-			approximation.erase(0,1);	
+				counters[approximation]++;	
+				// move on
+				approximation.erase(0,1);	
+			}
 		}
 	} 
 
-	calcEntropy(lut, counters, total);
+	cout << calcEntropy(lut, counters, total, order) << "\n";
 	for(it_lut it = lut.begin(); it != lut.end(); it++) {
 		float total = counters[it->first];
 
@@ -113,7 +124,6 @@ void FCM::printLUT() {
 }
 
 void FCM::loadTable(string fileName) {
-
 
 }
 
@@ -150,10 +160,18 @@ void FCM::genText(int len) {
 	//cout << text << "\n";
 }
 
-float FCM::calcEntropy(LUT l, map<string, float> counters, float total) {
-
+float FCM::calcEntropy(LUT l, map<string, float> counters, float total, int order) {
 
     float totalEntropy = 0;
+
+    if(order == 0) {
+    	for(it_map it = l.begin()->second.begin(); it != l.begin()->second.end(); it++) {
+    		float prob = it->second/total;
+    		totalEntropy += -prob*log2(prob);
+    	}
+
+    	return totalEntropy	;
+    }
 	for(it_lut it = l.begin(); it != l.end(); it++) {
 		// context
 
@@ -162,16 +180,15 @@ float FCM::calcEntropy(LUT l, map<string, float> counters, float total) {
 
 		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
 
-			// 
+			// symbols in each context
 
 			float prob = it2->second/sumLine;
 			localEntropy += -(prob * log2(prob));
 		}
 
 		totalEntropy += (localEntropy * (sumLine/total));
-		
 	}
+
 
 	return totalEntropy;
 }
-
