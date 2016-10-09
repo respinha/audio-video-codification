@@ -145,37 +145,21 @@ void FCM::genText(int len, int order) {
 	while(i < len) {
 
 		float r = ((float) rand() / (RAND_MAX));
-
-		if(order == 0) {
-			for(it_map it = lut.begin()->second.begin(); it != lut.begin()->second.end(); it++) {
-				if(r <= it->second) {				
-					text.push_back(it->first);
-					break;
-				}
-
+		
+		map<char,float> contextMap = (order != 0) ? lut[approximation] : lut.begin()->second;
+		
+		for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
+			if(r <= it->second) {				
+				text.push_back(it->first);
+				approximation.push_back(it->first);
+				break;
 			}
 
-			i++;
-			continue;
 		}
-		else {
-			map<char,float> contextMap = lut[approximation];
 
-			
-			//cout << r << "\n";
-			for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
-
-				if(r <= it->second) {				
-					text.push_back(it->first);
-					approximation.push_back(it->first);
-					break;
-				}
-			}
-
-
-			approximation.erase(0,1);
-			i++;
-		}
+		approximation.erase(0,1);
+		i++;
+		
 	}	
 	
 	cout << "$$$$$$$\n";
