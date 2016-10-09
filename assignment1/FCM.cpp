@@ -6,13 +6,12 @@
 #include <stdio.h>
 #include <cstdlib>
 
-#include <ctime>       /* time */
+#include <ctime>       
 
 const string FCM::TEXT_SEPARATOR = "\n////////_________\n";
 FCM::FCM(unsigned int order, string srcText) {
 
-	
-
+	initDict();
 	if(order > srcText.size()) {
 		cout << "No can do\n";
 		return;
@@ -73,7 +72,7 @@ FCM::FCM(unsigned int order, string srcText) {
 				map<char, float> values;
 				values.insert(make_pair((char)srcText[i], 1));
 				lut.insert(make_pair(approximation, values));
-			}
+			}	
 
 
 			counters[approximation]++;	
@@ -82,10 +81,6 @@ FCM::FCM(unsigned int order, string srcText) {
 		}
 
 	}
-
-	
-
-
 
 	for(it_lut it = lut.begin(); it != lut.end(); it++) {
 		float total = counters[it->first];
@@ -99,10 +94,7 @@ FCM::FCM(unsigned int order, string srcText) {
 
 	}
 
-	//printLUT();
-	
-	//saveTable();
-	//loadTable("saved_LUT");
+
 }		
 
 void FCM::printLUT() {
@@ -113,40 +105,15 @@ void FCM::printLUT() {
 	}
 
 }
-void FCM::saveTable() {
-
-
-	fstream myfile("saved_LUT", ios::out | ios::binary);
-
-	string output;
-	for(it_lut it = lut.begin(); it != lut.end(); it++) {
-		string context = it->first;
-		myfile.write(reinterpret_cast<const char*>( &context ), sizeof(string));
-		char n = '\n';
-		myfile.write(reinterpret_cast<const char*>(&n), sizeof(char));
-		
-		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-			char c = it2->first;
-			myfile.write(reinterpret_cast<const char*>( &c ),sizeof(char));
-			float f = it2->second;
-			myfile.write(reinterpret_cast<const char*>(&f),sizeof(float));
-
-			myfile.write(reinterpret_cast<const char*>( &FCM::TEXT_SEPARATOR ), sizeof(string));	
-		}
-	}
-
-	
-	myfile.close();
-}
 
 void FCM::loadTable(string fileName) {
 
-	/* */
+
 }
 
 void FCM::genText(int len) {
 
-	
+
 	string text(firstWord);
 	string approximation(firstWord);
 	int i = approximation.size()-1;
@@ -176,4 +143,13 @@ void FCM::genText(int len) {
 
 
 	cout << text << "\n";
+}
+
+float FCM::calcEntropy(LUT l) {
+
+	for(it_lut it = l.begin(); it != l.end(); it++) {
+		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+
+		}
+	}
 }
