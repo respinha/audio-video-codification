@@ -9,7 +9,8 @@
 #include <ctime>       
 
 const string FCM::FILENAME = "saved_LUT";
-FCM::FCM(unsigned int order, string srcText, int len) {
+
+FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 	LUT lut;
 	initDict();
@@ -44,8 +45,6 @@ FCM::FCM(unsigned int order, string srcText, int len) {
 	unsigned int n = 0;
 
 	
-	
-
 	// iterate over source text
 	for(int i = 0; i < srcText.size(); i++) 
 	{
@@ -123,8 +122,9 @@ FCM::FCM(unsigned int order, string srcText, int len) {
 
 	cout << "Entropy: " << calcEntropy(lut, counters, total, order) << "\n";
 
-	//printTable(lut);
 	saveTable(lut);
+
+	// accumulated probabilities for text generation
 	for(it_lut it = lut.begin(); it != lut.end(); it++) {
 		float contextTotal = counters[it->first];
 
@@ -138,9 +138,6 @@ FCM::FCM(unsigned int order, string srcText, int len) {
 	}
 
 	genText(lut, len, order);
-	LUT tmp = loadTable("saved_LUT");
-
-	printTable(tmp);
 
 }		
 
