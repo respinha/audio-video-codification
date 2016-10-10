@@ -19,12 +19,31 @@ FCM::FCM(unsigned int order, string srcText, int len) {
 		return;
 	}
 
-	string approximation;			
-	unsigned int n = 0;
+	ifstream stream(FILENAME.c_str());
 
+	cout << stream.good() << "\n";
 	float total = 0;
 	map<string, float> counters;
 
+	if(stream.good()) {
+		lut = loadTable(FILENAME);
+		for(it_lut it = lut.begin(); it != lut.end(); it++) 
+		{
+			counters.insert(make_pair(it->first, 0));
+			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++)
+			{
+				counters[it->first] += it2->second;
+
+			}
+
+			total += counters[it->first];
+		}
+	}
+	
+	string approximation;			
+	unsigned int n = 0;
+
+	
 	
 
 	// iterate over source text
@@ -121,7 +140,7 @@ FCM::FCM(unsigned int order, string srcText, int len) {
 	genText(lut, len, order);
 	LUT tmp = loadTable("saved_LUT");
 
-	//printTable(tmp);
+	printTable(tmp);
 
 }		
 
