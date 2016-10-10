@@ -9,28 +9,24 @@ using namespace std;
 class FCM {
 
 	public:	
-		FCM(unsigned int order,	 string srcText);
-		
-		void loadTable(string fileName);
-		void genText(int len, int order);
-
+		FCM(unsigned int order,	 string srcText, int len);		
 		typedef map<string, map<char,float> > LUT;	// <context, array of values>
-		void loadTextFile(string srcText);
+		void genText(LUT lut, int len, int order);
 
+		
 	private:		
-		void printLUT();
+		void loadTextFile(string srcText);
+		LUT loadTable(string fileName);
+		void saveTable(LUT l);
+		void printTable(LUT l);
+		float calcEntropy(LUT l, map<string, float> counters, float total, int order);
 
-		const static int ALPHABET_SIZE = 27;
-		LUT lut;
+		
 		typedef LUT::iterator it_lut;
 		typedef map<char,float>::iterator it_map;	
 
 		string firstWord;
-
-		int alphabetArray[ALPHABET_SIZE];	// for zero-order case; includes whitespace ' '
-		static const string TEXT_SEPARATOR;
-		
-		float calcEntropy(LUT l, map<string, float> counters, float total, int order);
+		static const string FILENAME;
 
 		map<char, char> dict;
 		void initDict() {
