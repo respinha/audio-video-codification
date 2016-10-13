@@ -21,7 +21,9 @@ class FCM {
 		void printTable(LUT l);
 		float calcEntropy(LUT l, map<string, float> counters, float total, int order);
 
-		
+		map<string, float> counters;
+		float total;
+
 		typedef LUT::iterator it_lut;
 		typedef map<char,float>::iterator it_map;	
 

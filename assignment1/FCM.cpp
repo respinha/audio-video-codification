@@ -12,6 +12,7 @@ const string FCM::FILENAME = "saved_LUT";
 
 FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
+	cout << "coiso: " << srcText.size() << "\n";
 	LUT lut;
 	initDict();
 
@@ -23,13 +24,14 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 	ifstream stream(FILENAME.c_str());
 
 	cout << stream.good() << "\n";
-	float total = 0;
-	map<string, float> counters;
+	total = 0;
 
 	if(stream.good()) {
-		lut = loadTable(FILENAME);
+
+		lut = loadTable(FILENAME);	
 		for(it_lut it = lut.begin(); it != lut.end(); it++) 
 		{
+
 			counters.insert(make_pair(it->first, 0));
 			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++)
 			{
@@ -39,12 +41,13 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 			total += counters[it->first];
 		}
+		cout << "after load \n";
 	}
-	
+
 	string approximation;			
 	unsigned int n = 0;
 
-	
+
 	// iterate over source text
 	for(int i = 0; i < srcText.size(); i++) 
 	{
@@ -54,7 +57,7 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 		if(dict.find(srcText[i]) != dict.end()) 
 			srcText[i] = dict[srcText[i]];	
-		
+
 		if(i >= order)  
 		{
 			total++;
@@ -69,25 +72,25 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 					firstWord = "key";
 					counters.insert(make_pair(firstWord, 1));
 					lut.insert(make_pair(firstWord, values));	
-				
+
 				}
 				else {
 					if(lut.begin()->second.find(srcText[i]) != lut.begin()->second.end()) {
 						lut.begin()->second[srcText[i]]++;
 					} else {
-							lut.begin()->second.insert(make_pair(srcText[i], 1));
+						lut.begin()->second.insert(make_pair(srcText[i], 1));
 					}
 
 					counters[firstWord]++;
 				}
 
-				
+
 
 			}
 			else {
 				if(i == order) firstWord = approximation;
 
-				
+
 				typedef LUT::iterator it_lut;
 
 				for(it_lut it = lut.begin(); it != lut.end(); it++) 
@@ -137,7 +140,7 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 	}
 
-	genText(lut, len, order);
+	//genText(lut, len, order);
 
 }		
 
@@ -161,9 +164,9 @@ void FCM::genText(LUT lut, int len, int order) {
 	while(i < len) {
 
 		float r = ((float) rand() / (RAND_MAX));
-		
+
 		map<char,float> contextMap = (order != 0) ? lut[approximation] : lut.begin()->second;
-		
+
 		for(it_map it = contextMap.begin(); it != contextMap.end(); it++) {
 			if(r <= it->second) {				
 				text.push_back(it->first);
@@ -177,22 +180,22 @@ void FCM::genText(LUT lut, int len, int order) {
 		i++;
 
 	}	
-	
+
 	cout << text << "\n";
 }
 
 float FCM::calcEntropy(LUT l, map<string, float> counters, float total, int order) {
 
-    float totalEntropy = 0;
+	float totalEntropy = 0;
 
-    if(order == 0) {
-    	for(it_map it = l.begin()->second.begin(); it != l.begin()->second.end(); it++) {
-    		float prob = it->second/total;
-    		totalEntropy += -prob*log2(prob);
-    	}
+	if(order == 0) {
+		for(it_map it = l.begin()->second.begin(); it != l.begin()->second.end(); it++) {
+			float prob = it->second/total;
+			totalEntropy += -prob*log2(prob);
+		}
 
-    	return totalEntropy;
-    }
+		return totalEntropy;
+	}
 
 	for(it_lut it = l.begin(); it != l.end(); it++) {
 		// context
@@ -218,110 +221,111 @@ float FCM::calcEntropy(LUT l, map<string, float> counters, float total, int orde
 
 
 FCM::LUT FCM::loadTable(string fileName) {
-   
-    ifstream infile;
-    infile.open(fileName.c_str());
-    string line;
-    string delimiter = "=>";
-    string delimiter2 = ";";
-    string delimiter3 = ",";
-    string delimiter4 = ":";   
- 
-    LUT l;
- 
-    if(infile.is_open()){
-        while(infile.good()){
-           
-            getline(infile,line);
- 
-            size_t pos = 0;
-            string context,occurr,prob_pair,caracter,prob_value;  
-            while((pos = line.find(delimiter)) != string::npos){
-               
-                context = line.substr(0,pos);
-                   
- 
-                map<char,float> mapa;
-                l.insert(make_pair(context, mapa));
-               
-                line.erase(0,pos + delimiter.length());
-                while((pos = line.find(delimiter2)) != string::npos){
-                    occurr = line.substr(0,pos);
- 
-                    line.erase(pos,line.length());
-                     
-                    do{
- 
-                        
-                        pos = line.find(delimiter3);
-                        if(pos == -1){
-                            if((pos = line.find(delimiter4)) != string::npos){
-                                caracter = line.substr(0,pos);
-                                prob_value = line.substr(pos+1,line.length()+1);
-                               
-                        
-                                l[context].insert(make_pair(caracter.at(0),strtof(prob_value.c_str(),NULL)));
-                            }
-                            break;
-                        }else{
-                            prob_pair = line.substr(0,pos);
-                            line.erase(0,pos + delimiter3.length());           
-                        
-                            if((pos = prob_pair.find(delimiter4)) != string::npos){
-                                caracter = prob_pair.substr(0,pos);
-                                prob_value = prob_pair.substr(pos+1,line.length()+1);
-                                       
-                        
- 
-                                l[context].insert(make_pair(caracter.at(0),strtof(prob_value.c_str(),NULL)));
-                           
-                            }
-                       
-                        }
-                       
-                    }while(1);
-                }
-            }
- 
-        }
-        infile.close();
-    }
-   
-    return l;
- 
+
+	ifstream infile;
+	infile.open(fileName.c_str());
+	string line;
+	string delimiter = "=>";
+	string delimiter2 = ";";
+	string delimiter3 = "|";
+	string delimiter4 = "@";   
+	LUT l;
+
+
+	if(infile.is_open()){
+		while(infile.good()){
+			getline(infile,line);
+
+			size_t pos = 0;
+			string context,occurr,prob_pair,caracter,prob_value;  
+			while((pos = line.find(delimiter)) != string::npos){
+				context = line.substr(0,pos);
+
+
+				map<char,float> mapa;
+				l.insert(make_pair(context, mapa));
+				
+				cout << "contexto: " << context << "\n";
+				line.erase(0,pos + delimiter.length());
+				while((pos = line.find(delimiter2)) != string::npos){
+					occurr = line.substr(0,pos);
+
+					line.erase(pos,line.length());
+
+					do{
+
+
+						pos = line.find(delimiter3);
+						if(pos == -1){
+							if((pos = line.find(delimiter4)) != string::npos){
+								caracter = line.substr(0,pos);
+								prob_value = line.substr(pos+1,line.length()+1);
+
+
+								cout << "character: " << caracter << "\n";
+								l[context].insert(make_pair(caracter.at(0),strtof(prob_value.c_str(),NULL)));
+							}
+							break;
+						}else{
+							prob_pair = line.substr(0,pos);
+							line.erase(0,pos + delimiter3.length());           
+
+							if((pos = prob_pair.find(delimiter4)) != string::npos){
+								caracter = prob_pair.substr(0,pos);
+								prob_value = prob_pair.substr(pos+1,line.length()+1);
+
+								cout << "character: " << caracter << "\n";
+								l[context].insert(make_pair(caracter.at(0),strtof(prob_value.c_str(),NULL)));
+
+							}
+
+						}
+
+					}while(1);
+
+				}
+			}
+
+		}
+		infile.close();
+	}
+	
+	
+	return l;
+
 }
 
 void FCM::saveTable(LUT lut) {
- 
- 
-    ofstream myfile("saved_LUT", ios::out);
- 
-    string output;
- 
-    for(it_lut it = lut.begin(); it != lut.end(); it++) {
-        char n = '\n';
-        myfile << it->first;       
-        myfile << "=>";
- 
-        int j = 0; 
-        for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            j++;
-            if(j == it->second.size()) {
-                myfile << it2->first << ":" << it2->second;
-            }
-            else{
-                myfile << it2->first << ":" << it2->second << ","; 
-            }
-           
-        }
-        myfile << ";";
-        myfile << "\n";
- 
- 
-    }
- 
-    myfile << "$eot$";
-    myfile.close();
- 
+
+
+	ofstream myfile("saved_LUT", ios::out);
+
+	string output;
+
+	for(it_lut it = lut.begin(); it != lut.end(); it++) {
+		char n = '\n';
+		myfile << it->first;       
+		myfile << "=>";
+
+		int j = 0; 
+		for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++) {
+			j++;
+			if(j == it->second.size()) {
+				myfile << it2->first << "@" << it2->second;
+			}
+			else{
+				myfile << it2->first << "@" << it2->second << "|"; 
+			}
+
+		}
+		myfile << ";";
+		myfile << "\n";
+
+
+	}
+
+	myfile << "$eot$";
+	myfile.close();
+
 }
- 
+
