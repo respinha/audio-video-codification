@@ -12,7 +12,6 @@ const string FCM::FILENAME = "saved_LUT";
 
 FCM::FCM(string srcText, unsigned int order, unsigned int len) {
 
-	cout << "coiso: " << srcText.size() << "\n";
 	LUT lut;
 	initDict();
 
@@ -23,7 +22,6 @@ FCM::FCM(string srcText, unsigned int order, unsigned int len) {
 
 	ifstream stream(FILENAME.c_str());
 
-	cout << stream.good() << "\n";
 	total = 0;
 
 	if(stream.good()) 
