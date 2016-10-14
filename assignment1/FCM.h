@@ -30,7 +30,7 @@ class FCM {
 		string firstWord;
 		static const string FILENAME;
 
-		map<char, char> dict;
+	/*	map<char, char> dict;
 		void initDict() {
 			// 'a'
 			dict.insert(make_pair('á', 'a'));
@@ -61,6 +61,6 @@ class FCM {
 			dict.insert(make_pair('û', 'u'));
 
 			dict.insert(make_pair('ñ', 'n'));
-		}
+		}*/
 
 };

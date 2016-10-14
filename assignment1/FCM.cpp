@@ -12,8 +12,9 @@ const string FCM::FILENAME = "saved_LUT";
 
 FCM::FCM(string srcText, unsigned int order, unsigned int len) {
 
+	cout << "coiso: " << srcText.size() << "\n";
 	LUT lut;
-	initDict();
+	//initDict();
 
 	if(order > srcText.size()) {
 		cout << "No can do\n";
@@ -22,6 +23,7 @@ FCM::FCM(string srcText, unsigned int order, unsigned int len) {
 
 	ifstream stream(FILENAME.c_str());
 
+	cout << stream.good() << "\n";
 	total = 0;
 
 	if(stream.good()) 
@@ -39,8 +41,8 @@ FCM::FCM(string srcText, unsigned int order, unsigned int len) {
 		if(i >= 1  && order != 0) approximation += srcText[i-1];
 
 
-		if(dict.find(srcText[i]) != dict.end()) 
-			srcText[i] = dict[srcText[i]];	
+		//if(dict.find(srcText[i]) != dict.end()) 
+		//	srcText[i] = dict[srcText[i]];	
 
 		if(i >= order)  
 		{
