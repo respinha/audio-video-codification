@@ -14,7 +14,7 @@ int main(int argc, 	char** argv) {
 	string text;
 
 	if(argc == 1) cout << "No input!\n";
-	for(int i = 1; i < argc; i+=2)  {i
+	for(int i = 1; i < argc; i+=2)  {
 		string arg = argv[i];
 		if(arg.compare("-t") == 0) {
 			text = argv[i+1];
@@ -43,10 +43,13 @@ string loadTextFromFile(string filename) {
 
 	
 	ifstream ifs(filename.c_str());
+	string* texto = new string();
 	if(ifs.is_open()) {
 		string line;
 		while(getline(ifs, line)) {
-			cout << line << "\n";
+				//cout << *line << "\n";
+			*texto += line;
+
 		}
 		ifs.close();
 	}
