@@ -20,7 +20,6 @@ int main(int argc, 	char** argv) {
 		string* arg = new string(argv[i]);
 		if(arg->compare("-t") == 0) {
 			text = new string(argv[i+1]);
-			cout << text;
 
 		} else if(arg->compare("-f") == 0) {
 			string* argument = new string(argv[i+1]);
@@ -35,7 +34,6 @@ int main(int argc, 	char** argv) {
 				ifs.close();
 			}
 			
-			cout << *text;
 
 
 		}
