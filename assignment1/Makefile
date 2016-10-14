@@ -1,5 +1,5 @@
 clean: 
 	rm saved_LUT
 	rm *.o*
-makefcm:
+fcm:
 	g++ run.cpp -o run.o
