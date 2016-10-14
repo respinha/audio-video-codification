@@ -9,7 +9,7 @@ using namespace std;
 class FCM {
 
 	public:	
-		FCM(unsigned int order,	 string srcText, unsigned int len);
+		FCM(string srcText, unsigned int order,	 unsigned int len);
 		typedef map<string, map<char,float> > LUT;	// <context, array of values>
 		void genText(LUT lut, int len, int order);
 

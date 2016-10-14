@@ -10,7 +10,7 @@
 
 const string FCM::FILENAME = "saved_LUT";
 
-FCM::FCM(unsigned int order, string srcText, unsigned int len) {
+FCM::FCM(string srcText, unsigned int order, unsigned int len) {
 
 	cout << "coiso: " << srcText.size() << "\n";
 	LUT lut;
@@ -35,7 +35,7 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 
 	// iterate over source text
-	for(int i = 0; i < srcText.size(); i++) 
+	for(unsigned int i = 0; i < srcText.size(); i++) 
 	{
 		// first operation: save the previous character
 		if(i >= 1  && order != 0) approximation += srcText[i-1];
