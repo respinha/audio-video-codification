@@ -26,23 +26,9 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 	cout << stream.good() << "\n";
 	total = 0;
 
-	if(stream.good()) {
-
+	if(stream.good()) 
 		lut = loadTable(FILENAME);	
-		for(it_lut it = lut.begin(); it != lut.end(); it++) 
-		{
 
-			counters.insert(make_pair(it->first, 0));
-			for(it_map it2 = it->second.begin(); it2 != it->second.end(); it2++)
-			{
-				counters[it->first] += it2->second;
-
-			}
-
-			total += counters[it->first];
-		}
-		cout << "after load \n";
-	}
 
 	string approximation;			
 	unsigned int n = 0;
@@ -117,7 +103,8 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 
 				counters[approximation]++;	
-				// move on
+
+				// update context
 				approximation.erase(0,1);	
 			}
 		}
@@ -140,7 +127,7 @@ FCM::FCM(unsigned int order, string srcText, unsigned int len) {
 
 	}
 
-	//genText(lut, len, order);
+	genText(lut, len, order);
 
 }		
 
@@ -231,7 +218,7 @@ FCM::LUT FCM::loadTable(string fileName) {
 	string delimiter4 = "@";   
 	LUT l;
 
-
+	total = 0;
 	if(infile.is_open()){
 		while(infile.good()){
 			getline(infile,line);
@@ -239,13 +226,14 @@ FCM::LUT FCM::loadTable(string fileName) {
 			size_t pos = 0;
 			string context,occurr,prob_pair,caracter,prob_value;  
 			while((pos = line.find(delimiter)) != string::npos){
+
+				float countOccurrence = 0;
 				context = line.substr(0,pos);
 
 
 				map<char,float> mapa;
 				l.insert(make_pair(context, mapa));
-				
-				cout << "contexto: " << context << "\n";
+
 				line.erase(0,pos + delimiter.length());
 				while((pos = line.find(delimiter2)) != string::npos){
 					occurr = line.substr(0,pos);
@@ -261,9 +249,8 @@ FCM::LUT FCM::loadTable(string fileName) {
 								caracter = line.substr(0,pos);
 								prob_value = line.substr(pos+1,line.length()+1);
 
-
-								cout << "character: " << caracter << "\n";
-								l[context].insert(make_pair(caracter.at(0),strtof(prob_value.c_str(),NULL)));
+								countOccurrence += strtof(prob_value.c_str(),NULL);
+								l[context].insert(make_pair(caracter.at(0),countOccurrence));
 							}
 							break;
 						}else{
@@ -274,7 +261,7 @@ FCM::LUT FCM::loadTable(string fileName) {
 								caracter = prob_pair.substr(0,pos);
 								prob_value = prob_pair.substr(pos+1,line.length()+1);
 
-								cout << "character: " << caracter << "\n";
+								countOccurrence += strtof(prob_value.c_str(),NULL);
 								l[context].insert(make_pair(caracter.at(0),strtof(prob_value.c_str(),NULL)));
 
 							}
@@ -284,13 +271,17 @@ FCM::LUT FCM::loadTable(string fileName) {
 					}while(1);
 
 				}
+
+				counters.insert(make_pair(context, countOccurrence));
+				total += countOccurrence;
+				countOccurrence = 0;
 			}
 
 		}
 		infile.close();
 	}
-	
-	
+
+
 	return l;
 
 }
