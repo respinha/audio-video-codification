@@ -22,6 +22,7 @@
 
 *.txt
 
+/*/*.o*
 /*/*.out
 /*/*.txt
 /*/saved_LUT
