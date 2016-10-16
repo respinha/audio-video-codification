@@ -21,7 +21,8 @@
 ### OTHERS ###
 
 *.txt
-
+/*.swp
+/*/*.swp
 /*/*.o*
 /*/*.out
 /*/*.txt
