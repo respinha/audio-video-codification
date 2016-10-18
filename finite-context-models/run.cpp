@@ -49,7 +49,6 @@ int main(int argc, 	char** argv) {
 
 	}
 
-	// TODO: Makefile and finish report
 	FCM test(*text, order, len);
 
 	return 0;

@@ -6,13 +6,14 @@ class BitStream {
 
 	public:
 		BitStream(string filename);
-		typedef unsigned char byte;
-		byte readBit(byte word, int position);	// returns byte
-		byte[] readNBits(byte word, int nPositions);
-		void writeBit(byte bit, string filename);
-		void writeNBits(byte[] bits, string filename);
+		char readBit();	// returns char
+		char[] readNBits(char word, int nPositions);
+		void writeBit(char bit, string filename);
+		void writeNBits(char[] bits, string filename);
 	private:
-		byte[] content;
-		byte[] readFile(string filename);
+		static string* filename;
+		static int readPosition;
+		static int writePosition;
+		static char byteBuffer;
 }	
 	
