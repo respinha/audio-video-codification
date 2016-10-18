@@ -10,7 +10,7 @@ BitStream::BitStream(string filename) {
 	*filename = new string(filename);
 }
 
-char BitStream::readBit () {
+void BitStream::readBit () {
 
 	ifstream* stream = new ifstream(filename->c_str(), ifstream::binary);
 	if (stream.is_open()) {
@@ -50,7 +50,7 @@ char BitStream::readBit () {
 	return (word >> 7) & 0x1;
 }
 
-char BitStream::readNBits(int nBits) {
+void BitStream::readNBits(int nBits) {
 
 	int div = nBits/8;
 	int rem = nBits%8;
@@ -96,14 +96,3 @@ char BitStream::readNBits(int nBits) {
 
 	}
 }
-/*
-   char[] BitStream::readNBits (char word, int n) {
-   char[] bits = new char[n];
-   for(int i = 0; i < n; i++) {
-// 
-std::stringstream ss;
-ss<< hex << (i+1); 
-word[i] = (word >> (7-i)) & (ss >> i);
-}
-return bits;
-}*/

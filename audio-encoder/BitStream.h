@@ -6,8 +6,8 @@ class BitStream {
 
 	public:
 		BitStream(string filename);
-		char readBit();	// returns char
-		char[] readNBits(char word, int nPositions);
+		void readBit();	// returns char
+		void readNBits(int nBits);
 		void writeBit(char bit, string filename);
 		void writeNBits(char[] bits, string filename);
 	private:
