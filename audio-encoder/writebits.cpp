@@ -38,5 +38,8 @@ int main(int argc, char** argv) {
 	bs->readNBits(atoi(argv[3]));
 	bs->writeNBits(atoi(argv[3]));
 
+	bs->readNBits(atoi(argv[3]));
+	bs->writeNBits(atoi(argv[3]));
+	
 	return 0;
 }

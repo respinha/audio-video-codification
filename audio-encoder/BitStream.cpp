@@ -105,7 +105,7 @@ void BitStream::writeNBits(int nBits) {
 	cout << "File: " << *writeFilename << "\n";	
 
 	ofstream* stream = new ofstream();
-	stream->open(writeFilename->c_str(), ios::out | ios::binary);
+	stream->open(writeFilename->c_str(), ios::out | ios::binary | ios::app);
 	stream->seekp(writePosition/8, stream->beg);
 
 	char buffer = 0;
@@ -129,7 +129,6 @@ void BitStream::writeNBits(int nBits) {
 	} //else stream->seekp((writePosition/8)+1);// right on next byte
 
 	for(int i = j; i < nBits; i++) {
-		cout << i << "\n";
 		int bit = readBits.front();
 		cout << bit;
 		if(readBits.empty()) {
