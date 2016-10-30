@@ -129,6 +129,7 @@ void BitStream::writeNBits(int nBits) {
 	} //else stream->seekp((writePosition/8)+1);// right on next byte
 
 	for(int i = j; i < nBits; i++) {
+		cout << i << "\n";
 		int bit = readBits.front();
 		cout << bit;
 		if(readBits.empty()) {
@@ -147,6 +148,8 @@ void BitStream::writeNBits(int nBits) {
 		}
 
 	}
+
+	if(bufferPos != 0) stream->write((char*) &buffer, sizeof(buffer));
 
 	stream->close();
 }
