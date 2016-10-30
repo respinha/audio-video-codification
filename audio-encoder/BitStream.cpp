@@ -1,53 +1,45 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <stringstream>
+#include <sstream>
+#include <queue>
+#include "BitStream.h"
 
-BitStream::BitStream(string filename) {
+BitStream::BitStream(string readname, string writename) {
+
 	// read file	
 	readPosition = 0;
 	writePosition = 0;
-	*filename = new string(filename);
+	readFilename = new string(readname);	
+	writeFilename = new string(writename);
 }
 
-void BitStream::readBit () {
+int BitStream::readBit () {
 
-	ifstream* stream = new ifstream(filename->c_str(), ifstream::binary);
-	if (stream.is_open()) {
+
+	ifstream* stream = new ifstream(readFilename->c_str(), ifstream::binary);
+	if (stream->is_open()) {
 		// get length of file:
-		stream.seekg(readPosition, stream.beg);
+		stream->seekg(readPosition/8, stream->beg);
 
 		char* bytesBuffer = new char[1];
 
 		// read data as a block
 		stream->read (bytesBuffer,1);
 		stream->close();
-
-		// cout << "Buff: " << bytesBuffer << "\n";
-
-		int readUntilNow = 0;
-		// bytewise
-		for(int j = 0; j < 8; j++) {
-			// bitwise	
-			int bit = (bytesBuffer[0] >> (7-j)) & 0x1;
-
-			bitBuffer[readUntilNow] = bit;
-			cout << bitBuffer[readUntilNow];
-
-			if(++readUntilNow == nBits) {	
-				cout << "\nDone!\n";	
-				// exit
-				break;
-
-			}
-		}
+		
+		// bitwise	
+		int bit = (bytesBuffer[0] >> (7-readPosition%8)) & 0x1;
+		//int bit = (bytesBuffer[readPosition%8] >> (7-(readPosition%8))) & 0x1;
+		readPosition++;
 
 		delete[] bytesBuffer;
-		readPosition += 1;	// update bit position on file
-		//delete[] bitBuffer;
+
+		readBits.push(bit);
+		return bit;
 
 	}
-	return (word >> 7) & 0x1;
+	return -1;
 }
 
 void BitStream::readNBits(int nBits) {
@@ -56,12 +48,13 @@ void BitStream::readNBits(int nBits) {
 	int rem = nBits%8;
 	int bytesToRead = !rem ? div : div+1;
 
-	ifstream* stream = new ifstream(filename->c_str());
+
+	ifstream* stream = new ifstream(readFilename->c_str());
 	int* bitBuffer = new int[nBits];
 
 	if (stream->is_open()) {
 		// get length of file:
-		stream->seekg (readPosition, stream->beg);
+		stream->seekg (readPosition/8, stream->beg);
 
 		char* bytesBuffer = new char[bytesToRead];
 		// read data as a block
@@ -71,16 +64,20 @@ void BitStream::readNBits(int nBits) {
 		// cout << "Buff: " << bytesBuffer << "\n";
 
 		int readUntilNow = 0;
+
+		// bytewise
 		for(int i = 0; i < bytesToRead; i++) {
-			// bytewise
+			// bitwise 
+			cout << "Byte: " << bytesBuffer[i] << "\n";
 			for(int j = 0; j < 8; j++) {
-				// bitwise	
 				int bit = (bytesBuffer[i] >> (7-j)) & 0x1;
 
 				bitBuffer[readUntilNow] = bit;
 				cout << bitBuffer[readUntilNow];
+				cout << "\n";
 
 				if(++readUntilNow == nBits) {	
+
 					cout << "\nDone!\n";	
 					// exit
 					i = bytesToRead;
@@ -92,7 +89,64 @@ void BitStream::readNBits(int nBits) {
 
 		delete[] bytesBuffer;
 		readPosition += nBits;	// update bit position on file
-		//delete[] bitBuffer;
+
+		for(int i = 0; i < nBits; i++) 
+			readBits.push(bitBuffer[i]);
+			
+		delete[] bitBuffer;
+	}
+
+	//return bitBuffer;
+}
+
+void BitStream::writeNBits(int nBits) {
+
+	cout << "N Bits: " << nBits << "\n";
+	cout << "File: " << *writeFilename << "\n";	
+
+	ofstream* stream = new ofstream();
+	stream->open(writeFilename->c_str(), ios::out | ios::binary);
+	stream->seekp(writePosition/8, stream->beg);
+
+	char buffer = 0;
+	int bufferPos = 0;
+
+	int j = 0;
+	if(writePosition > 0 && writePosition%8 !=0) {
+		cout << "diff\n";			
+		int lastByteWrittenPosition = writePosition%8;
+		int pos = lastByteWrittenPosition;
+		
+		while(pos < 8) {
+			buffer = buffer | (readBits.front() << (7-bufferPos));
+			readBits.pop();
+			j++;
+			pos++;
+		}
+
+		stream->write((char*) &buffer,sizeof(buffer));
+	
+	} //else stream->seekp((writePosition/8)+1);// right on next byte
+
+	for(int i = j; i < nBits; i++) {
+		int bit = readBits.front();
+		cout << bit;
+		if(readBits.empty()) {
+			cout << "Number of bits to write exceeded buffer's size" << "\n";
+			break;
+		}
+
+		buffer = buffer | (bit << (7-bufferPos));		
+		readBits.pop();
+
+		if(++bufferPos == 8) {
+			cout << buffer << "\n";
+			stream->write((char*) &buffer,sizeof(buffer));
+			buffer = 0;
+			bufferPos = 0;
+		}
 
 	}
+
+	stream->close();
 }

@@ -2,12 +2,13 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include "BitStream.cpp"
 
 using namespace std;
 
 int main(int argc, char** argv) {
 
-	if(argc < 3) {
+	/*if(argc < 3) {
 		cout << "Wrong number of arguments!";
 		return -1;
 	}
@@ -22,7 +23,6 @@ int main(int argc, char** argv) {
 	int* bitBuffer = new int[nBits];
 	if (stream->is_open()) {
 		// get length of file:
-		//stream->seekg (0, stream->end);
 		stream->seekg (0, stream->beg);
 
 		char* bytesBuffer = new char[bytesToRead];
@@ -56,8 +56,16 @@ int main(int argc, char** argv) {
 		delete[] bytesBuffer;
 		delete[] bitBuffer;
 		
+	}*/
+
+	BitStream* bs = new BitStream(argv[1]);
+	int nBits = atoi(argv[2]);
+	if(nBits == 1) {
+		for(int i = 0; i < 16; i++)
+			cout << bs->readBit();
 	}
-	
+	else bs->readNBits(nBits);		
+
 	return 0;
 }
 
