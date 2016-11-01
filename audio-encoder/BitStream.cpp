@@ -63,24 +63,19 @@ void BitStream::readNBits(int nBits) {
 		stream->read (bytesBuffer,bytesToRead);
 		stream->close();
 
-		// cout << "Buff: " << bytesBuffer << "\n";
 
 		int readUntilNow = 0;
 
 		// bytewise
 		for(int i = 0; i < bytesToRead; i++) {
 			// bitwise 
-			cout << "Byte: " << bytesBuffer[i] << "\n";
 			for(int j = 0; j < 8; j++) {
 				int bit = (bytesBuffer[i] >> (7-j)) & 0x1;
 
 				bitBuffer[readUntilNow] = bit;
-				cout << bitBuffer[readUntilNow];
-				cout << "\n";
 
 				if(++readUntilNow == nBits) {	
 
-					cout << "\nDone!\n";	
 					// exit
 					i = bytesToRead;
 					break;
@@ -108,7 +103,7 @@ void BitStream::writeBit(int* sequence) {
 	unsigned char buffer = 0;
 	int bufferPos = 0;
 
-	if(remainingSlots) {
+	if(remainingByteSlots) {
 		int pos = 8 - remainingByteSlots;
 		surplusByte = surplusByte | (sequence[0] << (7-pos));
 		remainingByteSlots--;
@@ -129,7 +124,10 @@ void BitStream::writeBit(int* sequence) {
 	}
 
 }
-void BitStream::writeNBits(int nBits, int* sequence) {
+
+void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
+
+	for(int s = 0; s < nBits; s++) cout << "Sequence: " << sequence[s] << "\n";	
 
 	ofstream* stream = new ofstream();
 	const char* filename = writeFilename->c_str();
@@ -138,30 +136,29 @@ void BitStream::writeNBits(int nBits, int* sequence) {
 	int bufferPos = 0;
 
 	stream->open(filename, ios::out | ios::binary | ios::app);
-	stream->seekp(writePosition/8, stream->beg);
 
 	int j = 0;
 	if(surplusByte != 0) {
-		cout << "remainder: " << remainingByteSlots << "\n";
 		int pos = 8 - remainingByteSlots;
 
-		while(pos < 8) {
-			cout << "Current sequence pos is: " << j << " and current shifting pos is " << pos << "\n";
+		stream->seekp(writePosition/8, stream->beg);
+		while(pos < 8) {			
 			surplusByte = surplusByte | (sequence[j] << (7-pos));
-
-			cout << "Excess byte: " << surplusByte << "\n";
 
 			j++;
 			pos++;
+			writePosition++;
 		}
 
 		stream->write(&surplusByte,sizeof(surplusByte));
 	}
 
+	if(j > 0) stream->seekp(writePosition/8, stream->beg);
+
 	for(int i = j; i < nBits; i++) {
 		int bit = sequence[i];
-		cout << bit;
 
+	
 		buffer = buffer | (bit << (7-bufferPos));
 
 		if(++bufferPos == 8) {
@@ -173,18 +170,20 @@ void BitStream::writeNBits(int nBits, int* sequence) {
 	}
 
 	if(bufferPos != 0) {
+		cout << "Buffer Pos: " << bufferPos << "\n";
 		surplusByte = buffer;
-		writePosition -= bufferPos;
-		remainingByteSlots = 8 - bufferPos;
+		remainingByteSlots = (8 - bufferPos)+1;
 	} else {
 		surplusByte = 0;
 		remainingByteSlots = 0;
 	}
 
 	stream->close();
+
+	if(finalWrite) writeRemainingBits();
 }
 
-void writeRemainingBits() {
+void BitStream::writeRemainingBits() {
 
 	if(remainingByteSlots == 0) return;
 
@@ -197,3 +196,5 @@ void writeRemainingBits() {
 
 	stream->close();
 }
+
+

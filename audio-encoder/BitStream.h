@@ -10,8 +10,7 @@ class BitStream {
 		int readBit();	
 		void readNBits(int nBits);
 		void writeBit(int* sequence);
-		void writeNBits(int nBits, int* sequence);
-		void writeRemainingBits();
+		void writeNBits(int nBits, int* sequence, int finalWrite);
 
 	private:
 		string* readFilename;
@@ -23,4 +22,6 @@ class BitStream {
 		char surplusByte;
 		unsigned int remainingByteSlots;
 		char byteBuffer;
+
+		void writeRemainingBits();
 };	

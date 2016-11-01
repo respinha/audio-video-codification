@@ -1,4 +1,4 @@
-#include <stdlib>
+#include <cstdlib>
 #include <string>
 
 #include "BitStream.cpp"
@@ -7,12 +7,12 @@ using namespace std;
 
 class Golomb {
 	public:
-		Golomb(int m);
-		void encode(int n, string filename);		
-		void decode(int n, string filename);
+		Golomb(int m, string encodedFilename, string decodedFilename);
+		void encode(int n);		
+		void decode(int n);
 
 	private:
-		int M;
-		int B;
+		const int M;
+		const int B;
 		BitStream* stream;
 };
