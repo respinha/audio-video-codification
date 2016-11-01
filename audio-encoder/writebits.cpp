@@ -35,11 +35,17 @@ int main(int argc, char** argv) {
 	stream->close();*/
 
 	BitStream* bs = new BitStream(argv[1], argv[2]);
-	bs->readNBits(atoi(argv[3]));
+/*	bs->readNBits(atoi(argv[3]));
 	bs->writeNBits(atoi(argv[3]));
 
-	bs->readNBits(atoi(argv[3]));
-	bs->writeNBits(atoi(argv[3]));
+	bs->readNBits(atoi(argv[3]));*/
+
+	// 'b' 'o': 0110 0010 0110 1111
+	int arr [16] = { 0, 1, 1, 0, 0, 0, 1, 0, 0,1,1,0,1,1,1,1};
+	bs->writeNBits(13, arr);	
+
+	int arr1[3] = { 1,1,1 };
+	bs->writeNBits(3, arr1);
 	
 	return 0;
 }

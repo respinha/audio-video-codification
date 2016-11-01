@@ -9,8 +9,8 @@ class BitStream {
 		BitStream(string readname, string writename);
 		int readBit();	
 		void readNBits(int nBits);
-		void writeBit();
-		void writeNBits(int nBits);
+		void writeBit(int* sequence);
+		void writeNBits(int nBits, int* sequence);
 	private:
 		string* readFilename;
 		string* writeFilename;
@@ -18,6 +18,7 @@ class BitStream {
 		int writePosition;
 		int fileWritePosition; 
 		queue<int> readBits;
-
+		char surplusByte;
+		unsigned int remainingByteSlots;
 		char byteBuffer;
 };	
