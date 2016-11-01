@@ -29,7 +29,7 @@ int BitStream::readBit () {
 		// read data as a block
 		stream->read (bytesBuffer,1);
 		stream->close();
-		
+
 		// bitwise	
 		int bit = (bytesBuffer[0] >> (7-readPosition%8)) & 0x1;
 		//int bit = (bytesBuffer[readPosition%8] >> (7-(readPosition%8))) & 0x1;
@@ -94,7 +94,7 @@ void BitStream::readNBits(int nBits) {
 
 		for(int i = 0; i < nBits; i++) 
 			readBits.push(bitBuffer[i]);
-			
+
 		delete[] bitBuffer;
 	}
 
@@ -104,48 +104,36 @@ void BitStream::readNBits(int nBits) {
 void BitStream::writeBit(int* sequence) {
 
 	ofstream* stream = new ofstream();
-	
+
 	unsigned char buffer = 0;
 	int bufferPos = 0;
 
-	if(writePosition > 0 && writePosition%8 !=0) {
+	if(remainingSlots) {
+		int pos = 8 - remainingByteSlots;
+		surplusByte = surplusByte | (sequence[0] << (7-pos));
+		remainingByteSlots--;
 
-		stream->open(writeFilename->c_str(), ios::out | ios::binary | ios::app);
-		ifstream* is = new ifstream(writeFilename->c_str());
+		if(!remainingByteSlots) {
+			stream->open(writeFilename->c_str(), ios::out | ios::binary | ios::app);
+			stream->seekp(writePosition/8, stream->beg);
 
-		if(is->is_open()) {
-			is->seekg(writePosition/8, stream->beg);
+			stream->write(&surplusByte, sizeof(surplusByte));
 
-			int j = writePosition%8-1;
-			is->read((char*) &buffer, 1);
+			stream->close();
 
-			buffer = buffer | (sequence[0] << (7-j));
-			writePosition++;
-
-			stream->write((char*) &buffer,sizeof(buffer));
-			is->close();
+			surplusByte = 0;
 		}
-
-		stream->close();
-		return;			
+	} else {
+		surplusByte = surplusByte | (sequence[0] << 7);
+		remainingByteSlots = 7;
 	}
-
-	stream->open(writeFilename->c_str(), ios::out | ios::binary | ios::app);
-	stream->seekp(writePosition/8, stream->beg);
-
-	int bit = sequence[0];
-	buffer = buffer | (bit << (7-writePosition%8));
-	stream->write((char*) &buffer,sizeof(buffer));
-
-	writePosition++;
-	stream->close();
 
 }
 void BitStream::writeNBits(int nBits, int* sequence) {
 
 	ofstream* stream = new ofstream();
 	const char* filename = writeFilename->c_str();
-	
+
 	char buffer = 0;
 	int bufferPos = 0;
 
@@ -160,13 +148,13 @@ void BitStream::writeNBits(int nBits, int* sequence) {
 		while(pos < 8) {
 			cout << "Current sequence pos is: " << j << " and current shifting pos is " << pos << "\n";
 			surplusByte = surplusByte | (sequence[j] << (7-pos));
-			
+
 			cout << "Excess byte: " << surplusByte << "\n";
 
 			j++;
 			pos++;
 		}
-		
+
 		stream->write(&surplusByte,sizeof(surplusByte));
 	}
 
@@ -184,7 +172,7 @@ void BitStream::writeNBits(int nBits, int* sequence) {
 		writePosition++;
 	}
 
-	if(bufferPos != 0) {//stream->write((char*) &buffer, sizeof(buffer));
+	if(bufferPos != 0) {
 		surplusByte = buffer;
 		writePosition -= bufferPos;
 		remainingByteSlots = 8 - bufferPos;
@@ -192,6 +180,20 @@ void BitStream::writeNBits(int nBits, int* sequence) {
 		surplusByte = 0;
 		remainingByteSlots = 0;
 	}
+
+	stream->close();
+}
+
+void writeRemainingBits() {
+
+	if(remainingByteSlots == 0) return;
+
+	surplusByte = surplusByte << remainingByteSlots;
+
+	ofstream* stream = new ofstream(writeFilename->c_str(), ios::out | ios::binary | ios::app);
+	stream->seekp(writePosition/8, stream->beg);
+
+	stream->write(&surplusByte, sizeof(surplusByte));
 
 	stream->close();
 }
