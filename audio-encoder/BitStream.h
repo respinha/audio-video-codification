@@ -11,6 +11,8 @@ class BitStream {
 		void readNBits(int nBits);
 		void writeBit(int* sequence);
 		void writeNBits(int nBits, int* sequence);
+		void writeRemainingBits();
+
 	private:
 		string* readFilename;
 		string* writeFilename;
