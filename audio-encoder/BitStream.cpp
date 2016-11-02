@@ -20,14 +20,14 @@ BitStream::BitStream(string readname, string writename) {
 
 int BitStream::readBit () {
 
+	
 	if(readPosition == writePosition) return -1;
-
+	
 	ifstream* stream = new ifstream(readFilename->c_str(), ifstream::binary);
 	
 	int bit = 0;
 	if (stream->is_open()) {
 	
-		cout << "POS: " << readPosition << "\n";
 		// get length of file
 		stream->seekg(readPosition/8, stream->beg);
 
@@ -36,8 +36,8 @@ int BitStream::readBit () {
 		// read data as a block
 		stream->read (&byteBuffer,1);
 
+		cout << "BYTE: " << byteBuffer << "\n";
 		stream->close();
-
 
 		// bitwise
 		bit = (byteBuffer >> (7-readPosition%8)) & 0x1;
@@ -177,7 +177,6 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 
 			j++;
 			pos++;
-			writePosition++;
 		}
 
 		stream->write(&surplusByte,sizeof(surplusByte));
@@ -196,18 +195,18 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 			buffer = 0;
 			bufferPos = 0;
 		}
-		writePosition++;
 	}
-
+	
+	writePosition += nBits;
 	if(bufferPos != 0) {
-		cout << "Buffer Pos: " << bufferPos << "\n";
 		surplusByte = buffer;
-		remainingByteSlots = (8 - bufferPos)+1;
+		remainingByteSlots = (8 - bufferPos);
 	} else {
 		surplusByte = 0;
 		remainingByteSlots = 0;
 	}
 
+	cout << "POS: " << writePosition << "\n";
 	stream->close();
 
 	if(finalWrite) writeRemainingBits();
@@ -217,7 +216,8 @@ void BitStream::writeRemainingBits() {
 
 	if(remainingByteSlots == 0) return;
 
-	surplusByte = surplusByte << remainingByteSlots;
+	cout << "REM: " << remainingByteSlots << "\n";
+	//surplusByte = surplusByte << remainingByteSlots;
 
 	ofstream* stream = new ofstream(writeFilename->c_str(), ios::out | ios::binary | ios::app);
 	stream->seekp(writePosition/8, stream->beg);

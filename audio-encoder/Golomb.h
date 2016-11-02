@@ -8,7 +8,7 @@ using namespace std;
 class Golomb {
 	public:
 		Golomb(int m, string encodedFilename, string decodedFilename);
-		void encode(int n);		
+		void encode(int n, int finalWrite);		
 		void decode(int n, int* sequence);
 
 	private:

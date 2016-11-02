@@ -14,11 +14,10 @@ Golomb::Golomb(int m, string encodedFilename, string decodedFilename) : M(m), B(
 }
 
 
-void Golomb::encode(int n) {
+void Golomb::encode(int n, int finalWrite) {
 
 	int q = n/M;
 	int r = n -(q*M);
-	
 
 	cout << "N = " << n << "\n";
 	cout << "M = " << M << "\n";
@@ -48,10 +47,14 @@ void Golomb::encode(int n) {
 	for(i = 0; i < (q+1+B); i++) 
 		cout << i << ": " << code[i] << "\n";
 
-	stream->writeNBits(q+1+B, code, 1);
+	cout << "Size: " << q+1+B << "\n";
+	stream->writeNBits(q+1+B, code, finalWrite);
 
+	int* bits = stream->readNBits(5);
+
+	for(int i = 0; i < 5; i++) cout << bits[i]  << "\n";
 }
-
+/*
 queue<int> Golomb::decode() {
 
 	int* sequence = stream->readNBits();
@@ -102,7 +105,7 @@ queue<int> Golomb::decode() {
 		
 	}
 	
-}
+}*/
 
 int BinToDec(string binary) {
 	int decimalNumber = 0;
