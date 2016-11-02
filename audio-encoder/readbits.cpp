@@ -19,9 +19,8 @@ int main(int argc, char** argv) {
 		char c;
 		cin >>  c;
 		if(c == 'b') {
-			int * bitos = bs->readNBits(8);
 			for(int i = 0; i < 8; i++) 
-				cout << "\n" << bitos[i] << "\n";
+				cout << "\n" << bs->readBit() << "\n";
 		}
 		else 
 			break;

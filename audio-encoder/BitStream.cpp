@@ -31,20 +31,19 @@ int BitStream::readBit () {
 		// get length of file
 		stream->seekg(readPosition/8, stream->beg);
 
-		char* bytesBuffer = new char[1];
+		char byteBuffer;
 
 		// read data as a block
-		stream->read (bytesBuffer,1);
-		cout << "Byte: " << bytesBuffer[0] << "& " << 7-readPosition%8 << "\n";
+		stream->read (&byteBuffer,1);
 
 		stream->close();
-	
+
+
 		// bitwise
-		int bit = (bytesBuffer[0] >> (7-readPosition%8)) & 0x1;
+		bit = (byteBuffer >> (7-readPosition%8)) & 0x1;
 		//int bit = (bytesBuffer[readPosition%8] >> (7-(readPosition%8))) & 0x1;
 		readPosition++;
 
-		delete[] bytesBuffer;
 
 
 	}
