@@ -3,6 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <queue>
+#include <cstdlib>
+
 #include "BitStream.h"
 
 BitStream::BitStream(string readname, string writename) {
@@ -18,33 +20,38 @@ BitStream::BitStream(string readname, string writename) {
 
 int BitStream::readBit () {
 
+	if(readPosition == writePosition) return -1;
 
 	ifstream* stream = new ifstream(readFilename->c_str(), ifstream::binary);
+	
+	int bit = 0;
 	if (stream->is_open()) {
-		// get length of file:
+	
+		cout << "POS: " << readPosition << "\n";
+		// get length of file
 		stream->seekg(readPosition/8, stream->beg);
 
 		char* bytesBuffer = new char[1];
 
 		// read data as a block
 		stream->read (bytesBuffer,1);
-		stream->close();
+		cout << "Byte: " << bytesBuffer[0] << "& " << 7-readPosition%8 << "\n";
 
-		// bitwise	
+		stream->close();
+	
+		// bitwise
 		int bit = (bytesBuffer[0] >> (7-readPosition%8)) & 0x1;
 		//int bit = (bytesBuffer[readPosition%8] >> (7-(readPosition%8))) & 0x1;
 		readPosition++;
 
 		delete[] bytesBuffer;
 
-		readBits.push(bit);
-		return bit;
 
 	}
-	return -1;
+	return bit;
 }
 
-void BitStream::readNBits(int nBits) {
+int* BitStream::readNBits(int nBits) {
 
 	int div = nBits/8;
 	int rem = nBits%8;
@@ -58,17 +65,44 @@ void BitStream::readNBits(int nBits) {
 		// get length of file:
 		stream->seekg (readPosition/8, stream->beg);
 
-		char* bytesBuffer = new char[bytesToRead];
-		// read data as a block
-		stream->read (bytesBuffer,bytesToRead);
-		stream->close();
-
-
+		char* bytesBuffer;		// read data as a block
+	
 		int readUntilNow = 0;
+		
+		if(readPosition%8 != 0) {
+			bytesToRead++;
+			bytesBuffer = new char[bytesToRead];
 
-		// bytewise
-		for(int i = 0; i < bytesToRead; i++) {
-			// bitwise 
+			stream->read (bytesBuffer,bytesToRead);
+			stream->close();
+
+			int pos = readPosition%8;
+			while(pos < 8) {
+	
+				int bit = (bytesBuffer[0] >> (7-pos++)) & 0x1;
+
+				bitBuffer[readUntilNow] = bit;			
+
+				if(++readUntilNow == nBits) {	
+					// exit
+					readPosition += nBits;
+					return bitBuffer;
+				}
+			}	
+		} else {
+			bytesBuffer = new char[bytesToRead];
+
+			stream->read (bytesBuffer,bytesToRead);
+			stream->close();
+
+		}
+		
+
+		// bytwise reading
+		// if we already started reading bits, then skip to next byte
+		for(int i = (readUntilNow != 0); i < bytesToRead; i++) {
+			// bitwise reading
+
 			for(int j = 0; j < 8; j++) {
 				int bit = (bytesBuffer[i] >> (7-j)) & 0x1;
 
@@ -86,14 +120,9 @@ void BitStream::readNBits(int nBits) {
 
 		delete[] bytesBuffer;
 		readPosition += nBits;	// update bit position on file
-
-		for(int i = 0; i < nBits; i++) 
-			readBits.push(bitBuffer[i]);
-
-		delete[] bitBuffer;
 	}
 
-	//return bitBuffer;
+	return bitBuffer;
 }
 
 void BitStream::writeBit(int* sequence) {
@@ -138,6 +167,8 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 	stream->open(filename, ios::out | ios::binary | ios::app);
 
 	int j = 0;
+	
+
 	if(surplusByte != 0) {
 		int pos = 8 - remainingByteSlots;
 

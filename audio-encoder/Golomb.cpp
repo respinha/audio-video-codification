@@ -3,6 +3,7 @@
 #include <cmath>
 #include <bitset>
 #include <sstream>
+#include <queue>
 
 #include "Golomb.h"
 
@@ -17,6 +18,7 @@ void Golomb::encode(int n) {
 
 	int q = n/M;
 	int r = n -(q*M);
+	
 
 	cout << "N = " << n << "\n";
 	cout << "M = " << M << "\n";
@@ -49,6 +51,72 @@ void Golomb::encode(int n) {
 	stream->writeNBits(q+1+B, code, 1);
 
 }
+
+queue<int> Golomb::decode() {
+
+	int* sequence = stream->readNBits();
+
+	int nUnary = 0;
+	int isUnary = 1;
+	int q = 0, b = 0;
+	string* remainder = new string();
+
+	queue<int> nQueue;
+
+	int eof = 0;
+	while(!eof) {
+		
+		int bit = stream->readBit();
+
+		if(isUnary) {
+			if(bit == 0) {
+				isUnary = 0;
+				q = nUnary;
+				nUnary = 0;
+
+			}
+			else nUnary++;
+		}
+		
+		if(!isUnary) {
+			ostringstream ss;
+			ss << bit;
+			remainder->append(ss.str());
+			
+			b++;
+				
+			if(b == B) {	
+				int r = BinToDec(*remainder);
+				int n = r+(q*M);
+
+				nQueue.push_back(n);
+				b = 0;
+				
+				isUnary = true;
+				q = 0;
+				
+						
+				
+			}
+		}
+		
+	}
+	
+}
+
+int BinToDec(string binary) {
+	int decimalNumber = 0;
+
+	int len = binary.length();	
+	for(int i = 0; i < len; i++) {
+		if(binary[i] == '1') {
+			decimalNumber = decimalNumber + pow(2, len-i-1);
+		}
+	}
+	
+	return decimalNumber;
+}
+
 
 // simple helper to convert from decimal to binary
 // original src: http://stackoverflow.com/questions/2548282/decimal-to-binary-and-vice-versa

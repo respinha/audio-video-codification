@@ -8,63 +8,24 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-	/*if(argc < 3) {
-		cout << "Wrong number of arguments!";
-		return -1;
-	}
-	
-	int nBits = atoi(argv[1]);
-	int div = nBits/8;
-	int rem = nBits%8;
-	int bytesToRead = !rem ? div : div+1;
+	BitStream* bs = new BitStream(argv[1], argv[1]);
+	//int nBits = atoi(argv[2]);
 
-	
-	ifstream* stream = new ifstream(argv[2]);
-	int* bitBuffer = new int[nBits];
-	if (stream->is_open()) {
-		// get length of file:
-		stream->seekg (0, stream->beg);
+	int arr [16] = { 0, 1, 1, 0, 0, 0, 1, 0, 0,1,1,0,1,1,1,1};
+	bs->writeNBits(16, arr, 1);
 
-		char* bytesBuffer = new char[bytesToRead];
-		// read data as a block
-		stream->read (bytesBuffer,bytesToRead);
-		stream->close();
-
-		cout << "Buff: " << bytesBuffer << "\n";
-		// print content:
-		//int bit = (buffer[0] >> 5) & 0x1;
-		int readUntilNow = 0;
-		for(int i = 0; i < bytesToRead; i++) {
-			// bytewise
-			for(int j = 0; j < 8; j++) {
-				// bitwise	
-				int bit = (bytesBuffer[i] >> (7-j)) & 0x1;
-			
-				bitBuffer[readUntilNow] = bit;
-				cout << bitBuffer[readUntilNow];
-
-				if(++readUntilNow == nBits) {	
-					cout << "\nDone!\n";	
-					// exit
-					i = bytesToRead;
-					break;
-
-				}
-			}
+	while(1) {
+		cout << "N bits: ";
+		char c;
+		cin >>  c;
+		if(c == 'b') {
+			int * bitos = bs->readNBits(8);
+			for(int i = 0; i < 8; i++) 
+				cout << "\n" << bitos[i] << "\n";
 		}
-
-		delete[] bytesBuffer;
-		delete[] bitBuffer;
-		
-	}*/
-
-	BitStream* bs = new BitStream(argv[1]);
-	int nBits = atoi(argv[2]);
-	if(nBits == 1) {
-		for(int i = 0; i < 16; i++)
-			cout << bs->readBit();
-	}
-	else bs->readNBits(nBits);		
+		else 
+			break;
+	} 
 
 	return 0;
 }

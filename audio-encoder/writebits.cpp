@@ -42,10 +42,10 @@ int main(int argc, char** argv) {
 
 	// 'b' 'o': 0110 0010 0110 1111
 	int arr [16] = { 0, 1, 1, 0, 0, 0, 1, 0, 0,1,1,0,1,1,1,1};
-	bs->writeNBits(13, arr);	
+	bs->writeNBits(13, arr, 0);	
 
 	int arr1[3] = { 1,1,1 };
-	bs->writeNBits(3, arr1);
+	bs->writeNBits(3, arr1, 1);
 	
 	return 0;
 }

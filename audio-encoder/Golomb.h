@@ -9,7 +9,7 @@ class Golomb {
 	public:
 		Golomb(int m, string encodedFilename, string decodedFilename);
 		void encode(int n);		
-		void decode(int n);
+		void decode(int n, int* sequence);
 
 	private:
 		const int M;
