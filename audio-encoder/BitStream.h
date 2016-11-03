@@ -17,11 +17,10 @@ class BitStream {
 		string* writeFilename;
 		int readPosition;
 		int writePosition;
-		int fileWritePosition; 
-		queue<int> readBits;
+
+		int surplus;
 		char surplusByte;
 		unsigned int remainingByteSlots;
-		char byteBuffer;
 
 		void writeRemainingBits();
 };	

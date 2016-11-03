@@ -4,10 +4,10 @@
 #include <bitset>
 #include <sstream>
 #include <queue>
+#include <list>
 
 #include "Golomb.h"
 
-string DecToBin(int);
 
 Golomb::Golomb(int m, string encodedFilename, string decodedFilename) : M(m), B(log2(m)){
 	stream = new BitStream(encodedFilename, decodedFilename);
@@ -24,7 +24,7 @@ void Golomb::encode(int n, int finalWrite) {
 	cout << "Q = " << q << "\n";
 	cout << "R = " << r << "\n";
 	cout << "B = " << B << "\n";
-
+	cout << "###########################\n";
 	int i = 0;
 	int* code = new int[q+1+B];
 
@@ -32,11 +32,12 @@ void Golomb::encode(int n, int finalWrite) {
 	while(i < q) {
 		code[i++] = 1;
 	}
+
 	code[q] = 0;
 
 
 	// get remainder in binary value
-	string binaryRem = DecToBin(r);
+	string binaryRem = Golomb::DecToBin(r);
 	for(i = 0; i < B; i++) {
 		char* value;
 		*value  = binaryRem[i];
@@ -44,98 +45,77 @@ void Golomb::encode(int n, int finalWrite) {
 	}
 
 
-	for(i = 0; i < (q+1+B); i++) 
-		cout << i << ": " << code[i] << "\n";
-
-	cout << "Size: " << q+1+B << "\n";
 	stream->writeNBits(q+1+B, code, finalWrite);
 
-	int* bits = stream->readNBits(5);
-
-	for(int i = 0; i < 5; i++) cout << bits[i]  << "\n";
 }
-/*
-queue<int> Golomb::decode() {
 
-	int* sequence = stream->readNBits();
+list<int> Golomb::decode() {
 
 	int nUnary = 0;
 	int isUnary = 1;
-	int q = 0, b = 0;
-	string* remainder = new string();
+	int q = 0;
 
-	queue<int> nQueue;
-
-	int eof = 0;
-	while(!eof) {
+	list<int> nList;
+	
+	int bit = 0;
+	int* binarySequence;
+	
+	while(1) {
 		
-		int bit = stream->readBit();
-
 		if(isUnary) {
-			if(bit == 0) {
-				isUnary = 0;
-				q = nUnary;
-				nUnary = 0;
+			bit = stream->readBit();
 
-			}
-			else nUnary++;
-		}
-		
-		if(!isUnary) {
-			ostringstream ss;
-			ss << bit;
-			remainder->append(ss.str());
+			if(bit == -1) break;
 			
-			b++;
-				
-			if(b == B) {	
-				int r = BinToDec(*remainder);
-				int n = r+(q*M);
+			if(bit) q++;			
+			else isUnary = bit;		
+		} else {
+			binarySequence = stream->readNBits(B);
 
-				nQueue.push_back(n);
-				b = 0;
-				
-				isUnary = true;
-				q = 0;
-				
-						
-				
-			}
+			cout << "decode: ";
+			int r = Golomb::BinToDec(binarySequence, B);
+			cout << "r = " << r;
+			int n = r + (q*M);
+			
+			cout << "; q = " << q << "; n = " << n << "\n";
+
+			nList.push_back(n);	
+			q = 0;
+			isUnary = 1;
 		}
 		
 	}
-	
-}*/
 
-int BinToDec(string binary) {
+	for(list<int>::iterator it = nList.begin(); it !=nList.end(); it++) 
+		cout << "N: " << *it << "\n";
+	return nQueue;
+	
+}
+
+int Golomb::BinToDec(int* binary, int len) {
 	int decimalNumber = 0;
 
-	int len = binary.length();	
 	for(int i = 0; i < len; i++) {
-		if(binary[i] == '1') {
+		if(binary[i] == 1) {			
 			decimalNumber = decimalNumber + pow(2, len-i-1);
 		}
 	}
-	
+
 	return decimalNumber;
 }
 
 
 // simple helper to convert from decimal to binary
-// original src: http://stackoverflow.com/questions/2548282/decimal-to-binary-and-vice-versa
-string DecToBin(int number)
+string Golomb::DecToBin(int number)
 {
 	string sum = "";
 	int dec = number,rem,i=1;
-	do
-	{
-		rem=dec%2;
-		ostringstream ss;
-		ss << i*rem;
-	        sum.append(ss.str());
-		dec=dec/2;
-	        i=i*10;
-	    }while(dec>0);
+
+	int value = number;
+	for(int i = B-1; i >= 0; i--, value>>=1) {
+		char val = (value & 1) + '0';
+		sum = val + sum;
+	}
 
 	return sum;
 }
