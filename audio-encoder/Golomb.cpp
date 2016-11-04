@@ -47,6 +47,11 @@ void Golomb::encode(int n, int finalWrite) {
 
 	stream->writeNBits(q+1+B, code, finalWrite);
 
+	/*if(finalWrite) {
+		cout << "Read: ";
+		for(int i = 0; i < 22; i++) cout << stream->readBit();
+		cout << "\n";
+	}*/
 }
 
 list<int> Golomb::decode() {
@@ -88,7 +93,7 @@ list<int> Golomb::decode() {
 
 	for(list<int>::iterator it = nList.begin(); it !=nList.end(); it++) 
 		cout << "N: " << *it << "\n";
-	return nQueue;
+	return nList;
 	
 }
 
