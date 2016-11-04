@@ -20,6 +20,7 @@ BitStream::BitStream(string readname, string writename) {
 
 int BitStream::readBit () {
 
+		cout << "Readbit: POS: " << readPosition << "\n";
 		if(readPosition >= writePosition) return -1;
 
 		ifstream* stream = new ifstream(readFilename->c_str(), ifstream::binary);
@@ -84,7 +85,10 @@ int* BitStream::readNBits(int nBits) {
 					readPosition += nBits;
 					return bitBuffer;
 				}
-			}	
+			}
+
+		cout << "POS: " << readPosition << "\n";
+	
 		} 
 		else {
 			bytesBuffer = new char[bytesToRead];
@@ -117,6 +121,7 @@ int* BitStream::readNBits(int nBits) {
 
 		delete[] bytesBuffer;
 		readPosition += nBits;	// update bit position on file
+		cout << "POS: " << readPosition << "\n";
 	}
 
 	return bitBuffer;
@@ -152,6 +157,7 @@ void BitStream::writeBit(int* sequence) {
 }
 
 void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
+
 
 	ofstream* stream = new ofstream();
 	const char* filename = writeFilename->c_str();
