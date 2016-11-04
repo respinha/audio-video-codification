@@ -22,5 +22,5 @@ class BitStream {
 		char surplusByte;
 		unsigned int remainingByteSlots;
 
-		void writeRemainingBits();
+		void flush();
 };	

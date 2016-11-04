@@ -221,10 +221,10 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 
 	stream->close();
 
-	if(finalWrite) writeRemainingBits();
+	if(finalWrite) flush();
 }
 
-void BitStream::writeRemainingBits() {
+void BitStream::flush() {
 
 	ofstream* stream = new ofstream(writeFilename->c_str(), ios::out | ios::binary | ios::app);
 	stream->seekp(writePosition/8, stream->beg);
