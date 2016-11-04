@@ -13,6 +13,5 @@ int main(int argc, char** argv) {
 //	g->encode(atoi(argv[5]), 1);
 
 	g->decode();
-
 	return 0;
 }

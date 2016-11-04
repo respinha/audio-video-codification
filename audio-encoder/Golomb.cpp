@@ -47,9 +47,12 @@ void Golomb::encode(int n, int finalWrite) {
 
 	stream->writeNBits(q+1+B, code, finalWrite);
 
-	/*if(finalWrite) {
+/*	if(finalWrite) {
 		cout << "Read: ";
-		for(int i = 0; i < 22; i++) cout << stream->readBit();
+		for(int i = 0; i < 22; i++) {
+			cout << stream->readBit();
+			if((i+1)%8 ==0) cout << " | ";
+		}
 		cout << "\n";
 	}*/
 }
