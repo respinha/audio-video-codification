@@ -9,15 +9,15 @@
 #include "Golomb.h"
 
 
-Golomb::Golomb(int m, string encodedFilename, string decodedFilename) : M(m), B(log2(m)){
+Golomb::Golomb(short m, string encodedFilename, string decodedFilename) : M(m), B(log2(m)){
 	stream = new BitStream(encodedFilename, decodedFilename);
 }
 
 
-void Golomb::encode(int n, int finalWrite) {
+void Golomb::encode(short n, short finalWrite) {
 
-	int q = n/M;
-	int r = n -(q*M);
+	short q = n/M;
+	short r = n -(q*M);
 
 	cout << "N = " << n << "\n";
 	cout << "M = " << M << "\n";
@@ -25,8 +25,8 @@ void Golomb::encode(int n, int finalWrite) {
 	cout << "R = " << r << "\n";
 	cout << "B = " << B << "\n";
 	cout << "###########################\n";
-	int i = 0;
-	int* code = new int[q+1+B];
+	short i = 0;
+	short* code = new short[q+1+B];
 
 	// unary
 	while(i < q) {
@@ -37,7 +37,7 @@ void Golomb::encode(int n, int finalWrite) {
 
 
 	// get remainder in binary value
-	int* binaryRem = Golomb::DecToBin(r);
+	short* binaryRem = Golomb::DecToBin(r);
 	for(i = 0; i < B; i++) {
 		/*char* value;
 		*value  = binaryRem[i];*/
@@ -50,7 +50,7 @@ void Golomb::encode(int n, int finalWrite) {
 
 /*	if(finalWrite) {
 		cout << "Read: ";
-		for(int i = 0; i < 22; i++) {
+		for(short i = 0; i < 22; i++) {
 			cout << stream->readBit();
 			if((i+1)%8 ==0) cout << " | ";
 		}
@@ -58,16 +58,16 @@ void Golomb::encode(int n, int finalWrite) {
 	}*/
 }
 
-list<int> Golomb::decode() {
+list<short> Golomb::decode() {
 
-	int nUnary = 0;
-	int isUnary = 1;
-	int q = 0;
+	short nUnary = 0;
+	short isUnary = 1;
+	short q = 0;
 
-	list<int> nList;
+	list<short> nList;
 	
-	int bit = 0;
-	int* binarySequence;
+	short bit = 0;
+	short* binarySequence;
 	
 	while(1) {
 		
@@ -82,9 +82,9 @@ list<int> Golomb::decode() {
 			binarySequence = stream->readNBits(B);
 
 			cout << "decode: ";
-			int r = Golomb::BinToDec(binarySequence, B);
+			short r = Golomb::BinToDec(binarySequence, B);
 			cout << "r = " << r;
-			int n = r + (q*M);
+			short n = r + (q*M);
 			
 			cout << "; q = " << q << "; n = " << n << "\n";
 
@@ -95,16 +95,16 @@ list<int> Golomb::decode() {
 		
 	}
 
-	for(list<int>::iterator it = nList.begin(); it !=nList.end(); it++) 
+	for(list<short>::iterator it = nList.begin(); it !=nList.end(); it++) 
 		cout << "N: " << *it << "\n";
 	return nList;
 	
 }
 
-int Golomb::BinToDec(int* binary, int len) {
-	int decimalNumber = 0;
+short Golomb::BinToDec(short* binary, short len) {
+	short decimalNumber = 0;
 
-	for(int i = 0; i < len; i++) {
+	for(short i = 0; i < len; i++) {
 		if(binary[i] == 1) {			
 			decimalNumber = decimalNumber + pow(2, len-i-1);
 		}
@@ -115,14 +115,14 @@ int Golomb::BinToDec(int* binary, int len) {
 
 
 // simple helper to convert from decimal to binary
-int*Golomb::DecToBin(int number)
+short*Golomb::DecToBin(short number)
 {
-	int* sum = new int[B];
-	int dec = number,rem,i=1;
+	short* sum = new short[B];
+	short dec = number,rem,i=1;
 
-	int value = number;
-	for(int i = B-1; i >= 0; i--, value>>=1) {
-		int val = (value & 1) + '0';
+	short value = number;
+	for(short i = B-1; i >= 0; i--, value>>=1) {
+		short val = (value & 1) + '0';
 		sum[i] = val;
 	}
 

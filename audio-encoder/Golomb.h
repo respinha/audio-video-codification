@@ -8,15 +8,15 @@ using namespace std;
 
 class Golomb {
 	public:
-		Golomb(int m, string encodedFilename, string decodedFilename);
-		void encode(int n, int finalWrite);	
-		list<int> decode();
+		Golomb(short m, string encodedFilename, string decodedFilename);
+		void encode(short n, short finalWrite);	
+		list<short> decode();
 
 	private:
-		const int M;
-		const int B;
+		const short M;
+		const short B;
 		BitStream* stream;
 
-		int BinToDec(int* binary, int len);
-		int* DecToBin(int number);
+		short BinToDec(short* binary, short len);
+		short* DecToBin(short number);
 };
