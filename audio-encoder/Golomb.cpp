@@ -37,13 +37,14 @@ void Golomb::encode(int n, int finalWrite) {
 
 
 	// get remainder in binary value
-	string binaryRem = Golomb::DecToBin(r);
+	int* binaryRem = Golomb::DecToBin(r);
 	for(i = 0; i < B; i++) {
-		char* value;
-		*value  = binaryRem[i];
-		code[q+1+i] =  atoi(value);
+		/*char* value;
+		*value  = binaryRem[i];*/
+		
+		//code[q+1+i] =  atoi(value);
+		code[q+1+i] = binaryRem[i];
 	}
-
 
 	stream->writeNBits(q+1+B, code, finalWrite);
 
@@ -114,15 +115,15 @@ int Golomb::BinToDec(int* binary, int len) {
 
 
 // simple helper to convert from decimal to binary
-string Golomb::DecToBin(int number)
+int*Golomb::DecToBin(int number)
 {
-	string sum = "";
+	int* sum = new int[B];
 	int dec = number,rem,i=1;
 
 	int value = number;
 	for(int i = B-1; i >= 0; i--, value>>=1) {
-		char val = (value & 1) + '0';
-		sum = val + sum;
+		int val = (value & 1) + '0';
+		sum[i] = val;
 	}
 
 	return sum;

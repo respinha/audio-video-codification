@@ -1,34 +1,37 @@
 #include <cstdlib> 
 #include <string>
-
+#include <algorithm>
 #include "Golomb.cpp"
 #include "Predictor.h"
 
+#include <sndfile.h> 
 
 Predictor::Predictor(int m, string encodedFilename, string decodedFilename){
 	
 }
 
 
-void Predictor::simple_predict(int* sequence, int length){
+void Predictor::simple_predict(short* sequence, short* sequence_buf, int length){
 //	int length = sizeof(sequence)/sizeof(*sequence); 
+	
+	
 
-	int remainder[length]; 
+	short remainderL;
+        short remainderR; 	
 
 	Golomb* g = new Golomb(8, "encoded", "encoded");
 
-	remainder[0] = 0; 
+	
+	remainderL = sequence[0] - sequence_buf[0];
+	remainderR = sequence[1] - sequence_buf[1];
+	int rL = remainderL;
+	cout << "LLL " << rL << "\n";
 
-	for(int i=1; i<length; i++){
-		cout <<i<<" top\n";  
-		remainder[i] = sequence[i-1] - sequence[i]; 
-		if( i== length)
-			g->encode(remainder[i], 1);
-		else
-			g->encode(remainder[i],0); 
-	}
+	g->encode(static_cast<int>(remainderL),0);
+	cout << "RRR" <<remainderR  << "\n";
+	g->encode(static_cast<int>(remainderR),0); 
 
-}
+}		
 
 void Predictor::predict(int* sequence, int length){
 	//int length = sizeof(sequence)/sizeof(sequence[0]); 
@@ -56,10 +59,104 @@ void Predictor::predict(int* sequence, int length){
 
 int main (int argc, char** argv){
 	
-	int samples[]= {1,2,3,4,5,6,7,8,9,10};
+//	int samples[]= {1,2,3,4,5,6,7,8,9,10};
+
+
 	Predictor* predictor = new Predictor(12, "encoded","encoded"); 
 
-	predictor->predict(samples,10); 
+	SNDFILE *soundFileIn; /* Pointer for input sound file */
+	//SNDFILE *soundFileOut; /* Pointer for output sound file */
+	SF_INFO soundInfoIn; /* Input sound file Info */
+	//SF_INFO soundInfoOut; /* Output sound file Info */
+
+	int i;
+	short sample[2];
+	sf_count_t nSamples = 1;
+
+	if (argc < 1){
+		fprintf(stderr, "Usage: <input file> \n");
+		return -1;
+	}
+
+
+	/* When opening a file for read, the format field should be set to zero
+	 * before calling sf_open(). All other fields of the structure are filled
+	 * in by the library
+	 */	
+	soundInfoIn.format = 0;
+	soundFileIn = sf_open (argv[1], SFM_READ, &soundInfoIn);
+	
+	if (soundFileIn == NULL){
+		fprintf(stderr, "Could not open file for reading: \"%s\"\n",
+		  argv[argc-2]);
+		sf_close(soundFileIn);
+		return -1;
+	}
+
+	fprintf(stderr, "Frames (samples): %d\n", (int) soundInfoIn.frames);
+	fprintf(stderr, "Samplerate: %d\n", soundInfoIn.samplerate);
+	fprintf(stderr, "Channels: %d\n", soundInfoIn.channels);
+
+	/* When opening a file for write, it is necessary to fill in the
+	 * structure members samplerate, channels and format.
+	 */
+	/*soundInfoOut.samplerate = soundInfoIn.samplerate;
+	soundInfoOut.channels = soundInfoIn.channels;
+	soundInfoOut.format = soundInfoIn.format;*/
+
+//	soundFileOut = sf_open (argv[2], SFM_WRITE, &soundInfoOut);
+
+	/*if (soundFileOut == NULL){
+		fprintf(stderr, "Could not open file for writing: \"%s\"\n", argv[2]);
+		sf_close(soundFileIn);
+		return -1;
+	}*/
+	
+	short tmp_buffer[2]; 
+
+	cout << "top 1\n"; 
+	for (i = 0; i < soundInfoIn.frames ; i++)
+	{
+		cout << "cheguei memo top\n";
+		if (sf_readf_short(soundFileIn, sample, nSamples) == 0){
+			
+			fprintf(stderr, "Error: Reached end of file\n");
+			sf_close(soundFileIn);
+			break;
+		
+		}else{
+
+			cout << "ShortL: " << sample[0] << "\n";
+			cout << "ShortR: " << sample[1] << "\n";
+
+			if(i==0){
+				short* first  = new short[2];
+				short *first_buffer = new short[2];
+				
+				predictor->simple_predict(first,first_buffer,2);
+			}
+			else{
+	
+				predictor->simple_predict(tmp_buffer,sample,2);
+			
+				int j; 
+				for(j=0; j<2; j++){
+					tmp_buffer[j] = sample[j]; 
+				}
+			}
+
+			//copy(begin(sample),end(sample),begin(tmp_buffer));				
+		}	
+
+	}
+
+	sf_close(soundFileIn);
+
+
+
+//	Predictor* predictor = new Predictor(12, "encoded","encoded"); 
+
+//	predictor->predict(samples,10); 
 	
 	cout << "top\n"; 	
 
