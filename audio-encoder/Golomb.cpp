@@ -16,10 +16,13 @@ Golomb::Golomb(short m, string encodedFilename, string decodedFilename) : M(m), 
 
 void Golomb::encode(short n, short finalWrite) {
 
-	short q = n/M;
-	short r = n -(q*M);
+	short transformedN = n >= 0 ? 2*n : (2*n)-1;
+
+	short q = transformedN/M;
+	short r = transformedN -(q*M);
 
 	cout << "N = " << n << "\n";
+	cout << "Transformed N: " << transformedN << "\n";
 	cout << "M = " << M << "\n";
 	cout << "Q = " << q << "\n";
 	cout << "R = " << r << "\n";
@@ -39,10 +42,6 @@ void Golomb::encode(short n, short finalWrite) {
 	// get remainder in binary value
 	short* binaryRem = Golomb::DecToBin(r);
 	for(i = 0; i < B; i++) {
-		/*char* value;
-		*value  = binaryRem[i];*/
-		
-		//code[q+1+i] =  atoi(value);
 		code[q+1+i] = binaryRem[i];
 	}
 
@@ -85,10 +84,16 @@ list<short> Golomb::decode() {
 			short r = Golomb::BinToDec(binarySequence, B);
 			cout << "r = " << r;
 			short n = r + (q*M);
-			
-			cout << "; q = " << q << "; n = " << n << "\n";
+			short original;
+			// checking if even or odd to apply transformation
+			if(n%2 == 0)
+				original = n/2;
+			else
+				original = (n+1)/(2*n);
+				
+			cout << "; q = " << q << "; n = " << original << "\n";
 
-			nList.push_back(n);	
+			nList.push_back(original);	
 			q = 0;
 			isUnary = 1;
 		}
