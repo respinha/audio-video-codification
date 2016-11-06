@@ -52,10 +52,11 @@ void Golomb::encode(short n, short finalWrite) {
 		code[q+1+i] = value;
 	}
 
-	cout << "BIN: ";
+	stream->writeNBits(q+1+B, code, finalWrite);
+	/*cout << "BIN: ";
 	for(int k = 0; k < B; k++) cout << code[q+1+k];
 	cout << "\n";
-	stream->writeNBits(q+1+B, code, finalWrite);
+	*/
 
 /*	if(finalWrite) {
 		cout << "Read: ";
@@ -79,14 +80,16 @@ short Golomb::decode() {
 	int* binarySequence;
 	
 	short sample;
-
+	
 	while(1) {
 		
 		if(isUnary) {
 			bit = stream->readBit();
 
 			cout << "BIT: " << bit << "\n";
-			if(bit == -1) break;
+			if(bit == -1) {
+				break;
+			}
 			
 			if(bit) q++;			
 			else isUnary = bit;		

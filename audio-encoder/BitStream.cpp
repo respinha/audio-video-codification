@@ -19,7 +19,10 @@ BitStream::BitStream(string fname) {
 
 int BitStream::readBit () {
 
-		if(readPosition >= writePosition) return -1;
+		if(readPosition >= writePosition){	
+			cout << "FINISH: " << readPosition << "; " << writePosition << "\n";
+			 return -1;
+		}
 
 		ifstream* stream = new ifstream(filename->c_str(), ifstream::binary);
 
@@ -154,9 +157,9 @@ void BitStream::writeBit(int* sequence) {
 
 void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 
-	cout << "SEQ: ";
+	/*cout << "SEQ: ";
 	for(int k = 0; k < nBits; k++) cout << sequence[k];
-	cout << "\n";
+	cout << "\n";*/
 	ofstream* stream = new ofstream();
 	const char* fname = filename->c_str();
 
@@ -184,10 +187,11 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 				return;
 			}
 		}
-		cout << "WRITE: ";
+		/*cout << "WRITE: ";
 			for(int k = 0; k < 8; k++) 
 				cout << ((surplusByte >> (7-k)) & 0x1);
-			cout << "\n";
+			cout << "\n";*/
+
 		stream->write(&surplusByte,sizeof(surplusByte));		
 		writePosition += 8;
 
@@ -206,10 +210,10 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 		if(++bufferPos == 8) {
 			stream->write((char*) &buffer,sizeof(buffer));
 
-			cout << "WRITE: ";
+			/*cout << "WRITE: ";
 			for(int k = 0; k < 8; k++) 
 				cout << ((buffer >> (7-k)) & 0x1);
-			cout << "\n";
+			cout << "\n";*/
 
 			buffer = 0;
 			bufferPos = 0;

@@ -5,6 +5,7 @@
 
 #include <sndfile.h> 
 
+
 Predictor::Predictor(int m, string encodedFilename, string decodedFilename){
 	g = new Golomb(m, encodedFilename);
 }

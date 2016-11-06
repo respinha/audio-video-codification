@@ -1,5 +1,6 @@
 all:
 	g++ Predictor.cpp -o p.o -lsndfile
+	rm output.txt
 	rm encoded
 readbit:
 	g++ readbits.cpp -o r.o
