@@ -10,7 +10,7 @@ class Golomb {
 	public:
 		Golomb(int m, string encodedFilename);
 		void encode(short n, short finalWrite);	
-		list<short> decode();
+		short decode();
 
 	private:
 		const int M;

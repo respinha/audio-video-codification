@@ -9,7 +9,7 @@ Predictor::Predictor(int m, string encodedFilename, string decodedFilename){
 	g = new Golomb(m, encodedFilename);
 }
 
-list<short> Predictor::reverse_simple_predict(short* sequence_buf){
+list<short> Predictor::reverse_simple_predict(int nFrames, short* sequence_buf){
 	cout << "entra reverse predictor TOP\n"; 
 	short sequenceL;
 	short sequenceR;
@@ -17,11 +17,11 @@ list<short> Predictor::reverse_simple_predict(short* sequence_buf){
 	list<short> reverse; 
 
 	cout << "inicio decoded\n"; 
-	list<short> decoded = g->decode();
+	list<short> decoded;// = g->decode();
 	cout << "fim decoded\n";
         
 	int i = 0; 
-
+/*
 	for(list<short>::iterator it = decoded.begin(); it !=decoded.end(); it++){
 		cout <<"entra no for ainda todo TOP\n";	
 		if(i%2==0){
@@ -38,9 +38,23 @@ list<short> Predictor::reverse_simple_predict(short* sequence_buf){
 		i+=1; 
 		cout << "reverse: "<<*it<<"\n"; 	
 	
-	} 
+	} */
 
+	for(int i = 0; i < 2*nFrames; i++) {
 
+		short sample = g->decode();
+		if(i%2==0){
+			cout << "reverse predictor par\n";
+			sequenceL = sample + sequence_buf[0];
+			reverse.push_back(sequenceL);
+		}else{
+			cout << "reverse predictor impar\n"; 
+			sequenceR = sample + sequence_buf[1]; 
+			reverse.push_back(sequenceR);
+		}
+	}
+
+	return reverse;	
 }
 
 
@@ -86,9 +100,6 @@ void Predictor::predict(int* sequence, int length){
 		else
 			g->encode(remainder[i],0);
 	}
-
-
-
 }
 
 
@@ -196,7 +207,7 @@ int main (int argc, char** argv){
 
 	sf_close(soundFileIn);
 	
-	list<short> top_lista = predictor->reverse_simple_predict(samples_demo);
+	/*list<short> top_lista = */predictor->reverse_simple_predict(soundInfoIn.frames, samples_demo);
 
 	
 

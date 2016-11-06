@@ -58,7 +58,7 @@ void Golomb::encode(short n, short finalWrite) {
 	}*/
 }
 
-list<short> Golomb::decode() {
+short Golomb::decode() {
 
 	int nUnary = 0;
 	int isUnary = 1;
@@ -69,6 +69,8 @@ list<short> Golomb::decode() {
 	int bit = 0;
 	int* binarySequence;
 	
+	short sample;
+
 	while(1) {
 		
 		if(isUnary) {
@@ -97,19 +99,20 @@ list<short> Golomb::decode() {
 			stringstream ss;
 			ss << original;
 			
-			short sample;
 			ss >> sample;
 
-			nList.push_back(sample);	
+			/*nList.push_back(sample);	
 			q = 0;
-			isUnary = 1;
+			isUnary = 1;*/
+			break;
 		}
 		
 	}
 
-	for(list<short>::iterator it = nList.begin(); it !=nList.end(); it++) 
+	/*for(list<short>::iterator it = nList.begin(); it !=nList.end(); it++) 
 		cout << "N: " << *it << "\n";
-	return nList;
+	return nList;*/
+	return sample;
 	
 }
 
