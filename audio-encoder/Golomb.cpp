@@ -17,18 +17,18 @@ Golomb::Golomb(int m, string encodedFilename) : M(m), B(log2(m)){
 void Golomb::encode(short n, short finalWrite) {
 
 		
-	int transformedN = n >= 0 ? 2*n : (2*n)-1;
+	int transformedN = n >= 0 ? 2*n : (2*abs(n))-1;
 
 	int q = transformedN/M;
 	int r = transformedN -(q*M);
 
-	cout << "N = " << n << "\n";
+/*	cout << "N = " << n << "\n";
 	cout << "Transformed N: " << transformedN << "\n";
 	cout << "M = " << M << "\n";
 	cout << "Q = " << q << "\n";
 	cout << "R = " << r << "\n";
 	cout << "B = " << B << "\n";
-	cout << "###########################\n";
+	cout << "###########################\n";*/
 	int i = 0;
 	int* code = new int[q+1+B];
 

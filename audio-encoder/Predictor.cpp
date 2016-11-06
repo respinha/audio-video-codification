@@ -10,6 +10,43 @@ Predictor::Predictor(int m, string encodedFilename, string decodedFilename){
 	
 }
 
+list<short> Predictor::reverse_simple_predict(short* sequence_buf){
+	cout << "entra reverse predictor TOP\n"; 
+	short sequenceL;
+	short sequenceR;
+	
+	list<short> reverse; 
+
+	Golomb* g = new Golomb(8, "encoded");
+	cout << "inicio decoded\n"; 
+	list<short> decoded = g->decode();
+	cout << "fim decoded\n";
+        
+	int i = 0; 
+
+	for(list<short>::iterator it = decoded.begin(); it !=decoded.end(); it++){
+		cout <<"entra no for ainda todo TOP\n";	
+		if(i%2==0){
+			cout << "reverse predictor par\n";
+			sequenceL = *it + sequence_buf[0];
+			reverse.push_back(sequenceL);
+		}else{
+			cout << "reverse predictor impar\n"; 
+			sequenceR = *it + sequence_buf[1]; 
+			reverse.push_back(sequenceR);
+		}
+
+
+		i+=1; 
+		cout << "reverse: "<<*it<<"\n"; 	
+	
+	} 
+
+
+}
+
+
+
 
 void Predictor::simple_predict(short* sequence, short* sequence_buf, int length){
 //	int length = sizeof(sequence)/sizeof(*sequence); 
@@ -19,11 +56,11 @@ void Predictor::simple_predict(short* sequence, short* sequence_buf, int length)
 	short remainderL;
         short remainderR; 	
 
-	Golomb* g = new Golomb(8, "encoded", "encoded");
+	Golomb* g = new Golomb(8, "encoded");
 
-	cout << "DEBUG: L = " << sequence[0] << " - " <<  sequence_buf[0] << "\n"; 
+//	cout << "DEBUG: L = " << sequence[0] << " - " <<  sequence_buf[0] << "\n"; 
 
-	cout << "DEBUG: R= " << sequence[1] << " - " <<  sequence_buf[1] << "\n"; 
+//	cout << "DEBUG: R= " << sequence[1] << " - " <<  sequence_buf[1] << "\n"; 
 
 	
 	remainderL = sequence[0] - sequence_buf[0];
@@ -40,7 +77,7 @@ void Predictor::predict(int* sequence, int length){
 	
 	int remainder[length]; 
 	
-	Golomb* g = new Golomb(8, "encoded", "encoded");
+	Golomb* g = new Golomb(8, "encoded");
 	
 	remainder[0] = 0; 
 	remainder[1] = 0; 
@@ -61,8 +98,10 @@ void Predictor::predict(int* sequence, int length){
 
 int main (int argc, char** argv){
 	
-//	int samples[]= {1,2,3,4,5,6,7,8,9,10};
-
+	//cout << "inicio\n";	
+	short samples_demo[]= {1,2,3,4,5,6,7,8,9,10};
+	int conta;
+	conta = 0; 
 
 	Predictor* predictor = new Predictor(12, "encoded","encoded"); 
 
@@ -116,10 +155,10 @@ int main (int argc, char** argv){
 	
 	short tmp_buffer[2] = {0,0}; 
 
-	cout << "top 1\n"; 
+	//cout << "top 1\n"; 
 	for (i = 0; i < soundInfoIn.frames ; i++)
 	{
-		cout << "cheguei memo top\n";
+	//	cout << "cheguei memo top\n";
 		if (sf_readf_short(soundFileIn, sample, nSamples) == 0){
 			
 			fprintf(stderr, "Error: Reached end of file\n");
@@ -128,21 +167,25 @@ int main (int argc, char** argv){
 		
 		}else{
 
-			cout << "ShortL: " << sample[0] << "\n";
-			cout << "ShortR: " << sample[1] << "\n";
+	//		cout << "ShortL: " << sample[0] << "\n";
+	//		cout << "ShortR: " << sample[1] << "\n";
 
 			if(i==0){
 				short* first  = new short[2];
 				short *first_buffer = new short[2];
 				
 				predictor->simple_predict(first,first_buffer,2);
+				conta+=1;
+			//	cout << "conta: "<<conta<<"\n";
 			}
 
-			cout << "Values to insert :\n";	
-			for(int j = 0; j < 2; j++) cout << tmp_buffer[j] << "\n";
-			for(int j = 0; j < 2; j++) cout << sample[j] << "\n";
+	//		cout << "Values to insert :\n";	
+			//for(int j = 0; j < 2; j++) cout << tmp_buffer[j] << "\n";
+			//for(int j = 0; j < 2; j++) cout << sample[j] << "\n";
 					
 			predictor->simple_predict(tmp_buffer,sample,2);
+			conta+=1;
+			//cout << "conta: "<<conta<<"\n"; 
 		
 			int j; 
 			for(j=0; j<2; j++){
@@ -155,8 +198,10 @@ int main (int argc, char** argv){
 	}
 
 	sf_close(soundFileIn);
+	
+	list<short> top_lista = predictor->reverse_simple_predict(samples_demo);
 
-
+	
 
 //	Predictor* predictor = new Predictor(12, "encoded","encoded"); 
 
