@@ -40,9 +40,10 @@ list<short> Predictor::reverse_simple_predict(int nFrames, short* sequence_buf){
 	
 	} */
 
-	for(int i = 0; i < 2*nFrames; i++) {
+	for(int i = 0; i < 20; i++) {
 
 		short sample = g->decode();
+		cout << "SAMPLE: " << sample << "\n";
 		if(i%2==0){
 			cout << "reverse predictor par\n";
 			sequenceL = sample + sequence_buf[0];

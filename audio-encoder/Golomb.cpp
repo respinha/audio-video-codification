@@ -92,15 +92,15 @@ short Golomb::decode() {
 			if(n%2 == 0)
 				original = n/2;
 			else
-				original = (n+1)/(2*n);
+				original = ((n+1)/2) * -1;
 				
-			cout << "; q = " << q << "; n = " << original << "\n";
 
 			stringstream ss;
 			ss << original;
 			
 			ss >> sample;
 
+			cout << "; q = " << q << "; n = " << sample << "\n";
 			/*nList.push_back(sample);	
 			q = 0;
 			isUnary = 1;*/
