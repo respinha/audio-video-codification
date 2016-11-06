@@ -44,9 +44,17 @@ void Golomb::encode(short n, short finalWrite) {
 	// get remainder in binary value
 	char* binaryRem = Golomb::DecToBin(r);
 	for(i = 0; i < B; i++) {
-		code[q+1+i] = binaryRem[i];
+		stringstream ss;
+		ss << binaryRem[i];
+		
+		int value;
+		ss >> value;
+		code[q+1+i] = value;
 	}
 
+	cout << "BIN: ";
+	for(int k = 0; k < B; k++) cout << code[q+1+k];
+	cout << "\n";
 	stream->writeNBits(q+1+B, code, finalWrite);
 
 /*	if(finalWrite) {
@@ -77,6 +85,7 @@ short Golomb::decode() {
 		if(isUnary) {
 			bit = stream->readBit();
 
+			cout << "BIT: " << bit << "\n";
 			if(bit == -1) break;
 			
 			if(bit) q++;			
@@ -137,13 +146,8 @@ char*Golomb::DecToBin(int number)
 	int value = number;
 	for(int i = B-1; i >= 0; i--, value>>=1) {
 		char val = (value & 1) + '0';
-		cout << "VAL: " << val << "\n";
 		sum[i] = val;
 	}
 
-	cout << "BIN: ";
-	for(int i = 0; i < B; i++) cout << *sum++;
-	cout << "\n";
-
-	return sum;
+		return sum;
 }

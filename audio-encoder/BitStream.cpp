@@ -155,9 +155,8 @@ void BitStream::writeBit(int* sequence) {
 void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 
 	cout << "SEQ: ";
-	for(int i = 0; i < nBits; i++) cout << sequence[i];
+	for(int k = 0; k < nBits; k++) cout << sequence[k];
 	cout << "\n";
-
 	ofstream* stream = new ofstream();
 	const char* fname = filename->c_str();
 
@@ -185,7 +184,10 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 				return;
 			}
 		}
-	
+		cout << "WRITE: ";
+			for(int k = 0; k < 8; k++) 
+				cout << ((surplusByte >> (7-k)) & 0x1);
+			cout << "\n";
 		stream->write(&surplusByte,sizeof(surplusByte));		
 		writePosition += 8;
 
@@ -201,11 +203,14 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 		buffer = buffer | (bit << (7-bufferPos));
 	
 
-		if(finalWrite && i == nBits-1) {
-					}
-
 		if(++bufferPos == 8) {
 			stream->write((char*) &buffer,sizeof(buffer));
+
+			cout << "WRITE: ";
+			for(int k = 0; k < 8; k++) 
+				cout << ((buffer >> (7-k)) & 0x1);
+			cout << "\n";
+
 			buffer = 0;
 			bufferPos = 0;
 			writePosition += 8;
