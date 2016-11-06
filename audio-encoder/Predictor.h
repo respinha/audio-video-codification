@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <string>
-
-
+#include <list>
+#include "Golomb.cpp"
 
 using namespace std;
 
@@ -12,4 +12,5 @@ class Predictor {
 		void predict(int* sequence, int length);
 		list<short> reverse_simple_predict(short* sequence_buf); 
 	private:
+		Golomb* g;
 };

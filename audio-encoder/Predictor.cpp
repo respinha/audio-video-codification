@@ -1,13 +1,12 @@
 #include <cstdlib> 
 #include <string>
 #include <algorithm>
-#include "Golomb.cpp"
 #include "Predictor.h"
 
 #include <sndfile.h> 
 
 Predictor::Predictor(int m, string encodedFilename, string decodedFilename){
-	
+	g = new Golomb(m, encodedFilename);
 }
 
 list<short> Predictor::reverse_simple_predict(short* sequence_buf){
@@ -17,7 +16,6 @@ list<short> Predictor::reverse_simple_predict(short* sequence_buf){
 	
 	list<short> reverse; 
 
-	Golomb* g = new Golomb(8, "encoded");
 	cout << "inicio decoded\n"; 
 	list<short> decoded = g->decode();
 	cout << "fim decoded\n";
@@ -56,7 +54,6 @@ void Predictor::simple_predict(short* sequence, short* sequence_buf, int length)
 	short remainderL;
         short remainderR; 	
 
-	Golomb* g = new Golomb(8, "encoded");
 
 //	cout << "DEBUG: L = " << sequence[0] << " - " <<  sequence_buf[0] << "\n"; 
 
@@ -77,7 +74,6 @@ void Predictor::predict(int* sequence, int length){
 	
 	int remainder[length]; 
 	
-	Golomb* g = new Golomb(8, "encoded");
 	
 	remainder[0] = 0; 
 	remainder[1] = 0; 
@@ -103,7 +99,8 @@ int main (int argc, char** argv){
 	int conta;
 	conta = 0; 
 
-	Predictor* predictor = new Predictor(12, "encoded","encoded"); 
+	Predictor* predictor = new Predictor(8, "encoded","encoded"); 
+
 
 	SNDFILE *soundFileIn; /* Pointer for input sound file */
 	//SNDFILE *soundFileOut; /* Pointer for output sound file */
