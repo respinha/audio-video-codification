@@ -6,21 +6,20 @@ using namespace std;
 class BitStream {
 
 	public:
-		BitStream(string readname, string writename);
-		short readBit();	
-		short* readNBits(short nBits);
-		void writeBit(short* sequence);
-		void writeNBits(short nBits, short* sequence, short finalWrite);
+		BitStream(string fname);
+		int readBit();	
+		int* readNBits(int nBits);
+		void writeBit(int* sequence);
+		void writeNBits(int nBits, int* sequence, int finalWrite);
 
 	private:
-		string* readFilename;
-		string* writeFilename;
-		short readPosition;
-		short writePosition;
+		string* filename;
+		int readPosition;
+		int writePosition;
 
-		short surplus;
+		int surplus;
 		char surplusByte;
-		unsigned short remainingByteSlots;
+		unsigned int remainingByteSlots;
 
 		void flush();
 };	
