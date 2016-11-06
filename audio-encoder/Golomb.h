@@ -18,5 +18,5 @@ class Golomb {
 		BitStream* stream;
 
 		int BinToDec(int* binary, int len);
-		int* DecToBin(int number);
+		char* DecToBin(int number);
 };

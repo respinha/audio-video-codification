@@ -16,9 +16,7 @@ list<short> Predictor::reverse_simple_predict(int nFrames, short* sequence_buf){
 	
 	list<short> reverse; 
 
-	cout << "inicio decoded\n"; 
 	list<short> decoded;// = g->decode();
-	cout << "fim decoded\n";
         
 	int i = 0; 
 /*
@@ -45,11 +43,9 @@ list<short> Predictor::reverse_simple_predict(int nFrames, short* sequence_buf){
 		short sample = g->decode();
 		cout << "SAMPLE: " << sample << "\n";
 		if(i%2==0){
-			cout << "reverse predictor par\n";
 			sequenceL = sample + sequence_buf[0];
 			reverse.push_back(sequenceL);
 		}else{
-			cout << "reverse predictor impar\n"; 
 			sequenceR = sample + sequence_buf[1]; 
 			reverse.push_back(sequenceR);
 		}
@@ -62,22 +58,14 @@ list<short> Predictor::reverse_simple_predict(int nFrames, short* sequence_buf){
 
 
 void Predictor::simple_predict(short* sequence, short* sequence_buf, int length){
-//	int length = sizeof(sequence)/sizeof(*sequence); 
-	
-	
-
 	short remainderL;
         short remainderR; 	
 
 
-//	cout << "DEBUG: L = " << sequence[0] << " - " <<  sequence_buf[0] << "\n"; 
-
-//	cout << "DEBUG: R= " << sequence[1] << " - " <<  sequence_buf[1] << "\n"; 
 
 	
 	remainderL = sequence[0] - sequence_buf[0];
 	remainderR = sequence[1] - sequence_buf[1];
-	int rL = remainderL;
 
 	g->encode(remainderL,0);
 	g->encode(remainderR,0); 
@@ -94,7 +82,6 @@ void Predictor::predict(int* sequence, int length){
 	remainder[1] = 0; 
 
 	for(int i=2; i<length; i++){
-		cout <<i<<" top\n"; 
 		remainder[i] = (2*sequence[i-1] - sequence[i-2]) - sequence[i]; 
 		if( i==length)
 			g->encode(remainder[i], 1);
@@ -106,10 +93,7 @@ void Predictor::predict(int* sequence, int length){
 
 int main (int argc, char** argv){
 	
-	//cout << "inicio\n";	
 	short samples_demo[]= {1,2,3,4,5,6,7,8,9,10};
-	int conta;
-	conta = 0; 
 
 	Predictor* predictor = new Predictor(8, "encoded","encoded"); 
 
@@ -164,10 +148,8 @@ int main (int argc, char** argv){
 	
 	short tmp_buffer[2] = {0,0}; 
 
-	//cout << "top 1\n"; 
 	for (i = 0; i < soundInfoIn.frames ; i++)
 	{
-	//	cout << "cheguei memo top\n";
 		if (sf_readf_short(soundFileIn, sample, nSamples) == 0){
 			
 			fprintf(stderr, "Error: Reached end of file\n");
@@ -176,25 +158,15 @@ int main (int argc, char** argv){
 		
 		}else{
 
-	//		cout << "ShortL: " << sample[0] << "\n";
-	//		cout << "ShortR: " << sample[1] << "\n";
 
 			if(i==0){
-				short* first  = new short[2];
-				short *first_buffer = new short[2];
-				
+				short first[2]  = {0,0};
+				short first_buffer[2] = {0,0};				
+
 				predictor->simple_predict(first,first_buffer,2);
-				conta+=1;
-			//	cout << "conta: "<<conta<<"\n";
 			}
 
-	//		cout << "Values to insert :\n";	
-			//for(int j = 0; j < 2; j++) cout << tmp_buffer[j] << "\n";
-			//for(int j = 0; j < 2; j++) cout << sample[j] << "\n";
-					
 			predictor->simple_predict(tmp_buffer,sample,2);
-			conta+=1;
-			//cout << "conta: "<<conta<<"\n"; 
 		
 			int j; 
 			for(j=0; j<2; j++){

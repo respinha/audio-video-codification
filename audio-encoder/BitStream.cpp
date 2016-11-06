@@ -85,7 +85,6 @@ int* BitStream::readNBits(int nBits) {
 				}
 			}
 
-		cout << "POS: " << readPosition << "\n";
 	
 		} 
 		else {
@@ -119,7 +118,6 @@ int* BitStream::readNBits(int nBits) {
 
 		delete[] bytesBuffer;
 		readPosition += nBits;	// update bit position on file
-		cout << "POS: " << readPosition << "\n";
 	}
 
 	return bitBuffer;
@@ -156,6 +154,9 @@ void BitStream::writeBit(int* sequence) {
 
 void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 
+	cout << "SEQ: ";
+	for(int i = 0; i < nBits; i++) cout << sequence[i];
+	cout << "\n";
 
 	ofstream* stream = new ofstream();
 	const char* fname = filename->c_str();
@@ -233,10 +234,6 @@ void BitStream::writeNBits(int nBits, int* sequence, int finalWrite) {
 }
 
 void BitStream::flush() {
-	cout << "FINAL: ";
-	for(int k = 0; k < 8; k++)
-		cout << ((surplusByte >> (7-k)) & 0x1);
-	cout << "\n";
 
 	ofstream* stream = new ofstream(filename->c_str(), ios::out | ios::binary | ios::app);
 	stream->seekp((writePosition/8)+1, stream->beg);
@@ -245,7 +242,6 @@ void BitStream::flush() {
 	stream->close();
 
 	writePosition+=remainingByteSlots;
-	cout << "POS: " << remainingByteSlots << "\n";
 	
 
 }

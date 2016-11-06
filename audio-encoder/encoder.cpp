@@ -9,10 +9,7 @@ int main(int argc, char** argv) {
 
 	g->encode(atoi(argv[2]), 0);
 	g->encode(atoi(argv[3]), 0);
-	g->encode(atoi(argv[4]), 0);
-	g->encode(atoi(argv[5]), 0);
-	g->encode(atoi(argv[6]), 0);
-	g->encode(atoi(argv[7]), 1);
+	g->encode(atoi(argv[4]), 1);
 //	g->encode(atoi(argv[5]), 1);
 
 	while(1) {
