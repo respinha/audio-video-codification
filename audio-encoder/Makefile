@@ -1,5 +1,8 @@
 all:
-	g++ Predictor.cpp -o p.o -lsndfile
+	g++ test_predictor.cpp -o tp.o -lsndfile
+	g++ test_reverse_predictor.cpp -o tr.o -lsndfile
+	g++ encoder.cpp -o e.o
+	rm metadata
 	rm output.txt
 	rm encoded
 readbit:

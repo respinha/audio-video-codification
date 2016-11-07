@@ -7,11 +7,11 @@
 
 #include "BitStream.h"
 
-BitStream::BitStream(string fname) {
+BitStream::BitStream(string fname, int pos) {
 
 		// read file	
 		readPosition = 0;
-		writePosition = 0;
+		writePosition = pos;
 		filename = new string(fname);
 		surplusByte = 0;
 		remainingByteSlots = 0;
@@ -19,13 +19,13 @@ BitStream::BitStream(string fname) {
 
 int BitStream::readBit () {
 
-		if(readPosition >= writePosition){	
+		if(readPosition >= writePosition){
 			cout << "FINISH: " << readPosition << "; " << writePosition << "\n";
 			 return -1;
 		}
-
+		
 		ifstream* stream = new ifstream(filename->c_str(), ifstream::binary);
-
+		
 		int bit = 0;
 		if (stream->is_open()) {
 
@@ -47,6 +47,7 @@ int BitStream::readBit () {
 
 
 		}
+
 		return bit;
 }
 
@@ -248,11 +249,15 @@ void BitStream::flush() {
 	stream->seekp((writePosition/8)+1, stream->beg);
 
 	stream->write(&surplusByte, sizeof(surplusByte));
-	stream->close();
 
 	writePosition+=remainingByteSlots;
-	
 
+	cout << "final position: "<< writePosition << "\n";
+
+	stream->close();
 }
 
+int BitStream::getFilePosition() {
+	return writePosition;
+}
 

@@ -8,10 +8,11 @@ using namespace std;
 
 class Golomb {
 	public:
-		Golomb(int m, string encodedFilename);
+		Golomb(int m, string encodedFilename, int pos);
 		void encode(short n, short finalWrite);	
-		short decode();
+		short decode(int* end);
 
+		int getFilePosition();
 	private:
 		const int M;
 		const int B;

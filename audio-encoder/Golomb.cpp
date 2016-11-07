@@ -9,8 +9,8 @@
 #include "Golomb.h"
 
 
-Golomb::Golomb(int m, string encodedFilename) : M(m), B(log2(m)){
-	stream = new BitStream(encodedFilename);
+Golomb::Golomb(int m, string encodedFilename, int pos) : M(m), B(log2(m)){
+	stream = new BitStream(encodedFilename,pos);
 }
 
 
@@ -68,7 +68,7 @@ void Golomb::encode(short n, short finalWrite) {
 	}*/
 }
 
-short Golomb::decode() {
+short Golomb::decode(int* end) {
 
 	int nUnary = 0;
 	int isUnary = 1;
@@ -86,9 +86,9 @@ short Golomb::decode() {
 		if(isUnary) {
 			bit = stream->readBit();
 
-			cout << "BIT: " << bit << "\n";
 			if(bit == -1) {
-				break;
+				*end = 1;
+				return -1;
 			}
 			
 			if(bit) q++;			
@@ -123,6 +123,8 @@ short Golomb::decode() {
 		}
 		
 	}
+
+	cout << "Here: " << *end << "\n";
 	return sample;
 	
 }
@@ -153,4 +155,8 @@ char*Golomb::DecToBin(int number)
 	}
 
 		return sum;
+}
+
+int Golomb::getFilePosition() {
+	return stream->getFilePosition();
 }

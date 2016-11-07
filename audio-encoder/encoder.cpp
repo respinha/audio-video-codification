@@ -5,19 +5,21 @@
 
 int main(int argc, char** argv) {
 
-	Golomb* g = new Golomb(atoi(argv[1]), "encoded");
+	Golomb* g = new Golomb(atoi(argv[1]), "encoded1",0);
+
 
 	g->encode(atoi(argv[2]), 0);
 	g->encode(atoi(argv[3]), 0);
 	g->encode(atoi(argv[4]), 1);
 //	g->encode(atoi(argv[5]), 1);
 
-	while(1) {
-		char b;
-		cin >> b;
-		if(b == 'b') 
-			g->decode();	
-		else break;
+	Golomb* h = new Golomb(atoi(argv[1]), "encoded1", g->getFilePosition());
+	
+	int e = 0;
+	int* end = &e;
+	while(*end == 0) {
+		h->decode(end);	
 	}
+
 	return 0;
 }
