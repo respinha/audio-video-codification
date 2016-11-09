@@ -103,7 +103,6 @@ short Golomb::decode(int* end) {
 			
 			cout << "decoded: " << n << "; Original: " << original << "\n";
 			cout << "\n";
-			cout << original << "\n";
 			stringstream ss;
 			ss << original;
 			
