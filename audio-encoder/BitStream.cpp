@@ -255,10 +255,11 @@ void BitStream::writeNBits(int nBits, int bit_buff, int finalWrite) {
 
 	stream->close();
 	if(finalWrite) {
+
 		if(!abort) {
 			surplusByte = buffer;
 
-			remainingByteSlots = (8-bufferPos);
+			remainingByteSlots = bufferPos;
 		} else remainingByteSlots = (8-remainingByteSlots);
 		flush();
 
