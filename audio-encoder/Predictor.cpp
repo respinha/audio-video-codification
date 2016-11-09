@@ -10,7 +10,6 @@ Predictor::Predictor(int m, string encodedFilename, int pos){
 }
 
 void Predictor::reverse_simple_predict(short* buffer, short* samples, int* end){
-	cout << "entra reverse predictor TOP\n"; 
 
 	// left  
 	short residue = g->decode(end);
@@ -24,8 +23,8 @@ void Predictor::reverse_simple_predict(short* buffer, short* samples, int* end){
 
 	samples[1] = residue + buffer[1]; 
 
-	cout << "Samples: ";
-	cout << samples[0] << "; " << samples[1] << "\n";
+/*	cout << "Samples: ";
+	cout << samples[0] << "; " << samples[1] << "\n";*/
 
 	buffer[0] = samples[0];
 	buffer[1] = samples[1];
@@ -37,9 +36,13 @@ void Predictor::reverse_simple_predict(short* buffer, short* samples, int* end){
 void Predictor::simple_predict(short* sequence, short* sequence_buf){
 	short remainderL;
     short remainderR; 	
-		
+
+
 	remainderL = sequence[0] - sequence_buf[0];
 	remainderR = sequence[1] - sequence_buf[1];
+
+	//cout << "sampleL: " << sequence[0] << " - " << sequence_buf[0];
+	//cout << "sampleR: " << sequence[1] << " - " << sequence_buf[1];
 
 	g->encode(remainderL,0);
 	g->encode(remainderR,0); 
@@ -66,7 +69,3 @@ void Predictor::predict(int* sequence, int length){
 			g->encode(remainder[i],0);
 	}
 }*/
-
-
-
-

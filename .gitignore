@@ -25,6 +25,8 @@
 /*/*.swp
 /*/*.o*
 /*/*.out
+/*/out*
+/*/encoded*
 /*/*.txt
 /*/saved_LUT
 /*/sample_file

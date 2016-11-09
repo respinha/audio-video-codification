@@ -99,10 +99,8 @@ int main(int argc, char** argv) {
 	// argv[1] = parameter M; argv[2] = file with encoded content
 	Predictor* predictor = new Predictor(atoi(argv[1]), argv[2], fileWritePosition);
 
-	int c = 0;
 	while(*pend == 0) {
 
-		if(++c%10000 == 0) fprintf(stderr, "Decoding........\n");
 		predictor->reverse_simple_predict(buffer, outputSamples, pend);
 
 		if (sf_writef_short(soundFileOut, outputSamples, nSamples) != 1){
@@ -117,7 +115,9 @@ int main(int argc, char** argv) {
 
 	sf_close(soundFileOut);
 
+	delete pend;
 	delete predictor;
+	delete stream;
 
 		
 	return 0;

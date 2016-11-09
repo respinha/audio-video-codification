@@ -13,4 +13,5 @@ writebit:
 	rm out*
 encode:
 	g++ encoder.cpp -o e.o
-	rm encoded
+	rm encoded1
+	rm out*

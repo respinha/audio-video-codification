@@ -31,28 +31,18 @@ void Golomb::encode(short n, short finalWrite) {
 	cout << "###########################\n";
 
 	int i = 0;
-	int* code = new int[q+1+B];
 
 	// unary
 	while(i < q) {
-		code[i++] = 1;
-	}
-	
-		code[q] = 0;
-
-
-	// get remainder in binary value
-	char* binaryRem = Golomb::DecToBin(r);
-	for(i = 0; i < B; i++) {
-		stringstream ss;
-		ss << binaryRem[i];
-		
-		int value;
-		ss >> value;
-		code[q+1+i] = value;
+		stream->writeBit(1);
+		i++;
 	}
 
-	stream->writeNBits(q+1+B, code, finalWrite);
+	//cout << 0;
+	stream->writeBit(0);
+
+	stream->writeNBits(B, r, finalWrite);
+
 	/*cout << "BIN: ";
 	for(int k = 0; k < B; k++) cout << code[q+1+k];
 	cout << "\n";
@@ -66,6 +56,7 @@ void Golomb::encode(short n, short finalWrite) {
 		}
 		cout << "\n";
 	}*/
+
 }
 
 short Golomb::decode(int* end) {
@@ -74,8 +65,6 @@ short Golomb::decode(int* end) {
 	int isUnary = 1;
 	int q = 0;
 
-	list<short> nList;
-	
 	int bit = 0;
 	int* binarySequence;
 	
@@ -86,8 +75,12 @@ short Golomb::decode(int* end) {
 		if(isUnary) {
 			bit = stream->readBit();
 
+			//cout << bit;
 			if(bit == -1) {
 				*end = 1;
+				cout << "The end as we know it\n";
+				//delete binarySequence;
+			
 				return -1;
 			}
 			
@@ -109,7 +102,8 @@ short Golomb::decode(int* end) {
 				original = ((n+1)/2) * -1;
 			
 			cout << "decoded: " << n << "; Original: " << original << "\n";
-
+			cout << "\n";
+			cout << original << "\n";
 			stringstream ss;
 			ss << original;
 			
@@ -119,12 +113,15 @@ short Golomb::decode(int* end) {
 			/*nList.push_back(sample);	
 			q = 0;
 			isUnary = 1;*/
+
+
+			//delete binarySequence;
 			break;
 		}
 		
 	}
 
-	cout << "Here: " << *end << "\n";
+//	cout << "Here: " << *end << "\n";
 	return sample;
 	
 }

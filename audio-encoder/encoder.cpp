@@ -8,13 +8,15 @@ int main(int argc, char** argv) {
 	Golomb* g = new Golomb(atoi(argv[1]), "encoded1",0);
 
 
-	g->encode(atoi(argv[2]), 0);
-	g->encode(atoi(argv[3]), 0);
-	g->encode(atoi(argv[4]), 1);
-//	g->encode(atoi(argv[5]), 1);
+	g->encode(23, 0);
+	g->encode(42, 0);
+	g->encode(-56, 0);
+	g->encode(73, 0);
+	g->encode(-88, 0);
+	g->encode(-14, 1);
 
 	Golomb* h = new Golomb(atoi(argv[1]), "encoded1", g->getFilePosition());
-	
+
 	int e = 0;
 	int* end = &e;
 	while(*end == 0) {

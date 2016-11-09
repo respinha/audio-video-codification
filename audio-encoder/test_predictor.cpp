@@ -20,7 +20,6 @@ int main (int argc, char** argv){
 	SF_INFO soundInfoIn; /* Input sound file Info */
 
 	int i;
-	short sample[2] = {0,0};
 	sf_count_t nSamples = 1;
 
 
@@ -49,6 +48,10 @@ int main (int argc, char** argv){
 	fprintf(stderr, "Channels: %d\n", soundInfoIn.channels);
 
 	
+	short* sample = new short[2];
+	sample[0] = 0;
+	sample[1] = 0;
+
 	short buffer[2] = {0,0}; 
 
 	for (i = 0; i < soundInfoIn.frames ; i++)
@@ -60,6 +63,8 @@ int main (int argc, char** argv){
 			break;
 		
 		}else{
+			//cout << "SampleL : " << sample[0] << "\n";
+			//cout << "SampleR : " << sample[1] << "\n";
 			predictor->simple_predict(sample, buffer);
 		
 			int j; 
@@ -80,7 +85,9 @@ int main (int argc, char** argv){
 	o->flush();
 	o->close();
 
-
+	delete o;
+	delete predictor;
+	delete[] sample;
 
 	return 0; 
 }
