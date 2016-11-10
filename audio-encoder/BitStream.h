@@ -8,7 +8,8 @@ class BitStream {
 	public:
 		BitStream(string fname, int pos);
 		int readBit();	
-		int* readNBits(int nBits);
+		int readNBits(int nBits);
+
 		void writeBit(int bit);
 		void writeNBits(int nBits, int bit_buff, int finalWrite);
 

@@ -65,13 +65,15 @@ short Golomb::decode(int* end) {
 	int isUnary = 1;
 	int q = 0;
 
+	int bit = 0;
+	int* binarySequence;
 	
 	short sample;
 	
 	while(1) {
 		
 		if(isUnary) {
-			int bit = stream->readBit();
+			bit = stream->readBit();
 
 			//cout << bit;
 			if(bit == -1) {
@@ -85,11 +87,10 @@ short Golomb::decode(int* end) {
 			if(bit) q++;			
 			else isUnary = bit;		
 		} else {
-			// binarySequence = stream->readNBits(B);
+			binarySequence = stream->readNBits(B);
 
 			//cout << "decode: ";
-			// int r = Golomb::BinToDec(binarySequence, B);
-			int r = stream->readNBits(B);
+			int r = Golomb::BinToDec(binarySequence, B);
 			//cout << "r = " << r;
 			int n = r + (q*M);
 			int original;
@@ -102,26 +103,28 @@ short Golomb::decode(int* end) {
 			
 			cout << "decoded: " << n << "; Original: " << original << "\n";
 			cout << "\n";
-
 			stringstream ss;
-			ss << original;			
+			ss << original;
+			
 			ss >> sample;
 
 			//cout << "; q = " << q << "; n = " << sample << "\n";
+			/*nList.push_back(sample);	
+			q = 0;
+			isUnary = 1;*/
+
+
 			//delete binarySequence;
 			break;
 		}
 		
 	}
 
+//	cout << "Here: " << *end << "\n";
 	return sample;
 	
 }
 
-int Golomb::getFilePosition() {
-	return stream->getFilePosition();
-}
-/*
 int Golomb::BinToDec(int* binary, int len) {
 	int decimalNumber = 0;
 
@@ -150,4 +153,6 @@ char*Golomb::DecToBin(int number)
 		return sum;
 }
 
-*/
+int Golomb::getFilePosition() {
+	return stream->getFilePosition();
+}
