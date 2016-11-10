@@ -33,16 +33,9 @@ void Predictor::reverse_simple_predict(short* buffer, short* samples, int* end){
 
 
 
-void Predictor::simple_predict(short* sequence, short* sequence_buf){
-	short remainderL;
-    short remainderR; 	
-
-
-	remainderL = sequence[0] - sequence_buf[0];
-	remainderR = sequence[1] - sequence_buf[1];
-
-	//cout << "sampleL: " << sequence[0] << " - " << sequence_buf[0];
-	//cout << "sampleR: " << sequence[1] << " - " << sequence_buf[1];
+void Predictor::simple_predict(short* sequence, short* sequence_buf) {
+	short remainderL = sequence[0] - sequence_buf[0];
+	short remainderR = sequence[1] - sequence_buf[1];
 
 	g->encode(remainderL,0);
 	g->encode(remainderR,0); 

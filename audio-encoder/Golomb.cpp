@@ -22,13 +22,13 @@ void Golomb::encode(short n, short finalWrite) {
 	int q = transformedN/M;
 	int r = transformedN -(q*M);
 
-	cout << "N = " << n << "\n";
+/*	cout << "N = " << n << "\n";
 	cout << "Transformed N: " << transformedN << "\n";
 	cout << "M = " << M << "\n";
 	cout << "Q = " << q << "\n";
 	cout << "R = " << r << "\n";
 	cout << "B = " << B << "\n";
-	cout << "###########################\n";
+	cout << "###########################\n";*/
 
 	int i = 0;
 
@@ -100,8 +100,8 @@ short Golomb::decode(int* end) {
 			else
 				original = ((n+1)/2) * -1;
 			
-			cout << "decoded: " << n << "; Original: " << original << "\n";
-			cout << "\n";
+			//cout << "decoded: " << n << "; Original: " << original << "\n";
+			// cout << "\n";
 
 			stringstream ss;
 			ss << original;			
@@ -121,33 +121,3 @@ short Golomb::decode(int* end) {
 int Golomb::getFilePosition() {
 	return stream->getFilePosition();
 }
-/*
-int Golomb::BinToDec(int* binary, int len) {
-	int decimalNumber = 0;
-
-	for(int i = 0; i < len; i++) {
-		if(binary[i] == 1) {			
-			decimalNumber = decimalNumber + pow(2, len-i-1);
-		}
-	}
-
-	return decimalNumber;
-}
-
-
-// simple helper to convert from decimal to binary
-char*Golomb::DecToBin(int number)
-{
-	char* sum = new char[B];
-	int dec = number,rem,i=1;
-
-	int value = number;
-	for(int i = B-1; i >= 0; i--, value>>=1) {
-		char val = (value & 1) + '0';
-		sum[i] = val;
-	}
-
-		return sum;
-}
-
-*/

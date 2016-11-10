@@ -10,11 +10,11 @@
 int main (int argc, char** argv){
 	
 	if (argc < 4){
-		fprintf(stderr, "Usage: <M parameter> <encoded file> <input file> \n");
+		fprintf(stderr, "Usage: <M parameter> <input file> <encoded file> \n");
 		return -1;
 	}
 
-	Predictor* predictor = new Predictor(atoi(argv[1]), argv[2]); 
+	Predictor* predictor = new Predictor(atoi(argv[1]), argv[3]); 
 
 	SNDFILE *soundFileIn; /* Pointer for input sound file */
 	SF_INFO soundInfoIn; /* Input sound file Info */
@@ -29,13 +29,8 @@ int main (int argc, char** argv){
 	 * in by the library
 	 */	
 	soundInfoIn.format = 0;
-	soundFileIn = sf_open (argv[3], SFM_READ, &soundInfoIn);
+	soundFileIn = sf_open (argv[2], SFM_READ, &soundInfoIn);
 
-	ofstream* o = new ofstream("metadata", ios::out | ios::app);
-
-	*o << soundInfoIn.samplerate << "\n";
-	*o << soundInfoIn.channels << "\n";
-	*o << soundInfoIn.format << "\n";
 
 	if (soundFileIn == NULL){
 		fprintf(stderr, "Could not open file for reading\n");
@@ -54,7 +49,8 @@ int main (int argc, char** argv){
 
 	short buffer[2] = {0,0}; 
 
-	for (i = 0; i < soundInfoIn.frames ; i++)
+	//for (i = 0; i < soundInfoIn.frames ; i++)
+	for (i = 0; i < 200; i++)
 	{
 		if (sf_readf_short(soundFileIn, sample, nSamples) == 0){
 			
@@ -79,7 +75,13 @@ int main (int argc, char** argv){
 
 	sf_close(soundFileIn);
 
-	cout << "The end: " << predictor->getFilePosition();
+	// cout << "The end: " << predictor->getFilePosition();	
+
+	ofstream* o = new ofstream("metadata", ios::out | ios::app);
+	*o << soundInfoIn.samplerate << "\n";
+	*o << soundInfoIn.channels << "\n";
+	*o << soundInfoIn.format << "\n";
+
 	*o << predictor->getFilePosition();
 
 	o->flush();
