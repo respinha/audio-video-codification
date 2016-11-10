@@ -6,7 +6,6 @@
 #include <map>
 #include <cmath>
 
-#include "Golomb.cpp"
 #include "Predictor.h"
 
 #include <sndfile.h> 
@@ -30,7 +29,7 @@ float Predictor::calcEntropy(map<short,float> o) {
 
 }
 
-void Predictor::simple_predict(short* sequence, short* sequence_buf, int length){
+void Predictor::simple_predict(short* sequence, short* sequence_buf, int length,short* rL, short* rR){
 //	int length = sizeof(sequence)/sizeof(*sequence); 
 	
 	
@@ -47,32 +46,33 @@ void Predictor::simple_predict(short* sequence, short* sequence_buf, int length)
 	
 	remainderL = sequence[0] - sequence_buf[0];
 	remainderR = sequence[1] - sequence_buf[1];
-	int rL = remainderL;
+	*rL = remainderL;
+	*rR = remainderR; 
 
 	g->encode(remainderL,0);
 	g->encode(remainderR,0); 
 
 }		
 
-void Predictor::predict(int* sequence, int length){
+void Predictor::predict(short* sequence, short* sequence_buf, short* sequence_buf2,int length,short* rL, short* rR){
 	//int length = sizeof(sequence)/sizeof(sequence[0]); 
 	
-	int remainder[length]; 
+	short remainderL;
+       	short remainderR; 	
 	
 	Golomb* g = new Golomb(8, "encoded");
 	
-	remainder[0] = 0; 
-	remainder[1] = 0; 
 
-	for(int i=2; i<length; i++){
-		cout <<i<<" top\n"; 
-		remainder[i] = (2*sequence[i-1] - sequence[i-2]) - sequence[i]; 
-		if( i==length)
-			g->encode(remainder[i], 1);
-		else
-			g->encode(remainder[i],0);
-	}
+	
+	remainderL = (2*sequence_buf[0] - sequence_buf2[0]) - sequence[0];
+	remainderR = (2*sequence_buf[1] - sequence_buf2[1]) - sequence[1]; 
 
+	*rL = remainderL; 
+	*rR = remainderR; 
+
+	g->encode(remainderL,0);
+	g->encode(remainderR,0); 
+	
 
 
 }
@@ -82,6 +82,8 @@ int main (int argc, char** argv){
 	
 //	int samples[]= {1,2,3,4,5,6,7,8,9,10};
 
+	short rL;
+	short rR; 
 
 	Predictor* predictor = new Predictor(12, "encoded"); 
 
@@ -134,27 +136,31 @@ int main (int argc, char** argv){
 	}*/
 	
 	short tmp_buffer[2] = {0,0}; 
+	short tmp_buffer2[2] = {0,0}; 
 
 	
 	cout << "top 1\n"; 
 	
 	short matrix[soundInfoIn.frames+1][2];
 
-	ofstream* left = new ofstream("hist_left", ios::out | ios::app);
-	ofstream* right = new ofstream("hist_right", ios::out | ios::app);
+	ofstream* left = new ofstream("hist_left2", ios::out | ios::app);
+	ofstream* right = new ofstream("hist_right2", ios::out | ios::app);
 
 	matrix[0][0] = 0;
 	matrix[0][1] = 0;
+	//predictor depth2
+	matrix[1][0] = 0;
+	matrix[1][1] = 0;
 
-	*left << 1;
-	*left << ",";
-	*left << 0;
-	*left << "\n";
+	//*left << 1;
+	//*left << ",";
+//	*left << 0;
+//	*left << "\n";
 
-	*right << 1;
-	*right << ",";
-	*right << 0;
-	*right << "\n";
+	//*right << 1;
+	//*right << ",";
+//	*right << 0;
+//	*right << "\n";
 
 	map<short, float> occurrenciesL;	
 	map<short, float> occurrenciesR;	
@@ -165,7 +171,7 @@ int main (int argc, char** argv){
 	for (i = 0; i < soundInfoIn.frames ; i++)
 	{
 		
-		cout << "cheguei memo top\n";
+	//	cout << "cheguei memo top\n";
 		if (sf_readf_short(soundFileIn, sample, nSamples) == 0){
 			
 			fprintf(stderr, "Error: Reached end of file\n");
@@ -175,57 +181,74 @@ int main (int argc, char** argv){
 		}else{
 			
 
-			/*if(i==0){
+			if(i==0){
 				short* first  = new short[2];
 				short *first_buffer = new short[2];
+				short* second_buffer = new short[2];
 
-				predictor->simple_predict(first,first_buffer,2);				
-			}*/
+				//predictor->simple_predict(first,first_buffer,2,&rL,&rR);				
+					
+					
+				predictor->predict(first,first_buffer,second_buffer,2,&rL,&rR);				
+			}
 
-			matrix[i+1][0] = sample[0];
-			matrix[i+1][1] = sample[1];
+			matrix[i+2][0] = sample[0];
+			matrix[i+2][1] = sample[1];
 
 			short valL = sample[0];
 			short valR = sample[1];	
-
+			
+			
 			
 		
 			if(i == soundInfoIn.frames-1) {
 				cout << "ShortL: " << valL << "\n";
 				cout << "ShortR: " << valR << "\n";
 			}
-
-			*left << i+2;
-			*left << ",";
-			*left << valL;
-			*left << "\n";
-
-			*right << i+2;
-			*right << ",";
-			*right << valR;
-			*right << "\n";
-
-			if(occurrenciesL.find(valL) != occurrenciesL.end())
-				occurrenciesL[valL]++;
-			else
-				occurrenciesL.insert(make_pair(valL, 1));
-
-			if(occurrenciesR.find(valR) != occurrenciesR.end())
-				occurrenciesR[valR]++;
-			else
-				occurrenciesR.insert(make_pair(valR, 1));
-
-			/*			
+			
+		
+								
 			cout << "Values to insert :\n";	
 			for(int j = 0; j < 2; j++) cout << tmp_buffer[j] << "\n";
 			for(int j = 0; j < 2; j++) cout << sample[j] << "\n";
 					
-			predictor->simple_predict(tmp_buffer,sample,2);
+			//predictor->simple_predict(tmp_buffer,sample,2,&rL,&rR);
+	
+			predictor->predict(sample,tmp_buffer,tmp_buffer2,2,&rL,&rR);
+	
 		
+			//if(i%10==0){
+			//*left << i+2;
+			//*left << ",";
+			
+				if(occurrenciesL.find(rL) != occurrenciesL.end())
+					occurrenciesL[rL]++;
+				else
+					occurrenciesL.insert(make_pair(rL, 1));
+
+				if(occurrenciesR.find(rR) != occurrenciesR.end())
+					occurrenciesR[rR]++;
+				else
+					occurrenciesR.insert(make_pair(rR, 1));
+
+
+
+				*left << rL <<" ";
+				*left << occurrenciesL[rL];
+				*left << "\n";
+
+				//*right << i+2;
+				//*right << ",";
+				*right << rR << " ";
+				*right << occurrenciesR[rR];
+				*right << "\n";
+			
+	
 			int j; 
 			for(j=0; j<2; j++){
+				tmp_buffer2[j] = tmp_buffer[j];
 				tmp_buffer[j] = sample[j]; 
-			}*/
+			}
 
 		}	
 
