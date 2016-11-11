@@ -3,7 +3,7 @@ all:
 	g++ test_reverse_predictor.cpp -o tr.o -lsndfile
 	g++ encoder.cpp -o e.o
 	rm metadata
-	rm output.txt
+	rm out*
 	rm encoded
 readbit:
 	g++ readbits.cpp -o r.o

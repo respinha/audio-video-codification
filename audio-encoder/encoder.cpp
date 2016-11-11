@@ -12,7 +12,8 @@ int main(int argc, char** argv) {
 	g->encode(42, 0);
 	g->encode(-56, 0);
 	g->encode(500, 0);
-	g->encode(-5000, 0);
+	g->encode(-92, 0);
+	g->encode(-17, 0);
 	g->encode(-14, 1);
 
 	Golomb* h = new Golomb(atoi(argv[1]), "encoded1", g->getFilePosition());

@@ -31,11 +31,6 @@ int main (int argc, char** argv){
 	soundInfoIn.format = 0;
 	soundFileIn = sf_open (argv[3], SFM_READ, &soundInfoIn);
 
-	ofstream* o = new ofstream("metadata", ios::out | ios::app);
-
-	*o << soundInfoIn.samplerate << "\n";
-	*o << soundInfoIn.channels << "\n";
-	*o << soundInfoIn.format << "\n";
 
 	if (soundFileIn == NULL){
 		fprintf(stderr, "Could not open file for reading\n");
@@ -63,8 +58,9 @@ int main (int argc, char** argv){
 			break;
 		
 		}else{
-			//cout << "SampleL : " << sample[0] << "\n";
-			//cout << "SampleR : " << sample[1] << "\n";
+			cout << "Samples " << sample[0] << "\n";
+			cout << "Samples2 " << sample[1] << "\n";
+
 			predictor->simple_predict(sample, buffer);
 		
 			int j; 
@@ -76,6 +72,11 @@ int main (int argc, char** argv){
 
 	}
 
+	ofstream* o = new ofstream("metadata", ios::out | ios::app);
+
+	*o << soundInfoIn.samplerate << "\n";
+	*o << soundInfoIn.channels << "\n";
+	*o << soundInfoIn.format << "\n";
 
 	sf_close(soundFileIn);
 
@@ -85,7 +86,6 @@ int main (int argc, char** argv){
 	o->flush();
 	o->close();
 
-	delete o;
 	delete predictor;
 	delete[] sample;
 

@@ -36,23 +36,6 @@ int main(int argc, char** argv) {
 		getline(*stream, filePos);
 
 		int channels, rate, format;
-/*		stringstream ss;
-
-		ss << strRate;
-		ss >> rate;
-		
-		ss << strChannels;
-		ss >> channels;
-		
-		ss << strFormat;
-		cout << "format: " << ss.str() << "\n";
-
-		ss >> format;
-		cout << "format: " << format << "\n";
-
-		ss << filePos;
-		ss >> fileWritePosition;
-*/
 
 		soundInfoOut.samplerate = atoi(strRate.c_str());
 		soundInfoOut.channels = atoi(strChannels.c_str());
@@ -83,7 +66,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	short outputSamples[2];
+	short outputSamples[2] = {0,0};
 
 
 	// assuming zero as starting value
@@ -103,6 +86,10 @@ int main(int argc, char** argv) {
 
 		predictor->reverse_simple_predict(buffer, outputSamples, pend);
 
+		
+		cout << "Samples " << outputSamples[0] << "\n";
+		cout << "Samples2 " << outputSamples[1] << "\n";
+
 		if (sf_writef_short(soundFileOut, outputSamples, nSamples) != 1){
 			fprintf(stderr, "Error writing frames to the output:\n");
 			sf_close(soundFileOut);
@@ -110,15 +97,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-				
-		
-
 	sf_close(soundFileOut);
-
-	delete pend;
-	delete predictor;
-	delete stream;
-
-		
+	
 	return 0;
 }

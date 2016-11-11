@@ -22,13 +22,13 @@ void Golomb::encode(short n, short finalWrite) {
 	int q = transformedN/M;
 	int r = transformedN -(q*M);
 
-	cout << "N = " << n << "\n";
+	/*cout << "N = " << n << "\n";
 	cout << "Transformed N: " << transformedN << "\n";
 	cout << "M = " << M << "\n";
 	cout << "Q = " << q << "\n";
 	cout << "R = " << r << "\n";
 	cout << "B = " << B << "\n";
-	cout << "###########################\n";
+	cout << "###########################\n";*/
 
 	int i = 0;
 
@@ -100,16 +100,16 @@ short Golomb::decode(int* end) {
 			else
 				original = ((n+1)/2) * -1;
 			
-			cout << "decoded: " << n << "; Original: " << original << "\n";
-			cout << "\n";
+			// cout << "decoded: " << n << "; Original: " << original << "\n";
 
 			stringstream ss;
 			ss << original;			
 			ss >> sample;
 
-			//cout << "; q = " << q << "; n = " << sample << "\n";
+			//cout << " n = " << sample << "\n";
+			return sample;
+
 			//delete binarySequence;
-			break;
 		}
 		
 	}

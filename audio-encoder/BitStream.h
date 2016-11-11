@@ -7,6 +7,7 @@ class BitStream {
 
 	public:
 		BitStream(string fname, int pos);
+		~BitStream();
 		int readBit();	
 		int readNBits(int nBits);
 
@@ -22,6 +23,9 @@ class BitStream {
 		int surplus;
 		char surplusByte;
 		unsigned int remainingByteSlots;
+
+		ofstream* outputstream;
+		ifstream* inputstream;
 
 		void flush();
 };	
