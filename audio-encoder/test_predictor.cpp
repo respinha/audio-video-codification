@@ -58,8 +58,8 @@ int main (int argc, char** argv){
 			break;
 		
 		}else{
-			cout << "Samples " << sample[0] << "\n";
-			cout << "Samples2 " << sample[1] << "\n";
+			//cout << "Samples " << sample[0] << "\n";
+			//cout << "Samples2 " << sample[1] << "\n";
 
 			predictor->simple_predict(sample, buffer);
 		

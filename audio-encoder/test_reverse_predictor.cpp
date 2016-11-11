@@ -87,8 +87,8 @@ int main(int argc, char** argv) {
 		predictor->reverse_simple_predict(buffer, outputSamples, pend);
 
 		
-		cout << "Samples " << outputSamples[0] << "\n";
-		cout << "Samples2 " << outputSamples[1] << "\n";
+		//cout << "Samples " << outputSamples[0] << "\n";
+		// cout << "Samples2 " << outputSamples[1] << "\n";
 
 		if (sf_writef_short(soundFileOut, outputSamples, nSamples) != 1){
 			fprintf(stderr, "Error writing frames to the output:\n");
