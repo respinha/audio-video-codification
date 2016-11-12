@@ -198,8 +198,7 @@ void BitStream::writeNBits(int nBits, int bit_buff, int finalWrite) {
 			pos++;
 		}
 		// cout << "\n";
-		
-		
+
 		if(!abort) {
 
 			/*for(int k = 0; k < 8; k++) 

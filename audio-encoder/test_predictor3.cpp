@@ -47,7 +47,8 @@ int main (int argc, char** argv){
 	sample[0] = 0;
 	sample[1] = 0;
 
-	short buffer[2] = {0,0}; 
+	short bufferL[3] = {0,0,0}; 
+	short bufferR[3] = {0,0,0};
 
 	for (i = 0; i < soundInfoIn.frames ; i++)
 	{
@@ -61,13 +62,7 @@ int main (int argc, char** argv){
 			//cout << "Samples " << sample[0] << "\n";
 			//cout << "Samples2 " << sample[1] << "\n";
 
-			predictor->order1_predict(sample, buffer, (i == (soundInfoIn.frames-1)));
-
-			int j; 
-			for(j=0; j<2; j++){
-				buffer[j] = sample[j]; 
-			}
-
+			predictor->order3_predict(bufferL, bufferR, sample, (i == (soundInfoIn.frames-1)));
 		}	
 
 	}

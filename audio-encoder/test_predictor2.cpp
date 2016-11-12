@@ -47,12 +47,14 @@ int main (int argc, char** argv){
 	sample[0] = 0;
 	sample[1] = 0;
 
-	short buffer[2] = {0,0}; 
+	short buffer[2] = {0,0};
+	short prev_buffer[2] = {0,0};
+	short residues[2] = {0,0};
 
 	for (i = 0; i < soundInfoIn.frames ; i++)
 	{
-		if (sf_readf_short(soundFileIn, sample, nSamples) == 0){
-			
+		if (sf_readf_short(soundFileIn, sample, nSamples) == 0) {
+
 			fprintf(stderr, "Error: Reached end of file\n");
 			sf_close(soundFileIn);
 			break;
@@ -60,13 +62,7 @@ int main (int argc, char** argv){
 		}else{
 			//cout << "Samples " << sample[0] << "\n";
 			//cout << "Samples2 " << sample[1] << "\n";
-
-			predictor->order1_predict(sample, buffer, (i == (soundInfoIn.frames-1)));
-
-			int j; 
-			for(j=0; j<2; j++){
-				buffer[j] = sample[j]; 
-			}
+			predictor->order2_predict(sample, buffer, prev_buffer, sample, (i == (soundInfoIn.frames-1)));
 
 		}	
 

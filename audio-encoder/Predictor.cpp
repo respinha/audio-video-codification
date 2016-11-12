@@ -9,29 +9,7 @@ Predictor::Predictor(int m, string encodedFilename, int pos){
 	g = new Golomb(m, encodedFilename, pos);
 }
 
-void Predictor::reverse_simple_predict(short* buffer, short* samples, int* end){
-
-
-	// left
-	short residue = g->decode(end);
-	if(*end) return;
-
-	samples[0] = residue + buffer[0];
-
-	// right
-	residue = g->decode(end);
-	if(*end) return;
-
-	samples[1] = residue + buffer[1]; 
-
-	buffer[0] = samples[0];
-	buffer[1] = samples[1];
-}
-
-
-
-
-void Predictor::simple_predict(short* sequence, short* sequence_buf){
+void Predictor::order1_predict(short* sequence, short* sequence_buf, int end){
 	short remainderL;
     short remainderR; 	
 
@@ -43,28 +21,97 @@ void Predictor::simple_predict(short* sequence, short* sequence_buf){
 	// cout << "sampleR: " << sequence[1] << " - " << sequence_buf[1];
 	cout << "value " << remainderL << "\n";
 	cout << "value2 " << remainderR<< "\n";
+
 	g->encode(remainderL,0);
-	g->encode(remainderR,0); 
+	g->encode(remainderR,end); 
+
 }		
 
 int Predictor::getFilePosition() {
 	return g->getFilePosition();
 }
-/*
-void Predictor::predict(int* sequence, int length){
-	//int length = sizeof(sequence)/sizeof(sequence[0]); 
-	
-	int remainder[length]; 
-	
-	
-	remainder[0] = 0; 
-	remainder[1] = 0; 
 
-	for(int i=2; i<length; i++){
-		remainder[i] = (2*sequence[i-1] - sequence[i-2]) - sequence[i]; 
-		if( i==length)
-			g->encode(remainder[i], 1);
-		else
-			g->encode(remainder[i],0);
-	}
-}*/
+void Predictor::order2_predict(short* sequence, short* sequence_buf, short* sequence_buf2,short* residues, int end){
+
+	short remainderL = (2*sequence_buf[0] -sequence_buf2[0]) - sequence[0];
+	short remainderR = (2*sequence_buf[1] -sequence_buf2[1]) - sequence[1];
+
+	residues[0] = remainderL;
+	residues[1] = remainderR;
+
+	g->encode(remainderL,0);
+	g->encode(remainderR,end);
+
+	for(int i = 0; i < 2; i++) sequence_buf2[i] = sequence_buf[i];
+
+	sequence_buf[0] = sequence[0];
+	sequence_buf[1] = sequence[1];
+
+}
+
+void Predictor::reverse_order1_predict(short* buffer, short* samples, int* end){
+
+	// left
+	short residue = g->decode(end);
+	if(*end) return;
+
+	samples[0] = residue + buffer[0];
+
+	// right
+	residue = g->decode(end);
+	if(*end) return;
+
+
+	samples[1] = residue + buffer[1];
+
+	buffer[0] = samples[0];
+	buffer[1] = samples[1];
+
+}
+
+void Predictor::reverse_order2_predict(short* prev_buffer, short* buffer, short* samples, int* end) {
+
+	// left
+	short residue = g->decode(end);
+	if(*end) return;
+	// right
+
+	samples[0] = residue - (2*prev_buffer[0]) + buffer[0];
+
+	residue = g->decode(end);
+	if(*end) return;
+
+	samples[1] = residue - (2*prev_buffer[1]) + buffer[1];
+}
+
+void Predictor::order3_predict(short* left_buffer, short* right_buffer, short* samples, int end) {
+
+	// 3(n−1) − 3(n−2) + (n−3)
+	
+	short remainderL = samples[0] - ((3* left_buffer[2]) - 3*(left_buffer[1]) + left_buffer[2]);
+	short remainderR = samples[1] - ((3* right_buffer[2]) - 3*(right_buffer[1]) + right_buffer[2]);
+
+	//cout << "sampleL: " << sequence[0] << " - " << sequence_buf[0];
+	// cout << "sampleR: " << sequence[1] << " - " << sequence_buf[1];
+	cout << "value " << remainderL << "\n";
+	cout << "value2 " << remainderR<< "\n";
+
+	g->encode(remainderL,0);
+	g->encode(remainderR,end); 
+
+}
+
+void Predictor::reverse_order3(short* left_buffer, short* right_buffer, short* samples, int* end) {
+
+	// left
+	short residue = g->decode(end);
+	if(*end) return;
+	// right
+
+	samples[0] = residue + ((3* left_buffer[2]) - 3*(left_buffer[1]) + left_buffer[2]);
+
+	residue = g->decode(end);
+	if(*end) return;
+
+	samples[1] = residue + ((3* left_buffer[2]) - 3*(left_buffer[1]) + left_buffer[2]);
+}

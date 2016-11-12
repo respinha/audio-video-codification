@@ -90,7 +90,6 @@ short Golomb::decode(int* end) {
 			//cout << "decode: ";
 			// int r = Golomb::BinToDec(binarySequence, B);
 			int r = stream->readNBits(B);
-			cout << "q = " << q << "; r = " << r << "\n";
 			int n = r + (q*M);
 			int original;
 			// checking if even or odd to apply transformation
@@ -109,6 +108,7 @@ short Golomb::decode(int* end) {
 			//cout << " n = " << sample << "\n";
 			return sample;
 
+			//delete binarySequence;
 		}
 		
 	}

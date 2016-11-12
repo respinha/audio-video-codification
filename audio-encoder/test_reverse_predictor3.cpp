@@ -71,7 +71,8 @@ int main(int argc, char** argv) {
 
 	// assuming zero as starting value
 	// value is updated in each call
-	short buffer[2] = {0,0};
+	short bufferL[3] = {0,0,0};
+	short bufferR[3] = {0,0,0};
 /*
 	buffer[0] = 0:
 	buffer[1] = 0;
@@ -84,9 +85,8 @@ int main(int argc, char** argv) {
 
 	while(*pend == 0) {
 
-		predictor->reverse_order1_predict(buffer, outputSamples, pend);
-
-		
+		predictor->reverse_order3(bufferL, bufferR, outputSamples, pend);
+	
 		//cout << "Samples " << outputSamples[0] << "\n";
 		// cout << "Samples2 " << outputSamples[1] << "\n";
 
