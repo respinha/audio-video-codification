@@ -1,0 +1,12 @@
+Implemented: 
+- Golomb lossless encoding/decoding with temporal predictive models
+
+Makefile commands:
+- all (compile all predictors and test files)
+- clean (remove all created files, including encoded and decoded files)
+
+RUNME:
+- Encoding with predictor 1: ./p.o <M> <encoded_file> <wav_file> 
+- Decoding with predictor 2: ./pr.o <M> <encoded_file> <output_wav_file>
+- Encoding with predictor 2: ./p2.o <M> <encoded_file> <wav_file> 
+- Decoding with predictor 2: ./pr2.o <M> <encoded_file> <output_wav_file>

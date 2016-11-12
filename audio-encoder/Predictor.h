@@ -14,9 +14,6 @@ class Predictor {
 
 		void reverse_order2_predict(short* prev_buffer, short* buffer, short* samples, int* end);
 
-		void order3_predict(short* left_buffer, short* right_buffer, short* samples, int end);
-		void reverse_order3(short* left_buffer, short* right_buffer, short* samples, int* end);
-
 		int getFilePosition(); 
 	private:
 		Golomb* g;
