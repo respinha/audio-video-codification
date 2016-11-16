@@ -15,20 +15,23 @@ using namespace cv;
 Predictor::Predictor(string filename, string encoded, int M, int pos) {
 
 	file = new string(filename);
-	g = new Golomb(filename, encoded, M, pos);
+	g = new Golomb(M, encoded, pos);
 }
 
-Predictor::predict_encode() {
+void Predictor::predict_encode() {
 
 	
-	Mat img = imread(file, 1);
+	Mat img = imread(file->c_str(), 1);
 	
-	if ( !image.data )
+	if ( !img.data )
     {
         printf("No image data \n");
-        return -1;
+        return;
     }	
 
+	Mat bgr[3];
+
+	split(img, bgr);
 	/* should we worry about this???
 	if (I.isContinuous())
     {
@@ -38,46 +41,55 @@ Predictor::predict_encode() {
 
 	// file metadata
 	// 1-> intra-frame prediction mode
-	g->(1, 0);
-	g->(img.rows, 0);
-	g->(img.cols, 0);
+	g->encode(1, 0);
+	g->encode(img.rows, 0);
+	g->encode(img.cols, 0);
 
-	for(int r = 0; r < img.rows; r++) {
+	uchar* p, *prev;
+	for(int m = 0; m < 3; m++) {
 
-		for(int col = 0; col < img.cols; col++) {
+		for(int r = 0; r < bgr[m].rows; r++) {
 
-			// JPEG-LS mode
-			int a, b, c;
-			int border = 0;
-			if(col == 0) {
-				a = 0;
-				border = 1;
-			} else  a = img[r][col-1];
+			if(r > 0) 
+				prev = p;
+	
+			p = bgr[m].ptr<uchar>(r);
+			
+			for(int col = 0; col < bgr[m].cols; col++) {
 
-			if(r == 0)  {
-				b = 0;
-				border = 1;
-			} else b = img[r-1][col];
+				// JPEG-LS mode
+				int a, b, c;
+				int border = 0;
+				if(col == 0) {
+					a = 0;
+					border = 1;
+				} else  a = p[col-1];
 
-			c = border ? 0 : img[r-1][col-1];
+				if(r == 0)  {
+					b = 0;
+					border = 1;
+				} else b = prev[col];
 
-			int x;
-			if(c >= max(a, b)) {
-				x = min(a,b);
-			} else (c <= min(a,b)) {
-				x = max(a,b);
-			} else {
-				x = a + b - c;
+				c = border ? 0 : prev[col-1];
+
+				int x;
+				if(c >= max(a, b)) {
+					x = min(a,b);
+				} else if (c <= min(a,b)) {
+					x = max(a,b);
+				} else {
+					x = a + b - c;
+				}
+
+				g->encode(x, (r == bgr[m].rows-1 && col == bgr[m].cols-1));
 			}
-
-			g->encode(x, (r == img.rows-1 && col == img.cols-1));
 		}
 	}
 }
 
-/*int main(int argc, char** argv){
+int main(int argc, char** argv){
 		
-	Mat I,J; 
+/*	Mat I,J; 
 	
 	if( argc == 4 && !strcmp(argv[3],"G") )
 		I = imread(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
@@ -88,6 +100,7 @@ Predictor::predict_encode() {
 	{
 		cout << "The image" << argv[1] << " could not be loaded." << endl;
 		return -1;
-	}
+	}*/
 
-}*/
+	return 0;
+}

@@ -32,3 +32,9 @@
 /*/sample_file
 /*/encoded
 /*/decoded
+
+/*/CMakeFiles*
+/*/CMakeFiles/*
+/*/CMakeCache.txt
+/*/bin/
+/*/bin/*

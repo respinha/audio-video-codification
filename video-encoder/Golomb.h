@@ -9,15 +9,12 @@ using namespace std;
 class Golomb {
 	public:
 		Golomb(int m, string encodedFilename, int pos);
-		void encode(short n, short finalWrite);	
-		short decode(int* end);
+		void encode(int n, int finalWrite);	
+		int decode(int* end);
 
 		int getFilePosition();
 	private:
 		const int M;
 		const int B;
 		BitStream* stream;
-
-		int BinToDec(int* binary, int len);
-		char* DecToBin(int number);
 };

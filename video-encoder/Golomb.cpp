@@ -45,7 +45,6 @@ void Golomb::encode(int n, int finalWrite) {
 
 int Golomb::decode(int* end) {
 
-	int nUnary = 0;
 	int isUnary = 1;
 	int q = 0;
 
