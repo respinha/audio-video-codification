@@ -14,7 +14,7 @@ Golomb::Golomb(int m, string encodedFilename, int pos) : M(m), B(log2(m)){
 }
 
 
-void Golomb::encode(short n, short finalWrite) {
+void Golomb::encode(int n, int finalWrite) {
 
 		
 	int transformedN = n >= 0 ? 2*n : (2*abs(n))-1;
@@ -43,14 +43,14 @@ void Golomb::encode(short n, short finalWrite) {
 	stream->writeNBits(B, r, finalWrite);
 }
 
-short Golomb::decode(int* end) {
+int Golomb::decode(int* end) {
 
 	int nUnary = 0;
 	int isUnary = 1;
 	int q = 0;
 
 	
-	short sample;
+	int sample;
 	
 	while(1) {
 		
