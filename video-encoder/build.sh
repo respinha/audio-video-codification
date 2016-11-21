@@ -1,6 +1,5 @@
 mkdir build/
 cd build/
-cmake ..
+cmake -DCMAKE_CXX_COMPILER=/usr/bin/c++ ..
 cd ..
 make 
-
