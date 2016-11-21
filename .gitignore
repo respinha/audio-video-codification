@@ -20,14 +20,12 @@
 
 ### OTHERS ###
 
-*.txt
 /*.swp
 /*/*.swp
 /*/*.o*
 /*/*.out
 /*/out*
 /*/encoded*
-/*/*.txt
 /*/saved_LUT
 /*/sample_file
 /*/encoded
@@ -35,7 +33,6 @@
 
 /*/CMakeFiles*
 /*/CMakeFiles/*
-/*/CMakeCache.txt
 /*/bin/
 /*/bin/*
 /*/build/
