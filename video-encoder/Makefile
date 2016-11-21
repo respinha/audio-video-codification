@@ -103,41 +103,78 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named SpatialPredictor
+# Target rules for targets named SpatialDecoder
 
 # Build rule for target.
-SpatialPredictor: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 SpatialPredictor
-.PHONY : SpatialPredictor
+SpatialDecoder: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 SpatialDecoder
+.PHONY : SpatialDecoder
 
 # fast build rule for target.
-SpatialPredictor/fast:
-	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/build
-.PHONY : SpatialPredictor/fast
+SpatialDecoder/fast:
+	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/build
+.PHONY : SpatialDecoder/fast
 
-SpatialPredictor.o: SpatialPredictor.cpp.o
-.PHONY : SpatialPredictor.o
+#=============================================================================
+# Target rules for targets named SpatialEncoder
+
+# Build rule for target.
+SpatialEncoder: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 SpatialEncoder
+.PHONY : SpatialEncoder
+
+# fast build rule for target.
+SpatialEncoder/fast:
+	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/build
+.PHONY : SpatialEncoder/fast
+
+test_spatial_decoder.o: test_spatial_decoder.cpp.o
+.PHONY : test_spatial_decoder.o
 
 # target to build an object file
-SpatialPredictor.cpp.o:
-	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/SpatialPredictor.cpp.o
-.PHONY : SpatialPredictor.cpp.o
+test_spatial_decoder.cpp.o:
+	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/test_spatial_decoder.cpp.o
+.PHONY : test_spatial_decoder.cpp.o
 
-SpatialPredictor.i: SpatialPredictor.cpp.i
-.PHONY : SpatialPredictor.i
+test_spatial_decoder.i: test_spatial_decoder.cpp.i
+.PHONY : test_spatial_decoder.i
 
 # target to preprocess a source file
-SpatialPredictor.cpp.i:
-	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/SpatialPredictor.cpp.i
-.PHONY : SpatialPredictor.cpp.i
+test_spatial_decoder.cpp.i:
+	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/test_spatial_decoder.cpp.i
+.PHONY : test_spatial_decoder.cpp.i
 
-SpatialPredictor.s: SpatialPredictor.cpp.s
-.PHONY : SpatialPredictor.s
+test_spatial_decoder.s: test_spatial_decoder.cpp.s
+.PHONY : test_spatial_decoder.s
 
 # target to generate assembly for a file
-SpatialPredictor.cpp.s:
-	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/SpatialPredictor.cpp.s
-.PHONY : SpatialPredictor.cpp.s
+test_spatial_decoder.cpp.s:
+	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/test_spatial_decoder.cpp.s
+.PHONY : test_spatial_decoder.cpp.s
+
+test_spatial_encoder.o: test_spatial_encoder.cpp.o
+.PHONY : test_spatial_encoder.o
+
+# target to build an object file
+test_spatial_encoder.cpp.o:
+	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/test_spatial_encoder.cpp.o
+.PHONY : test_spatial_encoder.cpp.o
+
+test_spatial_encoder.i: test_spatial_encoder.cpp.i
+.PHONY : test_spatial_encoder.i
+
+# target to preprocess a source file
+test_spatial_encoder.cpp.i:
+	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/test_spatial_encoder.cpp.i
+.PHONY : test_spatial_encoder.cpp.i
+
+test_spatial_encoder.s: test_spatial_encoder.cpp.s
+.PHONY : test_spatial_encoder.s
+
+# target to generate assembly for a file
+test_spatial_encoder.cpp.s:
+	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/test_spatial_encoder.cpp.s
+.PHONY : test_spatial_encoder.cpp.s
 
 # Help Target
 help:
@@ -145,12 +182,16 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... SpatialPredictor"
+	@echo "... SpatialDecoder"
+	@echo "... SpatialEncoder"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... SpatialPredictor.o"
-	@echo "... SpatialPredictor.i"
-	@echo "... SpatialPredictor.s"
+	@echo "... test_spatial_decoder.o"
+	@echo "... test_spatial_decoder.i"
+	@echo "... test_spatial_decoder.s"
+	@echo "... test_spatial_encoder.o"
+	@echo "... test_spatial_encoder.i"
+	@echo "... test_spatial_encoder.s"
 .PHONY : help
 
 
