@@ -103,41 +103,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named S1Predictor
+# Target rules for targets named SpatialPredictor
 
 # Build rule for target.
-S1Predictor: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 S1Predictor
-.PHONY : S1Predictor
+SpatialPredictor: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 SpatialPredictor
+.PHONY : SpatialPredictor
 
 # fast build rule for target.
-S1Predictor/fast:
-	$(MAKE) -f CMakeFiles/S1Predictor.dir/build.make CMakeFiles/S1Predictor.dir/build
-.PHONY : S1Predictor/fast
+SpatialPredictor/fast:
+	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/build
+.PHONY : SpatialPredictor/fast
 
-S1Predictor.o: S1Predictor.cpp.o
-.PHONY : S1Predictor.o
+SpatialPredictor.o: SpatialPredictor.cpp.o
+.PHONY : SpatialPredictor.o
 
 # target to build an object file
-S1Predictor.cpp.o:
-	$(MAKE) -f CMakeFiles/S1Predictor.dir/build.make CMakeFiles/S1Predictor.dir/S1Predictor.cpp.o
-.PHONY : S1Predictor.cpp.o
+SpatialPredictor.cpp.o:
+	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/SpatialPredictor.cpp.o
+.PHONY : SpatialPredictor.cpp.o
 
-S1Predictor.i: S1Predictor.cpp.i
-.PHONY : S1Predictor.i
+SpatialPredictor.i: SpatialPredictor.cpp.i
+.PHONY : SpatialPredictor.i
 
 # target to preprocess a source file
-S1Predictor.cpp.i:
-	$(MAKE) -f CMakeFiles/S1Predictor.dir/build.make CMakeFiles/S1Predictor.dir/S1Predictor.cpp.i
-.PHONY : S1Predictor.cpp.i
+SpatialPredictor.cpp.i:
+	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/SpatialPredictor.cpp.i
+.PHONY : SpatialPredictor.cpp.i
 
-S1Predictor.s: S1Predictor.cpp.s
-.PHONY : S1Predictor.s
+SpatialPredictor.s: SpatialPredictor.cpp.s
+.PHONY : SpatialPredictor.s
 
 # target to generate assembly for a file
-S1Predictor.cpp.s:
-	$(MAKE) -f CMakeFiles/S1Predictor.dir/build.make CMakeFiles/S1Predictor.dir/S1Predictor.cpp.s
-.PHONY : S1Predictor.cpp.s
+SpatialPredictor.cpp.s:
+	$(MAKE) -f CMakeFiles/SpatialPredictor.dir/build.make CMakeFiles/SpatialPredictor.dir/SpatialPredictor.cpp.s
+.PHONY : SpatialPredictor.cpp.s
 
 # Help Target
 help:
@@ -145,12 +145,12 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... S1Predictor"
+	@echo "... SpatialPredictor"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... S1Predictor.o"
-	@echo "... S1Predictor.i"
-	@echo "... S1Predictor.s"
+	@echo "... SpatialPredictor.o"
+	@echo "... SpatialPredictor.i"
+	@echo "... SpatialPredictor.s"
 .PHONY : help
 
 
