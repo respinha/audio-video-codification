@@ -18,11 +18,9 @@ Predictor::Predictor(string filename, string encoded, int M, int pos) {
 	g = new Golomb(M, encoded, pos);
 }
 
-void Predictor::predict_encode() {
+void Predictor::predict_encode(int mode) {
 
-	
-	Mat img = imread(file->c_str(), 1);
-	
+	Mat img = imread(file->c_str(), 1);	
 	if ( !img.data )
     {
         printf("No image data \n");
@@ -32,12 +30,6 @@ void Predictor::predict_encode() {
 	Mat bgr[3];
 
 	split(img, bgr);
-	/* should we worry about this???
-	if (I.isContinuous())
-    {
-        nCols *= nRows;
-        nRows = 1;
-    }*/
 
 	// file metadata
 	// 1-> intra-frame prediction mode
@@ -58,9 +50,8 @@ void Predictor::predict_encode() {
 			for(int col = 0; col < bgr[m].cols; col++) {
 
 				// JPEG-LS mode
-				uchar a, b, c, x;
-				predict_aux(col, row, &a, &b, &c, &x, p, prev);
-
+				uchar x;
+				predict_aux(col, row, &x, p, prev, mode);
 
 				uchar residue = p[col] - x;
 				g->encode((int) residue, (row == bgr[m].rows-1 && col == bgr[m].cols-1));
@@ -75,7 +66,6 @@ void Predictor::predict_decode() {
 
 	int end = 0;
 	int* pend = &end;
-
 	int predMode = g->decode(pend);
 	if(!*pend) fprintf(stderr, "An error occurred decoding!\n");
 
@@ -103,8 +93,8 @@ void Predictor::predict_decode() {
 			for(int col = 0; col < cols; col++) {
 
 				if(predMode == 1) {
-					uchar a, b, c, x;
-					predict_aux(col, row, &a, &b, &c, &x, p, prev);
+					uchar x;
+					predict_aux(col, row, &x, p, prev, predMode);
 				
 					uchar residue = (uchar) g->decode(pend);
 
@@ -121,28 +111,36 @@ void Predictor::predict_decode() {
 	merge(bgr, img);
 }
 
-void Predictor::predict_aux(int col, int row, uchar* a, uchar* b, uchar* c, uchar* x, uchar* p, uchar* prev) {
+void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode) {
 
-	int border = 0;
-	
-	if(col == 0) {
-		*a = 0;
-		border = 1;
-	} else  *a = p[col-1];
+	uchar a,b,c;
+	switch(mode) {
+		case 1: 
+			int border = 0;
 
-	if(row == 0)  {
-		*b = 0;
-		border = 1;
-	} else *b = prev[col];
+			if(col == 0) {
+				a = 0;
+				border = 1;
+			} else  a = p[col-1];
 
-	*c = border ? 0 : prev[col-1];
+			if(row == 0)  {
+				b = 0;
+				border = 1;
+			} else b = prev[col];
 
-	if(*c >= max(*a, *b)) {
-		*x = min(*a,*b);
-	} else if (*c <= min(*a,*b)) {
-		*x = max(*a,*b);
-	} else {
-		*x = *a + *b - *c;
+			c = border ? 0 : prev[col-1];
+
+			if(c >= max(a, b)) {
+				*x = min(a,b);
+			} else if (c <= min(a,b)) {
+				*x = max(a,b);
+			} else {
+				*x = a + b - c;
+			}
+			break;
+		default:
+			fprintf(stderr, "Not implemented yet!\n");	
+			break;
 	}
 
 }

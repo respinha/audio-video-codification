@@ -12,7 +12,7 @@ class Golomb {
 		void encode(int n, int finalWrite);	
 		int decode(int* end);
 
-		int getFilePosition();
+		//int getFilePosition();
 	private:
 		const int M;
 		const int B;

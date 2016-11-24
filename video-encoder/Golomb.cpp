@@ -22,14 +22,6 @@ void Golomb::encode(int n, int finalWrite) {
 	int q = transformedN/M;
 	int r = transformedN -(q*M);
 
-/*	cout << "N = " << n << "\n";
-	cout << "Transformed N: " << transformedN << "\n";
-	cout << "M = " << M << "\n";
-	cout << "Q = " << q << "\n";
-	cout << "R = " << r << "\n";
-	cout << "B = " << B << "\n";
-	cout << "###########################\n";*/
-
 	int i = 0;
 
 	// unary
@@ -66,7 +58,8 @@ int Golomb::decode(int* end) {
 			if(bit) q++;			
 			else isUnary = bit;		
 		} else {
-					int r = stream->readNBits(B);
+
+			int r = stream->readNBits(B);
 			int n = r + (q*M);
 			int original;
 
@@ -91,6 +84,6 @@ int Golomb::decode(int* end) {
 	
 }
 
-int Golomb::getFilePosition() {
+/*int Golomb::getFilePosition() {
 	return stream->getFilePosition();
-}
+}*/

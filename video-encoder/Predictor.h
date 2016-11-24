@@ -7,11 +7,11 @@
 class Predictor {
 	public:
 		Predictor(string filename, string encoded, int M, int pos=0);
-		void predict_encode();
+		void predict_encode(int mode);
 		void predict_decode();
 	private:
 		void calcEntropy();
-		void predict_aux(int col, int row, uchar* a, uchar* b, uchar* c, uchar* x, uchar* p, uchar* prev);
+		void predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode);
 		Golomb* g;
 	
 		string* file;

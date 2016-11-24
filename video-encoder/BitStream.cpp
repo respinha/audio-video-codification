@@ -7,29 +7,47 @@
 
 #include "BitStream.h"
 
-BitStream::BitStream(string fname, int pos) {
+BitStream::BitStream(string fname, int read) {
 
 	// read file	
 	readPosition = 0;
-	writePosition = pos;
 	filename = new string(fname);
 	surplusByte = 0;
 	remainingByteSlots = 0;
 	surplus = 0;
 
-	if(pos != 0) {
+	if(read != 0) {
 		inputstream = new ifstream();
 		inputstream->open(filename->c_str(), ios::in | ios::binary);		
 
+		char last = 'a';
+		string num = "";
+		int i = -1;
+
+		while(true) {
+			inputstream->seekg(i, ios::end);
+			*inputstream >> last;
+			if(last == ';') break;
+			num = last + num;
+			i--;
+		}
+
+		writePosition = atoi(num.c_str());
+
+		inputstream->seekg(0);
 	} else {
 		outputstream = new ofstream();
 		outputstream->open(filename->c_str(), ios::out | ios::app | ios::binary);
+
+		writePosition = 0;
 	} 
 }
 
 int BitStream::readBit () {
 
 	if(readPosition >= writePosition){
+	//if(readingBytes == writtenBytes) {
+
 		inputstream->close();
 		return -1;
 	}
@@ -78,6 +96,7 @@ int BitStream::readNBits(int nBits) {
 
 			if(readUntilNow == nBits) {	
 				// exit
+				readingBytes++;
 				readPosition += nBits;
 
 				return word;
@@ -101,6 +120,7 @@ int BitStream::readNBits(int nBits) {
 
 			if(readUntilNow == nBits) {	
 
+
 				i = bytesToRead;
 				break;
 			}
@@ -109,6 +129,7 @@ int BitStream::readNBits(int nBits) {
 		i++;
 	}
 
+	readingBytes++;
 	readPosition += nBits;	// update bit position on file
 
 	return word;
@@ -196,6 +217,7 @@ void BitStream::writeNBits(int nBits, int bit_buff, int finalWrite) {
 
 		}
 	}
+
 	if(finalWrite) {
 
 		if(!abort) {
@@ -232,14 +254,16 @@ BitStream::~BitStream() {
 void BitStream::flush() {
 
 	outputstream->write(&surplusByte, sizeof(surplusByte));
-	outputstream->flush();
 
 	writePosition+=remainingByteSlots;
 
+	*outputstream << ";";
+	*outputstream << writePosition;
+
+	outputstream->flush();
 	outputstream->close();
 }
-
+/*
 int BitStream::getFilePosition() {
 	return writePosition;
-}
-
+}*/
