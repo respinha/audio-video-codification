@@ -6,7 +6,7 @@
 
 class Predictor {
 	public:
-		Predictor(string filename, string encoded, int M, int pos=0);
+		Predictor(string filename, string encoded, int M, int decodeFlag=0);
 		void predict_encode(int mode);
 		void predict_decode();
 	private:

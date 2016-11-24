@@ -12,10 +12,10 @@ using namespace std;
 using namespace cv;
 
 
-Predictor::Predictor(string filename, string encoded, int M, int pos) {
+Predictor::Predictor(string filename, string encoded, int M, int decodeFlag) {
 
 	file = new string(filename);
-	g = new Golomb(M, encoded, pos);
+	g = new Golomb(M, encoded, decodeFlag);
 }
 
 void Predictor::predict_encode(int mode) {
@@ -95,7 +95,7 @@ void Predictor::predict_decode() {
 				if(predMode == 1) {
 					uchar x;
 					predict_aux(col, row, &x, p, prev, predMode);
-				
+
 					uchar residue = (uchar) g->decode(pend);
 
 					if(*pend && !(col == cols-1 && rows == rows-1)) {
@@ -109,6 +109,11 @@ void Predictor::predict_decode() {
 	}
 
 	merge(bgr, img);
+
+	namedWindow( "Window", WINDOW_AUTOSIZE );// Create a window for display.
+    imshow( "Window", img );                   // Show our image inside it.
+
+    waitKey(0);                                          // Wait for a keystroke in the window
 }
 
 void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode) {
@@ -116,6 +121,7 @@ void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, i
 	uchar a,b,c;
 	switch(mode) {
 		case 1: 
+		{
 			int border = 0;
 
 			if(col == 0) {
@@ -138,9 +144,12 @@ void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, i
 				*x = a + b - c;
 			}
 			break;
+		}
 		default:
+		{
 			fprintf(stderr, "Not implemented yet!\n");	
 			break;
+		}
 	}
 
 }
