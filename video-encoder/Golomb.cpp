@@ -50,8 +50,7 @@ int Golomb::decode(int* end) {
 
 			if(bit == -1) {
 				*end = 1;
-				cout << "The end as we know it\n";
-			
+				//cout << "The end as we know it\n";			
 				return -1;
 			}
 			
@@ -69,7 +68,7 @@ int Golomb::decode(int* end) {
 			else
 				original = ((n+1)/2) * -1;
 			
-			cout << "decoded: " << n << "; Original: " << original << "\n";
+			//cout << "decoded: " << n << "; Original: " << original << "\n";
 
 			stringstream ss;
 			ss << original;			

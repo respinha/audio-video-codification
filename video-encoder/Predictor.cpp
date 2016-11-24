@@ -31,6 +31,8 @@ void Predictor::predict_encode(int mode) {
 
 	split(img, bgr);
 
+
+
 	// file metadata
 	// 1-> intra-frame prediction mode
 	g->encode(1, 0);
@@ -54,6 +56,8 @@ void Predictor::predict_encode(int mode) {
 				predict_aux(col, row, &x, p, prev, mode);
 
 				uchar residue = p[col] - x;
+
+				cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
 				g->encode((int) residue, (row == bgr[m].rows-1 && col == bgr[m].cols-1));
 			}
 		}
@@ -62,22 +66,35 @@ void Predictor::predict_encode(int mode) {
 
 void Predictor::predict_decode() {
 
-	Mat img;
 
 	int end = 0;
 	int* pend = &end;
 	int predMode = g->decode(pend);
-	if(!*pend) fprintf(stderr, "An error occurred decoding!\n");
+	if(*pend) {
+		cout << predMode << "\n";
+		fprintf(stderr, "An error occurred decoding prediction mode!\n");
+		return;
+	}
 
 	int rows = g->decode(pend);
-	if(!*pend) fprintf(stderr, "An error occurred decoding!\n");
+	if(*pend) {
+		cout << rows << "\n";
+		fprintf(stderr, "An error occurred decoding rows!\n");
+		return;
+	}
 
 	int cols = g->decode(pend);
-	if(!*pend) fprintf(stderr, "An error occurred decoding!\n");
+	if(*pend) {
+		cout << cols << "\n";
+		fprintf(stderr, "An error occurred decoding columns!\n");
+		return;
+	}
+
+	Mat img = Mat::zeros(Size(rows, cols), CV_8UC3);
 
 	// init channel matrices
 	vector<Mat> bgr(3);
-	for(unsigned int i = 0; i < bgr.size(); i++) bgr[i] = Mat::zeros(rows, cols, CV_8UC3);
+	for(unsigned int i = 0; i < bgr.size(); i++) bgr[i] = Mat::zeros(rows, cols, CV_8UC1);
 
 	uchar* p, *prev;
 
@@ -98,11 +115,13 @@ void Predictor::predict_decode() {
 
 					uchar residue = (uchar) g->decode(pend);
 
-					if(*pend && !(col == cols-1 && rows == rows-1)) {
+					/*if(*pend && !(col == cols-1 && rows == rows-1)) {
 						fprintf(stderr, "Error occurred decoding. Reached end of file.\n");
+						return;
+					}*/
 
-						p[col] = residue + x;
-					} else fprintf(stderr, "Error occurred decoding. Predictor mode not implemented.\n");
+					p[col] = residue + x;
+					cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
 				}
 			}
 		}
@@ -118,6 +137,11 @@ void Predictor::predict_decode() {
 
 void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode) {
 
+	if(mode != 1) {
+		fprintf(stderr, "Not implemented yet.\n");
+		return;
+	}
+	
 	uchar a,b,c;
 	switch(mode) {
 		case 1: 
@@ -143,11 +167,6 @@ void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, i
 			} else {
 				*x = a + b - c;
 			}
-			break;
-		}
-		default:
-		{
-			fprintf(stderr, "Not implemented yet!\n");	
 			break;
 		}
 	}
