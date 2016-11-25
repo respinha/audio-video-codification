@@ -74,7 +74,7 @@ int Golomb::decode(int* end) {
 			ss << original;			
 			ss >> sample;
 
-			cout << "Residue: " << sample << "\n";
+			//cout << "Residue: " << sample << "\n";
 			return sample;
 		}
 		
@@ -83,7 +83,3 @@ int Golomb::decode(int* end) {
 	return sample;
 	
 }
-
-/*int Golomb::getFilePosition() {
-	return stream->getFilePosition();
-}*/

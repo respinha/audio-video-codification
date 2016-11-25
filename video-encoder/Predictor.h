@@ -4,12 +4,16 @@
 
 #include "Golomb.cpp"
 
+using namespace std;
+using namespace cv;
+
 class Predictor {
 	public:
 		Predictor(string encoded_filename, int M, int decodeFlag=0);
 		void predict_encode(string filename, int mode);
 		void predict_decode();
 	private:
+		int encodeFrame(Mat frame, int mode);
 		void calcEntropy();
 		void predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode);
 		Golomb* g;

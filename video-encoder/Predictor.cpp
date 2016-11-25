@@ -8,8 +8,8 @@
 
 #include "Predictor.h"
 
-using namespace std;
-using namespace cv;
+//using namespace std;
+//using namespace cv;
 
 
 Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
@@ -21,12 +21,44 @@ Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
 void Predictor::predict_encode(string filename, int mode) {
 
 	string* file = new string(filename);
-	
-	Mat img = imread(file->c_str(), 1);	
+
+	VideoCapture cap(*file);
+	Mat frame;
+
+	// video parameters
+	g->encode(cap.get(CV_CAP_PROP_FOURCC), 0);
+	g->encode(cap.get(CV_CAP_PROP_FPS), 0);
+	g->encode(cap.get(CV_CAP_PROP_FRAME_WIDTH), 0);
+	g->encode(cap.get(CV_CAP_PROP_FRAME_HEIGHT), 0);
+
+	if(!cap.isOpened()) {
+		fprintf(stderr, "Error reading video file!\n");
+		return;
+	}
+
+	int nFrames = 0;
+	for(;;) {
+		cap >> frame;
+		
+		if(frame.empty()) 
+			break;
+
+
+		nFrames++;
+		if((encodeFrame(frame, mode)) != 0) {
+			return;
+		}
+
+
+	}	
+}
+
+int Predictor::encodeFrame(Mat img, int mode) {
+	//Mat img = imread(file->c_str(), 1);	
 	if ( !img.data )
     {
     	printf("No image data \n");
-        return;
+        return -1;
     }	
 
 	Mat bgr[3];
@@ -35,14 +67,16 @@ void Predictor::predict_encode(string filename, int mode) {
 
 	// file metadata
 	// 1-> intra-frame prediction mode
-	g->encode(1, 0);
+	g->encode(mode, 0);
 	g->encode(bgr[0].rows, 0);
 	g->encode(bgr[0].cols, 0);
 
+
 	uchar* p, *prev;
+
 	for(int m = 0; m < 3; m++) {
 
-		cout << "#### Channel: " << m << "\n";
+		//cout << "#### Channel: " << m << "\n";
 
 		for(int row = 0; row < bgr[m].rows; row++) {
 
@@ -52,27 +86,53 @@ void Predictor::predict_encode(string filename, int mode) {
 			p = bgr[m].ptr<uchar>(row);
 			
 			for(int col = 0; col < bgr[m].cols; col++) {
-
 				// JPEG-LS mode
 				uchar x;
 				predict_aux(col, row, &x, p, prev, mode);
 
 				uchar residue = p[col] - x;
 
-				cout << "Residue: " << (int) residue << "\n";
+				//cout << "Residue: " << (int) residue << "\n";
 				//cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
-				cout << "Value: " << (int) p[col] << "\n";
+				//cout << "Value: " << (int) p[col] << "\n";
 				g->encode((int) residue, (row == bgr[m].rows-1 && col == bgr[m].cols-1 && m == 2));
 			}
 		}
 	}
+
+	return 0;
 }
 
 void Predictor::predict_decode() {
 
-
 	int end = 0;
 	int* pend = &end;
+
+	int videoParams[4];
+
+	for(int i = 0; i< 4; i++) {
+		videoParams[i] = g->decode(pend);
+		if(*pend) {
+			cout << videoParams[i]<< "\n";
+			fprintf(stderr, "An error occurred video parameters!\n");
+			return;
+		}
+	}
+
+	VideoWriter outputVideo("output.mp4", 
+							videoParams[0], 
+							videoParams[1],
+							Size(videoParams[2], videoParams[3]));
+
+	if(!outputVideo.isOpened()) {
+		fprintf(stderr, "Could not open output video for writing!\n");
+		return;
+	}
+	// cap.get(CV_CAP_PROP_FOURCC
+	// cap.get(CV_CAP_PROP_FPS
+	// input_cap.get(CV_CAP_PROP_FRAME_WIDTH
+	// cap.get(CV_CAP_PROP_FRAME_HEIGHT
+
 	int predMode = g->decode(pend);
 	if(*pend) {
 		cout << predMode << "\n";
@@ -94,52 +154,62 @@ void Predictor::predict_decode() {
 		return;
 	}
 
-	Mat img = Mat::zeros(Size(rows, cols), CV_8UC3);
 
-	// init channel matrices
-	vector<Mat> bgr(3);
-	for(unsigned int i = 0; i < bgr.size(); i++) bgr[i] = Mat::zeros(rows, cols, CV_8UC1);
+	while(!(*pend)) {
 
-	uchar* p, *prev;
+		Mat img = Mat::zeros(Size(rows, cols), CV_8UC3);
 
-	for(int m = 0; m < 3; m++) {
-		cout << "#### Channel: " << m << "\n";
-		for(int row = 0; row < rows; row++) {
+		// init channel matrices
+		vector<Mat> bgr(3);
+		for(unsigned int i = 0; i < bgr.size(); i++) 
+			bgr[i] = Mat::zeros(rows, cols, CV_8UC1);
 
-			if(row > 0) 
-				prev = p;
-	
-			p = bgr[m].ptr<uchar>(row);
+		uchar* p, *prev;
+
+		for(int m = 0; m < 3; m++) {
+			//cout << "#### Channel: " << m << "\n";
+			for(int row = 0; row < rows; row++) {
+
+				if(row > 0) 
+					prev = p;
+		
+				p = bgr[m].ptr<uchar>(row);
 
 
-			for(int col = 0; col < cols; col++) {
+				for(int col = 0; col < cols; col++) {
 
-				if(predMode == 1) {
-					uchar x;
-					predict_aux(col, row, &x, p, prev, predMode);
+					if(predMode == 1) {
+						uchar x;
+						predict_aux(col, row, &x, p, prev, predMode);
 
-					uchar residue = (uchar) g->decode(pend);
-					//cout << "Residue: " << (int) residue << "\n";
+						uchar residue = (uchar) g->decode(pend);
+						//cout << "Residue: " << (int) residue << "\n";
 
-					/*if(*pend && !(col == cols-1 && rows == rows-1)) {
-						fprintf(stderr, "Error occurred decoding. Reached end of file.\n");
-						return;
-					}*/
+						/*if(*pend && !(col == cols-1 && rows == rows-1)) {
+							fprintf(stderr, "Error occurred decoding. Reached end of file.\n");
+							return;
+						}*/
 
-					p[col] = residue + x;
-					//cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
-					cout << "Value: " << (int) p[col] << "\n";
+						p[col] = residue + x;
+						//cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
+						//cout << "Value: " << (int) p[col] << "\n";
+					}
 				}
 			}
 		}
-	}
 
-	merge(bgr, img);
+		merge(bgr, img);
 
-	namedWindow( "Decoded image", WINDOW_AUTOSIZE );// Create a window for display.
+		// writing frame to output
+		outputVideo.write(img);
+	}	
+
+
+	/*namedWindow( "Decoded image", WINDOW_AUTOSIZE );// Create a window for display.
     imshow( "Decoded image", img );                   // Show our image inside it.
 
     waitKey(0);                                          // Wait for a keystroke in the window
+    */
 }
 
 void Predictor::predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode) {
