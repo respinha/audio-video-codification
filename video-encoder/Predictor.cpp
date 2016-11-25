@@ -12,14 +12,16 @@ using namespace std;
 using namespace cv;
 
 
-Predictor::Predictor(string filename, string encoded, int M, int decodeFlag) {
+Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
 
-	file = new string(filename);
-	g = new Golomb(M, encoded, decodeFlag);
+	//file = new string(filename);
+	g = new Golomb(M, encoded_filename, decodeFlag);
 }
 
-void Predictor::predict_encode(int mode) {
+void Predictor::predict_encode(string filename, int mode) {
 
+	string* file = new string(filename);
+	
 	Mat img = imread(file->c_str(), 1);	
 	if ( !img.data )
     {

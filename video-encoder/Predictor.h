@@ -6,8 +6,8 @@
 
 class Predictor {
 	public:
-		Predictor(string filename, string encoded, int M, int decodeFlag=0);
-		void predict_encode(int mode);
+		Predictor(string encoded_filename, int M, int decodeFlag=0);
+		void predict_encode(string filename, int mode);
 		void predict_decode();
 	private:
 		void calcEntropy();
