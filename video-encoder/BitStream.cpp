@@ -33,6 +33,7 @@ BitStream::BitStream(string fname, int read) {
 		}
 
 		writePosition = atoi(num.c_str());
+		cout << "Write position: " << writePosition << "\n";
 
 		inputstream->seekg(0);
 	} else {
@@ -259,6 +260,8 @@ void BitStream::flush() {
 
 	*outputstream << ";";
 	*outputstream << writePosition;
+
+	cout << "Write position: " << writePosition << "\n";
 
 	outputstream->flush();
 	outputstream->close();

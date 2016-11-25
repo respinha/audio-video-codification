@@ -74,6 +74,7 @@ int Golomb::decode(int* end) {
 			ss << original;			
 			ss >> sample;
 
+			cout << "Residue: " << sample << "\n";
 			return sample;
 		}
 		
