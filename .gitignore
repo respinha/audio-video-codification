@@ -33,6 +33,11 @@
 
 /*/CMakeFiles*
 /*/CMakeFiles/*
+/*/CMakeCache*
+/video-encoder/Makefile
+/video-encoder/cmake_*
+
+
 /*/bin/
 /*/bin/*
 /*/build/
