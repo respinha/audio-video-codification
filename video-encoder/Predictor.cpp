@@ -23,7 +23,6 @@ void Predictor::predict_encode(string filename, int mode) {
 	string* file = new string(filename);
 
 	VideoCapture cap(*file);
-	Mat frame;
 
 	// video parameters
 	g->encode(cap.get(CV_CAP_PROP_FOURCC), 0);
@@ -36,24 +35,28 @@ void Predictor::predict_encode(string filename, int mode) {
 		return;
 	}
 
-	int nFrames = 0;
-	for(;;) {
+	Mat frame;
+
+	double numFrames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+
+	for(int i = 0; i < numFrames; i++) {
 		cap >> frame;
 		
-		if(frame.empty()) 
+		if(frame.empty()) {
+			fprintf(stderr, "Unexpectedly reached end of video. No more frames to read.\n");
 			break;
-
-
-		nFrames++;
-		if((encodeFrame(frame, mode)) != 0) {
-			return;
 		}
 
+		int isLastFrame = (i == numFrames-1);
+
+		if((encodeFrame(frame, mode, isLastFrame)) != 0) {
+			return;
+		}
 
 	}	
 }
 
-int Predictor::encodeFrame(Mat img, int mode) {
+int Predictor::encodeFrame(Mat img, int mode, int isLastFrame) {
 	//Mat img = imread(file->c_str(), 1);	
 	if ( !img.data )
     {
@@ -92,10 +95,10 @@ int Predictor::encodeFrame(Mat img, int mode) {
 
 				uchar residue = p[col] - x;
 
-				//cout << "Residue: " << (int) residue << "\n";
+				cout << "Residue: " << (int) residue << "\n";
 				//cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
-				//cout << "Value: " << (int) p[col] << "\n";
-				g->encode((int) residue, (row == bgr[m].rows-1 && col == bgr[m].cols-1 && m == 2));
+				cout << "Value: " << (int) p[col] << "\n";
+				g->encode((int) residue, (row == bgr[m].rows-1 && col == bgr[m].cols-1 && m == 2 && isLastFrame));
 			}
 		}
 	}
@@ -191,8 +194,9 @@ void Predictor::predict_decode() {
 						}*/
 
 						p[col] = residue + x;
+						cout << "Residue: " << (int) residue << "\n";
 						//cout << "Residue: " << (int) residue << "; value " << (int) p[col] << "\n";
-						//cout << "Value: " << (int) p[col] << "\n";
+						cout << "Value: " << (int) p[col] << "\n";
 					}
 				}
 			}
