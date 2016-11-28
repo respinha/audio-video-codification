@@ -33,7 +33,7 @@ BitStream::BitStream(string fname, int read) {
 		}
 
 		writePosition = atoi(num.c_str());
-		cout << "Write position: " << writePosition << "\n";
+		//cout << "Write position: " << writePosition << "\n";
 
 		inputstream->seekg(0);
 	} else {
@@ -221,6 +221,7 @@ void BitStream::writeNBits(int nBits, int bit_buff, int finalWrite) {
 
 	if(finalWrite) {
 
+		cout << "f l u s h\n";
 		if(!abort) {
 			surplusByte = buffer;
 

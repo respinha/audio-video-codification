@@ -13,7 +13,7 @@ class Predictor {
 		void predict_encode(string filename, int mode);
 		void predict_decode();
 	private:
-		int encodeFrame(Mat frame, int mode);
+		int encodeFrame(Mat frame, int mode, int isLastFrame);
 		void calcEntropy();
 		void predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode);
 		Golomb* g;
