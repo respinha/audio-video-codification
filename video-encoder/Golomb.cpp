@@ -39,12 +39,11 @@ int Golomb::decode(int* end) {
 
 	int isUnary = 1;
 	int q = 0;
+	
+	int original;
 
-	
-	int sample;
-	
 	while(1) {
-		
+
 		if(isUnary) {
 			int bit = stream->readBit();
 
@@ -60,30 +59,17 @@ int Golomb::decode(int* end) {
 
 			int r = stream->readNBits(B);
 			int n = r + (q*M);
-			int original;
 
 			// checking if even or odd to apply transformation
 			if(n%2 == 0)
 				original = n/2;
 			else
 				original = ((n+1)/2) * -1;
-			
-			//cout << "decoded: " << n << "; Original: " << original << "\n";
 
-			stringstream ss;
-			ss << original;			
-			ss >> sample;
-
-			cout << "Residue: " << sample << "\n";
-			return sample;
+			return original;
 		}
 		
 	}
 
-	return sample;
-	
+	return original;
 }
-
-/*int Golomb::getFilePosition() {
-	return stream->getFilePosition();
-}*/
