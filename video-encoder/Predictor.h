@@ -12,6 +12,7 @@ class Predictor {
 		Predictor(string encoded_filename, int M, int decodeFlag=0);
 		void predict_encode(string filename, int mode);
 		void predict_decode();
+		void predict_block_encode(string filename, int mode);
 	private:
 		int encodeFrame(Mat frame, int mode, int isLastFrame);
 		void calcEntropy();

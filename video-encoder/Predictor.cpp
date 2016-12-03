@@ -18,6 +18,85 @@ Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
 	g = new Golomb(M, encoded_filename, decodeFlag);
 }
 
+void Predictor::predict_block_encode(string filename, int mode){
+
+	/*string* file = new string(filename);
+
+	VideoCapture cap(*file);
+
+	// video parameters
+	g->encode(cap.get(CV_CAP_PROP_FOURCC), 0);
+	g->encode(cap.get(CV_CAP_PROP_FPS), 0);
+	g->encode(cap.get(CV_CAP_PROP_FRAME_WIDTH), 0);
+	g->encode(cap.get(CV_CAP_PROP_FRAME_HEIGHT), 0);
+
+	if(!cap.isOpened()) {
+		fprintf(stderr, "Error reading video file!\n");
+		return;
+	}
+
+	Mat frame;
+
+	double numFrames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+
+	for(int i = 0; i < numFrames; i++) {
+		cap >> frame;
+		
+		if(frame.empty()) {
+			fprintf(stderr, "Unexpectedly reached end of video. No more frames to read.\n");
+			break;
+		}
+
+		int isLastFrame = (i == numFrames-1);
+
+		if((encodeFrame(frame, mode, isLastFrame)) != 0) {
+			return;
+		}
+	*/
+	cv::Mat image;
+//	capture >> img;
+	image = imread(filename,CV_LOAD_IMAGE_COLOR);
+	int N = 10; 
+
+	// get the image data
+ 	int height = image.rows;
+	int width = image.cols;
+
+	 printf("Processing a %dx%d image\n",height,width);
+	
+	cv :: Size smallSize ( 50 , 50 );
+
+	std :: vector < Mat > smallImages ;
+	namedWindow("smallImages ", CV_WINDOW_AUTOSIZE );
+
+	for  ( int y =  0 ; y < image.rows ; y += smallSize.height )
+	{
+    		for  ( int x =  0 ; x < image.cols ; x += smallSize.width )
+   	 	{	
+			int smallW;
+			int smallH;
+
+			if( (image.cols - x) < smallSize.width )
+				smallW = image.cols - x; 
+			else 
+				smallW = smallSize.width;
+
+			if( (image.rows - y) < smallSize.height)
+				smallH = image.rows - y; 
+			else
+				smallH = smallSize.height; 
+
+        		cv::Rect rect =   cv::Rect ( x , y , smallW , smallH );
+        		smallImages.push_back ( cv::Mat ( image , rect ));
+    			imshow( "smallImages", cv::Mat ( image, rect ));
+       			waitKey(0);
+    		}
+	}//	}	
+
+}
+
+
+
 void Predictor::predict_encode(string filename, int mode) {
 
 	string* file = new string(filename);

@@ -25,3 +25,6 @@ target_link_libraries( SpatialEncoder ${OpenCV_LIBS} )
 
 add_executable( SpatialDecoder test_spatial_decoder.cpp )
 target_link_libraries( SpatialDecoder ${OpenCV_LIBS} )
+
+add_executable( BlockEncoder test_interframe.cpp )
+target_link_libraries( BlockEncoder ${OpenCV_LIBS} ) 
