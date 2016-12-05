@@ -18,7 +18,7 @@ Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
 	g = new Golomb(M, encoded_filename, decodeFlag);
 }
 
-void Predictor::predict_block_encode(string filename, int mode){
+void Predictor::predict_block_encode(string filename, int blockHeight, int blockWidth){
 
 	/*string* file = new string(filename);
 
@@ -49,14 +49,19 @@ void Predictor::predict_block_encode(string filename, int mode){
 
 		int isLastFrame = (i == numFrames-1);
 
-		if((encodeFrame(frame, mode, isLastFrame)) != 0) {
+		if((encodeIntraFrame(frame, mode, isLastFrame)) != 0) {
 			return;
 		}
 	*/
+	//	}	
 	cv::Mat image;
-//	capture >> img;
 	image = imread(filename,CV_LOAD_IMAGE_COLOR);
-	int N = 10; 
+
+	encodeInterFrame(image, 1, blockHeight, blockWidth);
+
+}
+
+int Predictor::encodeInterFrame(Mat image, int isLastFrame, int blockHeight, int blockWidth) {
 
 	// get the image data
  	int height = image.rows;
@@ -64,7 +69,7 @@ void Predictor::predict_block_encode(string filename, int mode){
 
 	 printf("Processing a %dx%d image\n",height,width);
 	
-	cv :: Size smallSize ( 50 , 50 );
+	cv :: Size smallSize ( blockHeight , blockWidth );
 
 	std :: vector < Mat > smallImages ;
 	namedWindow("smallImages ", CV_WINDOW_AUTOSIZE );
@@ -91,12 +96,10 @@ void Predictor::predict_block_encode(string filename, int mode){
     			imshow( "smallImages", cv::Mat ( image, rect ));
        			waitKey(0);
     		}
-	}//	}	
+	}
 
+	return 0;	
 }
-
-
-
 void Predictor::predict_encode(string filename, int mode) {
 
 	string* file = new string(filename);
@@ -128,14 +131,14 @@ void Predictor::predict_encode(string filename, int mode) {
 
 		int isLastFrame = (i == numFrames-1);
 
-		if((encodeFrame(frame, mode, isLastFrame)) != 0) {
+		if((encodeIntraFrame(frame, mode, isLastFrame)) != 0) {
 			return;
 		}
 
 	}	
 }
 
-int Predictor::encodeFrame(Mat img, int mode, int isLastFrame) {
+int Predictor::encodeIntraFrame(Mat img, int mode, int isLastFrame) {
 	//Mat img = imread(file->c_str(), 1);	
 	if ( !img.data )
     {
