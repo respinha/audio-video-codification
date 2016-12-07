@@ -8,17 +8,19 @@
 
 #include "Predictor.h"
 
+/*using namespace std;
+using namespace cv;*/
 
-Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
 
-	//file = new string(filename);
-	g = new Golomb(M, encoded_filename, decodeFlag);
+Predictor::Predictor(string filename, string encoded, int M, int decodeFlag) {
+
+	file = new string(filename);
+	g = new Golomb(M, encoded, decodeFlag);
 }
 
+void Predictor::predict_encode(int mode) {
 
-void Predictor::predict_encode(string file, int mode) {
-
-	VideoCapture cap(file);
+	VideoCapture cap(*file);
 
 	g->encode(mode, 0);
 	
@@ -33,17 +35,17 @@ void Predictor::predict_encode(string file, int mode) {
 	Mat frame;
 	for(int i = 0; i < nFrames; i++) {
 		cap.read(frame);
-		encodeIntraFrame(frame, mode, i==nFrames-1);
+		encode_frame(frame, mode, i==nFrames-1);
 	}
 	//Mat img = imread(file->c_str(), 1);
 }
 
-int Predictor::encodeIntraFrame(Mat frame, int mode, int isLastFrame) {
+void Predictor::encode_frame(Mat frame, int mode, int isLastFrame) {
 
 	if ( !frame.data )
     {
     	printf("No image data \n");
-        return -1;
+        return;
     }
 	Mat bgr[3];
 
@@ -69,7 +71,7 @@ int Predictor::encodeIntraFrame(Mat frame, int mode, int isLastFrame) {
 
 				// JPEG-LS mode
 				uint8_t x;
-				predict_aux(col, row, &x, p, prev);
+				predict_aux(col, row, &x, p, prev, mode);
 
 				int16_t residue = (int16_t) (p[col] - x);
 
@@ -79,59 +81,7 @@ int Predictor::encodeIntraFrame(Mat frame, int mode, int isLastFrame) {
 			}
 		}
 	}
-
-	return 0;
 }
-
-void Predictor::predict_block_encode(string filename, int blockHeight, int blockWidth){
-
-	cv::Mat image;
-	image = imread(filename,CV_LOAD_IMAGE_COLOR);
-
-	encodeInterFrame(image, 1, blockHeight, blockWidth);
-
-}
-
-int Predictor::encodeInterFrame(Mat image, int isLastFrame, int blockHeight, int blockWidth) {
-
-	// get the image data
- 	int height = image.rows;
-	int width = image.cols;
-
-	 printf("Processing a %dx%d image\n",height,width);
-	
-	cv :: Size smallSize ( blockHeight , blockWidth );
-
-	std :: vector < Mat > smallImages ;
-	namedWindow("smallImages ", CV_WINDOW_AUTOSIZE );
-
-	for  ( int y =  0 ; y < image.rows ; y += smallSize.height )
-	{
-    		for  ( int x =  0 ; x < image.cols ; x += smallSize.width )
-   	 	{	
-			int smallW;
-			int smallH;
-
-			if( (image.cols - x) < smallSize.width )
-				smallW = image.cols - x; 
-			else 
-				smallW = smallSize.width;
-
-			if( (image.rows - y) < smallSize.height)
-				smallH = image.rows - y; 
-			else
-				smallH = smallSize.height; 
-
-        		cv::Rect rect =   cv::Rect ( x , y , smallW , smallH );
-        		smallImages.push_back ( cv::Mat ( image , rect ));
-    			imshow( "smallImages", cv::Mat ( image, rect ));
-       			waitKey(0);
-    		}
-	}
-
-	return 0;	
-}
-
 void Predictor::predict_decode() {
 
 	int end = 0;
@@ -176,7 +126,6 @@ void Predictor::predict_decode() {
 	int cols = videoParams[2];	// width
 	int rows = videoParams[3];	// height
 
-	// decoding frame count
 	int nFrames = g->decode(pend);
 	if(*pend) {
 		cout << nFrames << "\n";
@@ -211,7 +160,7 @@ void Predictor::predict_decode() {
 
 					if(predMode == 1) {
 						uint8_t x;
-						predict_aux(col, row, &x, p, prev);
+						predict_aux(col, row, &x, p, prev, predMode);
 
 						int16_t residue = (int16_t) g->decode(pend);
 						//cout << "Residue: " << (int) residue << "\n";

@@ -19,7 +19,7 @@ class Predictor {
 		int encodeInterFrame(Mat frame, int isLastFrame, int height, int width);
 
 		void calcEntropy();
-		void predict_aux(int col, int row, uchar* x, uchar* p, uchar* prev, int mode);
+		void predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev);
 		Golomb* g;
 	
 		string* file;
