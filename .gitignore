@@ -44,3 +44,6 @@
 /*/*.jpg
 /*/*.jpeg
 /*/build/*
+
+/*/video_files/
+/*/video_files/*
