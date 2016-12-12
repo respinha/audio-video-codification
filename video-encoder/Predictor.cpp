@@ -14,7 +14,248 @@ Predictor::Predictor(string encoded_filename, int M, int decodeFlag) {
 	//file = new string(filename);
 	g = new Golomb(M, encoded_filename, decodeFlag);
 }
+int Predictor::encodeInterFrame(Mat frame, int isLastFrame, int height, int width, std::vector<Mat>* smallImages,std::vector<Mat> blocks,int m){
+	 //Mat img = imread(file->c_str(), 1);   
+       if ( !frame.data )
+    {
+       printf("No image data \n");
+        return -1;
+    }  
 
+       //Mat bgr[3];
+
+       //split(frame, bgr);
+
+       // file metadata
+       // 1-> intra-frame prediction mode
+       /*g->encode(1, 0);
+       g->encode(bgr[0].rows, 0);
+       g->encode(bgr[0].cols, 0);*/
+
+       //std::vector<Mat> blocks; 
+
+       int8_t* p, *prev;
+
+       //for(int m = 0; m < 3; m++) {
+
+               //cout << "#### Channel: " << m << "\n";
+
+               //aux_block_encode(bgr[m],0,height,width,&blocks);
+
+               //cout << "smallImages size: "<<smallImages->size()<<"\n";
+               //cout << "blocks size: "<<blocks.size()<<"\n";
+
+               for( std::vector<Mat>::size_type idx = 0; idx != smallImages->size(); idx++){
+                       //cout << "idx "<<idx<<"\n";
+
+                       Mat diff = Mat::zeros(blocks[idx].rows, blocks[idx].cols, CV_8UC1);
+                       // differences
+                       for(int r = 0; r < blocks[idx].rows; r++) {
+
+                               int8_t* ptr1 = blocks[idx].ptr<int8_t>(r);
+                               int8_t* ptr2 = (*smallImages)[idx].ptr<int8_t>(r);
+                               int8_t* ptrDiff = diff.ptr<int8_t>(r);
+ 
+                               for(int c = 0; c < blocks[idx].cols; c++) {
+
+                                       ptrDiff[c] = ptr1[c] - ptr2[c];
+                               }
+                       }
+
+
+                       for(int row = 0; row < diff.rows; row++) {
+
+                               /*if(row > 0) 
+                                       prev = p;*/
+               
+                               p = diff.ptr<int8_t>(row);
+                               
+                               
+                               for(int col = 0; col < diff.cols; col++) {
+                                       
+                                       //redict_aux(col, row, &x, p, prev, mode);
+
+                                       int16_t residue = (int16_t) p[col];
+
+                                       //cout << "IResidue: " << (int) residue << "\n";
+                                       /*cout << "IResidue: " << (int) residue << "; value " << (int) p[col] << "\n";
+                                       cout << "IValue: " << (int) p[col] << "\n";
+                                       */
+
+                                       int end = (row == diff.rows-1 && col == diff.cols-1 && m == 2 && isLastFrame && idx == smallImages->size()-1);
+
+                                       g->encode((int) residue, end);
+
+                               }
+                       }
+               }
+       //}
+
+       return 0;
+
+
+}
+
+void Predictor::predict_block_encode(string filename, int blockHeight, int blockWidth){
+
+	//Mat frame;
+	//VideoCapture cap(filename);
+
+	ifstream myfile;
+
+	myfile.open(filename);
+	if (!myfile.is_open())
+	{
+		cerr << "Error opening file\n";
+		return;
+	}
+
+	string line;
+	int nCols, nRows, type, fps;
+	getline (myfile,line);
+	cout << line << endl;
+
+	istringstream(line) >> nCols >> nRows >> fps >> type;
+	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
+	
+
+	
+
+ 
+       // double numFrames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+       
+       std :: vector <Mat> buffer_frames[3]; 
+
+       std :: vector <Mat> blocks[3];
+
+       int i = 0;
+ 
+       while(true){
+       		if(!myfile.read((char*)frame.data, frame.cols * frame.rows * frame.channels())) break;
+
+			if (frame.empty()) break;         // check if at end
+
+
+               
+           std :: vector <Mat> frames[3];      
+
+                //cap >> frame;
+                
+                
+//@@ -49,30 +57,156 @@ void Predictor::predict_block_encode(string filename, int blockHeight, int block
+ 
+                int isLastFrame = 0 ; 
+
+           if(waitKey((int)(1.0 / fps * 1000)) >= 0){ 
+           		isLastFrame = 1; 
+           }
+
+ 
+
+               if(i==0){
+                       //cout << "encoding first frame..\n";
+                       if((encodeIntraFrame(frame, 1, isLastFrame)) != 0 ) {
+                              return;
+                       }
+
+                       Mat bgr[3];
+
+                       split(frame, bgr);
+                       for(int j=0; j<3;j++){
+                               aux_block_encode(bgr[j],0,blockHeight,blockWidth,&buffer_frames[j]);
+                       }
+                             
+                }
+
+       
+               else{
+                       //cout << "encoding frame "<<i<<"\n";
+               //cout << "size NOT FIRST frame: "<<frames.size() << "\n"; 
+                       Mat bgr[3];
+
+                       split(frame, bgr);
+
+                       g->encode(1, 0);
+                       g->encode(bgr[0].rows, 0);
+                       g->encode(bgr[0].cols, 0);
+                       
+                       for(int j=0; j<3;j++){
+
+                               aux_block_encode(bgr[j],0,blockHeight,blockWidth,&blocks[j]);
+
+
+
+                               if((encodeInterFrame(frame,isLastFrame,blockHeight,blockWidth,&buffer_frames[j],blocks[j],j)) != 0) {
+                                       return;
+                               }
+                       }
+
+                       
+               }
+
+               i++;
+
+               if (isLastFrame == 1){
+               	break; 
+               }
+           }
+
+               //buffer_frames = frames; 
+               
+
+
+       
+       }
+
+       //cv::Mat image;
+       //image = imread(filename,CV_LOAD_IMAGE_COLOR);
+
+       //encodeInterFrame(image, 1, blockHeight, blockWidth);
+
+
+
+
+
+
+int Predictor::aux_block_encode(Mat image, int isLastFrame, int blockHeight, int blockWidth,std::vector<Mat>* smallImages) {
+
+	// get the image data
+ 	int height = image.rows;
+	int width = image.cols;
+
+	//printf("Processing a %dx%d image\n",height,width);
+	
+	cv :: Size smallSize ( blockHeight , blockWidth );
+
+	//std :: vector < Mat > smallImages ;
+	//namedWindow("smallImages ", CV_WINDOW_AUTOSIZE );
+
+	for  ( int y =  0 ; y < image.rows ; y += smallSize.height )
+	{
+    		for  ( int x =  0 ; x < image.cols ; x += smallSize.width )
+   	 	{	
+			int smallW;
+			int smallH;
+
+			if( (image.cols - x) < smallSize.width )
+				smallW = image.cols - x; 
+			else 
+				smallW = smallSize.width;
+
+			if( (image.rows - y) < smallSize.height)
+				smallH = image.rows - y; 
+			else
+				smallH = smallSize.height; 
+
+        		cv::Rect rect =   cv::Rect ( x , y , smallW , smallH );
+        		smallImages->push_back ( cv::Mat ( image , rect ));
+    			//imshow( "smallImages", cv::Mat ( image, rect ));
+       			//waitKey(0);
+    		}
+	}
+
+	return 0;	
+}
 
 void Predictor::predict_encode(string file, int mode) {
 
@@ -83,16 +324,73 @@ int Predictor::encodeIntraFrame(Mat frame, int mode, int isLastFrame) {
 	return 0;
 }
 
-void Predictor::predict_block_encode(string filename, int blockHeight, int blockWidth){
+/*void Predictor::predict_block_encode(string filename, int blockHeight, int blockWidth){
 
-	cv::Mat image;
-	image = imread(filename,CV_LOAD_IMAGE_COLOR);
 
-	encodeInterFrame(image, 1, blockHeight, blockWidth);
+	   Mat frame;
+ 
+        double numFrames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+       
+       std :: vector <Mat> buffer_frames[3]; 
 
-}
+       std :: vector <Mat> blocks[3];
+ 
+        for(int i = 0; i < numFrames; i++) {
 
-int Predictor::encodeInterFrame(Mat image, int isLastFrame, int blockHeight, int blockWidth) {
+               
+           std :: vector <Mat> frames[3];      
+
+                cap >> frame;
+                
+                if(frame.empty()) {
+
+ 
+                int isLastFrame = (i == numFrames-1);
+ 
+               if(i==0){
+                       //cout << "encoding first frame..\n";
+                       if((encodeIntraFrame(frame, 1, isLastFrame)) != 0 ) {
+                              return;
+                       }
+
+                       Mat bgr[3];
+
+                       split(frame, bgr);
+                       for(int j=0; j<3;j++){
+                               aux_block_encode(bgr[j],0,blockHeight,blockWidth,&buffer_frames[j]);
+                       }
+                }else{
+                       //cout << "encoding frame "<<i<<"\n";
+                       //cout << "size NOT FIRST frame: "<<frames.size() << "\n"; 
+                       Mat bgr[3];
+
+                       split(frame, bgr);
+
+                       g->encode(1, 0);
+                       g->encode(bgr[0].rows, 0);
+                       g->encode(bgr[0].cols, 0);
+                       
+                       for(int j=0; j<3;j++){
+
+                               aux_block_encode(bgr[j],0,blockHeight,blockWidth,&blocks[j]);
+
+
+
+                               if((encodeInterFrame(frame,isLastFrame,blockHeight,blockWidth,&buffer_frames[j],blocks[j],j)) != 0) {
+                                       return;
+                               }
+                       }
+                       
+               }
+
+               //buffer_frames = frames; 
+
+                             
+
+
+}*/
+
+/*int Predictor::encodeInterFrame(Mat image, int isLastFrame, int blockHeight, int blockWidth) {
 
 	// get the image data
  	int height = image.rows;
@@ -130,7 +428,7 @@ int Predictor::encodeInterFrame(Mat image, int isLastFrame, int blockHeight, int
 	}
 
 	return 0;	
-}
+}*/
 
 void Predictor::predict_decode() {
 
