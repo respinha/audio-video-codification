@@ -76,7 +76,6 @@ void Predictor::spatialPredict(string filename) {
 		*histogramFile << it->first << " " << it->second << "\n";
 	}
 
-	//cout << counter << "\n";
 	histogramFile->close();
 }
 
@@ -115,7 +114,12 @@ void Predictor::encodeIntraframe(Mat frame) {
 				else
 					occurrences.insert(make_pair((int) residue, 1));
 
-				cout << "Residue: " << residue << "\n";
+
+				counter++;
+				if(counter < 3128734)
+					cout << "Residue: " << residue << "\n";
+
+			
 				if(residue < 0) {
 	
 					residue = -2*(residue)-1;	
@@ -125,7 +129,6 @@ void Predictor::encodeIntraframe(Mat frame) {
 				}
 
 				ge->encode((int) residue);
-				counter++;
 			}
 		}
 	}
@@ -169,16 +172,18 @@ void Predictor::spatialDecode() {
 					residue = (int16_t) gd->decode();
 					counter++;
 					
-					if(residue %2 == 0) { // even
+					if(residue %2 == 0) { 	// even
 						residue = residue/2;
 					}
-					else {	// odd	
+					else {					// odd	
 						residue = -(residue+1)/2;
 					}
-					
-					cout << "Residue: " << residue << "\n";
+
+					//if(counter < 3128734)
+					cout << "X: " << (int) x << "\n";
+					cout << "Residue: " << (int) residue << "\n";
+
 					p[col] = (uint8_t) (residue + x);
-				
 				}
 			}
 		}
@@ -198,8 +203,6 @@ void Predictor::spatialDecode() {
 }
 
 void Predictor::predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev) {
-
-
 	
 	uint8_t a,b,c;
 	int border = 0;

@@ -69,6 +69,7 @@ int GolombDecoder::decode() {
 	unsigned int q = 0, r, t;
 	int x;
 
+	//std::cout << "Golomb: \n";//<< t << "\n";
 	x = bs->readNBits(b - 1);
 	if(x == -1)
 		return -1;
@@ -94,6 +95,5 @@ int GolombDecoder::decode() {
 
 	t = q * m + r;
 
-	//std::cout << "Residue: " << t << "\n";
 	return t;
 }
