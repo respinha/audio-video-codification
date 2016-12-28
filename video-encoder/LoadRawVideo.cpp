@@ -1,0 +1,54 @@
+#include <iostream>
+#include <getopt.h>
+#include <fstream>
+#include <opencv2/opencv.hpp>
+#include <string>
+
+using namespace cv;
+using namespace std;
+
+void displayVideo(string);
+
+int main(int argc, char **argv)
+{
+	string inputFileName = argv[1];
+	displayVideo(inputFileName);
+	
+	return 0;
+}
+
+void displayVideo(string inputFileName) {
+	ifstream myfile;
+
+	myfile.open(inputFileName);
+	if (!myfile.is_open())
+	{
+		cerr << "Error opening file\n";
+		return;
+	}
+
+	string line;
+	int nCols, nRows, type, fps;
+	getline (myfile,line);
+	cout << line << endl;
+
+	istringstream(line) >> nCols >> nRows >> fps >> type;
+	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
+	
+
+	while(true)
+	{
+
+		if(!myfile.read((char*)frame.data, frame.cols * frame.rows * frame.channels())) break;
+
+		if (frame.empty()) break;         // check if at end
+
+		imshow("Display frame", frame);
+
+		if(waitKey((int)(1.0 / fps * 1000)) >= 0) break;
+	}
+
+	if(myfile.is_open()) myfile.close();
+
+
+}

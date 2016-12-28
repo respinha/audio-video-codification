@@ -1,75 +1,99 @@
-#include <cstdlib>
-#include <string>
-#include <cmath>
-#include <bitset>
-#include <sstream>
-#include <queue>
-#include <list>
+//
+//  Golomb.cpp
+//  CAV_T2
+//
+//  Created by Pedro Costa on 11/11/14.
+//  Copyright (c) 2014 pmec. All rights reserved.
+//
 
 #include "Golomb.h"
+#include <math.h>
+#include <stdlib.h>
+#include <iostream>
 
+Golomb::Golomb(BitStream *bs, int m) {
+	this->bs = bs;
+	this->m = m;
 
-Golomb::Golomb(int m, string encodedFilename, int pos) : M(m), B(log2(m)){
-	stream = new BitStream(encodedFilename,pos);
+	this->b = (int)ceil(log2(m));
+	this->l = pow(2, b) - m;
+	this->h = m - l;
 }
 
+Golomb::~Golomb() {
 
-void Golomb::encode(int n, int finalWrite) {
-
-		
-	int transformedN = n >= 0 ? 2*n : (2*abs(n))-1;
-
-	int q = transformedN/M;
-	int r = transformedN -(q*M);
-
-	int i = 0;
-
-	// unary
-	while(i < q) {
-		stream->writeBit(1);
-		i++;
-	}
-
-	stream->writeBit(0);
-
-	stream->writeNBits(B, r, finalWrite);
 }
 
-int Golomb::decode(int* end) {
+GolombEncoder::GolombEncoder(BitStream *bs, int m) : Golomb(bs, m) {
 
-	int isUnary = 1;
-	int q = 0;
-	
-	int original;
+}
 
-	while(1) {
+GolombEncoder::~GolombEncoder() {
 
-		if(isUnary) {
-			int bit = stream->readBit();
+}
 
-			if(bit == -1) {
-				*end = 1;
-				//cout << "The end as we know it\n";			
-				return -1;
-			}
-			
-			if(bit) q++;			
-			else isUnary = bit;		
-		} else {
+void GolombEncoder::encode(int e) {
 
-			int r = stream->readNBits(B);
-			int n = r + (q*M);
+	unsigned int q, r;
 
-			// checking if even or odd to apply transformation
-			if(n%2 == 0)
-				original = n/2;
-			else
-				original = ((n+1)/2) * -1;
+	q = e / m;
+	r = e % m;
 
-			return original;
-		}
-		
+	/*
+     Check if m is efficitent
+        if yes      . Rice code
+        otherwise   . Golomb code
+	 */
+	if (r < l){
+		bs->writeNBits(r, b - 1);
+	} else {
+		bs->writeNBits(r + l, b);
 	}
 
-	return original;
+	for (unsigned int i = 0; i < q; i++) {
+		bs->writeBit(1);
+	}
+
+	bs->writeBit(0);
+}
+
+GolombDecoder::GolombDecoder(BitStream *bs, int m) : Golomb(bs, m) {
+
+}
+
+GolombDecoder::~GolombDecoder() {
+
+}
+
+int GolombDecoder::decode() {
+	unsigned int q = 0, r, t;
+	int x;
+
+	x = bs->readNBits(b - 1);
+	if(x == -1)
+		return -1;
+
+	if((unsigned)x < l){
+		r = x;
+	}
+	else{
+		int y = bs->readNBits(1);
+		if(y == -1)
+			return -1;
+		x = ( x << 1 ) | y;
+		r = x - l;
+	}
+
+	int tmp;
+	while ((tmp = bs->readBit() == 1)) {
+		q ++;
+	}
+
+	if(tmp == -1)
+		return -1;
+
+	t = q * m + r;
+
+	//std::cout << "Residue: " << t << "\n";
+	return t;
 }

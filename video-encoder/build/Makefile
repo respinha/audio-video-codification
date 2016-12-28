@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/espinha/Documents/CAV/test/audio-video-codification/video-encoder
+CMAKE_SOURCE_DIR = /home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/espinha/Documents/CAV/test/audio-video-codification/video-encoder/build
+CMAKE_BINARY_DIR = /home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/espinha/Documents/CAV/test/audio-video-codification/video-encoder/build/CMakeFiles /home/espinha/Documents/CAV/test/audio-video-codification/video-encoder/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder/build/CMakeFiles /home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/espinha/Documents/CAV/test/audio-video-codification/video-encoder/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,30 +111,160 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named SpatialDecoder
+# Target rules for targets named LoadVideo
 
 # Build rule for target.
-SpatialDecoder: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 SpatialDecoder
-.PHONY : SpatialDecoder
+LoadVideo: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 LoadVideo
+.PHONY : LoadVideo
 
 # fast build rule for target.
-SpatialDecoder/fast:
-	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/build
-.PHONY : SpatialDecoder/fast
+LoadVideo/fast:
+	$(MAKE) -f CMakeFiles/LoadVideo.dir/build.make CMakeFiles/LoadVideo.dir/build
+.PHONY : LoadVideo/fast
 
 #=============================================================================
-# Target rules for targets named SpatialEncoder
+# Target rules for targets named Encoder
 
 # Build rule for target.
-SpatialEncoder: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 SpatialEncoder
-.PHONY : SpatialEncoder
+Encoder: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Encoder
+.PHONY : Encoder
 
 # fast build rule for target.
-SpatialEncoder/fast:
-	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/build
-.PHONY : SpatialEncoder/fast
+Encoder/fast:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/build
+.PHONY : Encoder/fast
+
+#=============================================================================
+# Target rules for targets named Decoder
+
+# Build rule for target.
+Decoder: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Decoder
+.PHONY : Decoder
+
+# fast build rule for target.
+Decoder/fast:
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/build
+.PHONY : Decoder/fast
+
+BitStream.o: BitStream.cpp.o
+
+.PHONY : BitStream.o
+
+# target to build an object file
+BitStream.cpp.o:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/BitStream.cpp.o
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/BitStream.cpp.o
+.PHONY : BitStream.cpp.o
+
+BitStream.i: BitStream.cpp.i
+
+.PHONY : BitStream.i
+
+# target to preprocess a source file
+BitStream.cpp.i:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/BitStream.cpp.i
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/BitStream.cpp.i
+.PHONY : BitStream.cpp.i
+
+BitStream.s: BitStream.cpp.s
+
+.PHONY : BitStream.s
+
+# target to generate assembly for a file
+BitStream.cpp.s:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/BitStream.cpp.s
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/BitStream.cpp.s
+.PHONY : BitStream.cpp.s
+
+Golomb.o: Golomb.cpp.o
+
+.PHONY : Golomb.o
+
+# target to build an object file
+Golomb.cpp.o:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/Golomb.cpp.o
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/Golomb.cpp.o
+.PHONY : Golomb.cpp.o
+
+Golomb.i: Golomb.cpp.i
+
+.PHONY : Golomb.i
+
+# target to preprocess a source file
+Golomb.cpp.i:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/Golomb.cpp.i
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/Golomb.cpp.i
+.PHONY : Golomb.cpp.i
+
+Golomb.s: Golomb.cpp.s
+
+.PHONY : Golomb.s
+
+# target to generate assembly for a file
+Golomb.cpp.s:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/Golomb.cpp.s
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/Golomb.cpp.s
+.PHONY : Golomb.cpp.s
+
+LoadRawVideo.o: LoadRawVideo.cpp.o
+
+.PHONY : LoadRawVideo.o
+
+# target to build an object file
+LoadRawVideo.cpp.o:
+	$(MAKE) -f CMakeFiles/LoadVideo.dir/build.make CMakeFiles/LoadVideo.dir/LoadRawVideo.cpp.o
+.PHONY : LoadRawVideo.cpp.o
+
+LoadRawVideo.i: LoadRawVideo.cpp.i
+
+.PHONY : LoadRawVideo.i
+
+# target to preprocess a source file
+LoadRawVideo.cpp.i:
+	$(MAKE) -f CMakeFiles/LoadVideo.dir/build.make CMakeFiles/LoadVideo.dir/LoadRawVideo.cpp.i
+.PHONY : LoadRawVideo.cpp.i
+
+LoadRawVideo.s: LoadRawVideo.cpp.s
+
+.PHONY : LoadRawVideo.s
+
+# target to generate assembly for a file
+LoadRawVideo.cpp.s:
+	$(MAKE) -f CMakeFiles/LoadVideo.dir/build.make CMakeFiles/LoadVideo.dir/LoadRawVideo.cpp.s
+.PHONY : LoadRawVideo.cpp.s
+
+Predictor.o: Predictor.cpp.o
+
+.PHONY : Predictor.o
+
+# target to build an object file
+Predictor.cpp.o:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/Predictor.cpp.o
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/Predictor.cpp.o
+.PHONY : Predictor.cpp.o
+
+Predictor.i: Predictor.cpp.i
+
+.PHONY : Predictor.i
+
+# target to preprocess a source file
+Predictor.cpp.i:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/Predictor.cpp.i
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/Predictor.cpp.i
+.PHONY : Predictor.cpp.i
+
+Predictor.s: Predictor.cpp.s
+
+.PHONY : Predictor.s
+
+# target to generate assembly for a file
+Predictor.cpp.s:
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/Predictor.cpp.s
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/Predictor.cpp.s
+.PHONY : Predictor.cpp.s
 
 test_spatial_decoder.o: test_spatial_decoder.cpp.o
 
@@ -142,7 +272,7 @@ test_spatial_decoder.o: test_spatial_decoder.cpp.o
 
 # target to build an object file
 test_spatial_decoder.cpp.o:
-	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/test_spatial_decoder.cpp.o
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/test_spatial_decoder.cpp.o
 .PHONY : test_spatial_decoder.cpp.o
 
 test_spatial_decoder.i: test_spatial_decoder.cpp.i
@@ -151,7 +281,7 @@ test_spatial_decoder.i: test_spatial_decoder.cpp.i
 
 # target to preprocess a source file
 test_spatial_decoder.cpp.i:
-	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/test_spatial_decoder.cpp.i
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/test_spatial_decoder.cpp.i
 .PHONY : test_spatial_decoder.cpp.i
 
 test_spatial_decoder.s: test_spatial_decoder.cpp.s
@@ -160,7 +290,7 @@ test_spatial_decoder.s: test_spatial_decoder.cpp.s
 
 # target to generate assembly for a file
 test_spatial_decoder.cpp.s:
-	$(MAKE) -f CMakeFiles/SpatialDecoder.dir/build.make CMakeFiles/SpatialDecoder.dir/test_spatial_decoder.cpp.s
+	$(MAKE) -f CMakeFiles/Decoder.dir/build.make CMakeFiles/Decoder.dir/test_spatial_decoder.cpp.s
 .PHONY : test_spatial_decoder.cpp.s
 
 test_spatial_encoder.o: test_spatial_encoder.cpp.o
@@ -169,7 +299,7 @@ test_spatial_encoder.o: test_spatial_encoder.cpp.o
 
 # target to build an object file
 test_spatial_encoder.cpp.o:
-	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/test_spatial_encoder.cpp.o
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/test_spatial_encoder.cpp.o
 .PHONY : test_spatial_encoder.cpp.o
 
 test_spatial_encoder.i: test_spatial_encoder.cpp.i
@@ -178,7 +308,7 @@ test_spatial_encoder.i: test_spatial_encoder.cpp.i
 
 # target to preprocess a source file
 test_spatial_encoder.cpp.i:
-	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/test_spatial_encoder.cpp.i
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/test_spatial_encoder.cpp.i
 .PHONY : test_spatial_encoder.cpp.i
 
 test_spatial_encoder.s: test_spatial_encoder.cpp.s
@@ -187,7 +317,7 @@ test_spatial_encoder.s: test_spatial_encoder.cpp.s
 
 # target to generate assembly for a file
 test_spatial_encoder.cpp.s:
-	$(MAKE) -f CMakeFiles/SpatialEncoder.dir/build.make CMakeFiles/SpatialEncoder.dir/test_spatial_encoder.cpp.s
+	$(MAKE) -f CMakeFiles/Encoder.dir/build.make CMakeFiles/Encoder.dir/test_spatial_encoder.cpp.s
 .PHONY : test_spatial_encoder.cpp.s
 
 # Help Target
@@ -197,9 +327,22 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... SpatialDecoder"
+	@echo "... LoadVideo"
+	@echo "... Encoder"
+	@echo "... Decoder"
 	@echo "... rebuild_cache"
-	@echo "... SpatialEncoder"
+	@echo "... BitStream.o"
+	@echo "... BitStream.i"
+	@echo "... BitStream.s"
+	@echo "... Golomb.o"
+	@echo "... Golomb.i"
+	@echo "... Golomb.s"
+	@echo "... LoadRawVideo.o"
+	@echo "... LoadRawVideo.i"
+	@echo "... LoadRawVideo.s"
+	@echo "... Predictor.o"
+	@echo "... Predictor.i"
+	@echo "... Predictor.s"
 	@echo "... test_spatial_decoder.o"
 	@echo "... test_spatial_decoder.i"
 	@echo "... test_spatial_decoder.s"

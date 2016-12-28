@@ -1,4 +1,4 @@
-# Install script for directory: /home/espinha/Documents/CAV/test/audio-video-codification/video-encoder
+# Install script for directory: /home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/espinha/Documents/CAV/test/audio-video-codification/video-encoder/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/espinha/Documents/CAV/intraframe/audio-video-codification/video-encoder/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -8,39 +8,79 @@
 
 #include "Predictor.h"
 
-/*using namespace std;
-using namespace cv;*/
+int counter;
+Predictor::Predictor(string encodedFile, int M, int decodeFlag) {
 
+	counter = 0;
+	string mode = decodeFlag ? "r" : "w";
 
-Predictor::Predictor(string filename, string encoded, int M, int decodeFlag) {
+	BitStream* bs = new BitStream(encodedFile, mode);
+	if(mode == "w") 
+		ge = new GolombEncoder(bs, M);
+	else 
+		gd = new GolombDecoder(bs, M);
 
-	file = new string(filename);
-	g = new Golomb(M, encoded, decodeFlag);
+	histogramFile = new ofstream();
+	histogramFile->open("hist.txt", ios::out | ios::app);
 }
 
-void Predictor::predict_encode(int mode) {
+void Predictor::spatialPredict(string filename) {
+ 
+	ifstream* stream = new ifstream();
+	stream->open(filename);
 
-	VideoCapture cap(*file);
-
-	g->encode(mode, 0);
-	
-	g->encode(cap.get(CV_CAP_PROP_FOURCC), 0);
-	g->encode(cap.get(CV_CAP_PROP_FPS), 0);
-	g->encode(cap.get(CV_CAP_PROP_FRAME_WIDTH), 0);
-	g->encode(cap.get(CV_CAP_PROP_FRAME_HEIGHT), 0); 
-
-	int nFrames = cap.get(CV_CAP_PROP_FRAME_COUNT);
-	g->encode(nFrames, 0);
-
-	Mat frame;
-	for(int i = 0; i < nFrames; i++) {
-		cap.read(frame);
-		encode_frame(frame, mode, i==nFrames-1);
+	if (!stream->is_open())
+	{
+		cerr << "Error opening file\n";
+		return;
 	}
-	//Mat img = imread(file->c_str(), 1);
+
+	string line;
+	int nCols, nRows, type, fps;
+
+	getline (*stream,line);
+
+	istringstream(line) >> nCols >> nRows >> fps >> type;
+
+	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
+
+	int nFrames = 0;
+	while(true) {
+		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
+		nFrames++;
+		if(nFrames == 1) break;
+	}
+
+
+	stream->clear();
+	stream->seekg(0, ios::beg);
+
+	//ge->encode(nFrames);
+	ge->encode(1);
+	ge->encode(nRows);
+	ge->encode(nCols);
+	ge->encode(fps);
+	counter += 4;
+
+	nFrames = 0;
+	while(true) {
+		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
+		encodeIntraframe(frame);
+		nFrames++;
+		if(nFrames == 1) break;
+	}
+
+	// building dataset for histogram
+	for(map<int,int>::iterator it = occurrences.begin(); it != occurrences.end(); it++) {
+
+		*histogramFile << it->first << " " << it->second << "\n";
+	}
+
+	//cout << counter << "\n";
+	histogramFile->close();
 }
 
-void Predictor::encode_frame(Mat frame, int mode, int isLastFrame) {
+void Predictor::encodeIntraframe(Mat frame) {
 
 	if ( !frame.data )
     {
@@ -51,13 +91,8 @@ void Predictor::encode_frame(Mat frame, int mode, int isLastFrame) {
 
 	split(frame, bgr);
 
-	// file metadata
-	// 1-> intra-frame prediction mode
-	/*g->encode(1, 0);
-	g->encode(bgr[0].rows, 0);
-	g->encode(bgr[0].cols, 0);*/
-
 	uint8_t* p, *prev;
+
 	for(int m = 0; m < 3; m++) {
 
 		for(int row = 0; row < bgr[m].rows; row++) {
@@ -71,82 +106,53 @@ void Predictor::encode_frame(Mat frame, int mode, int isLastFrame) {
 
 				// JPEG-LS mode
 				uint8_t x;
-				predict_aux(col, row, &x, p, prev, mode);
+				predict_aux(col, row, &x, p, prev);
 
 				int16_t residue = (int16_t) (p[col] - x);
 
-				cout << "Residue: " << (int) residue << "\n";
-				cout << "Value: " << (int) p[col] << "\n";
-				g->encode((int) residue, (row == bgr[m].rows-1 && col == bgr[m].cols-1 && m == 2 && isLastFrame));
+				if(occurrences.find((int) residue) != occurrences.end()) 
+					occurrences[(int) residue]++;
+				else
+					occurrences.insert(make_pair((int) residue, 1));
+
+				cout << "Residue: " << residue << "\n";
+				if(residue < 0) {
+	
+					residue = -2*(residue)-1;	
+				}
+				else {
+					residue = 2*residue;
+				}
+
+				ge->encode((int) residue);
+				counter++;
 			}
 		}
 	}
 }
-void Predictor::predict_decode() {
+void Predictor::spatialDecode() {
 
-	int end = 0;
-	int* pend = &end;
-	int predMode = g->decode(pend);
-	if(*pend) {
-		cout << predMode << "\n";
-		fprintf(stderr, "An error occurred decoding prediction mode!\n");
-		return;
-	}
+	int nFrames = gd->decode();
+	int rows = gd->decode();	// height
+	int cols = gd->decode();	// width
+	int fps = gd->decode();
 
-	int videoParams[4];
-	for(int i = 0; i < 4; i++) {
-		videoParams[i] = g->decode(pend);
-		if(*pend) {
-			cout << predMode << "\n";
-			fprintf(stderr, "An error occurred decoding video params!\n");
-			return;
-		}
-	}
+	counter += 4;
+	ofstream* outputStream = new ofstream("decoded_video.rgb", 
+											ios::binary | ios::out);
 
+	Mat frame = Mat(Size(rows, cols), CV_8UC3);
+	vector<Mat> bgr(3);
+	for(unsigned int i = 0; i < bgr.size(); i++) 
+		bgr[i] = Mat(Size(rows, cols), CV_8UC1);
 
-	/*g->encode(cap.get(CV_CAP_PROP_FOURCC), 0);
-	g->encode(cap.get(CV_CAP_PROP_FPS), 0);
-	g->encode(cap.get(CV_CAP_PROP_FRAME_WIDTH), 0);
-	g->encode(cap.get(CV_CAP_PROP_FRAME_HEIGHT), 0); */
+	*outputStream << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
 
-	/*int rows = g->decode(pend);
-	if(*pend) {
-		cout << rows << "\n";
-		fprintf(stderr, "An error occurred decoding rows!\n");
-		return;
-	}
-
-	int cols = g->decode(pend);
-	if(*pend) {
-		cout << cols << "\n";
-		fprintf(stderr, "An error occurred decoding columns!\n");
-		return;
-	}*/
-
-	int cols = videoParams[2];	// width
-	int rows = videoParams[3];	// height
-
-	int nFrames = g->decode(pend);
-	if(*pend) {
-		cout << nFrames << "\n";
-		fprintf(stderr, "An error occurred decoding number of frames!\n");
-		return;
-	}
-
-	VideoWriter output("output.mkv", 
-						videoParams[0],
-						videoParams[1],
-						Size(videoParams[2], videoParams[3]));
-
+	int16_t residue;
 	for(int f = 0; f < nFrames; f++) {
-		Mat img = Mat::zeros(Size(rows, cols), CV_8UC3);
-
-		// init channel matrices
-		vector<Mat> bgr(3);
-		for(unsigned int i = 0; i < bgr.size(); i++) bgr[i] = Mat::zeros(rows, cols, CV_8UC1);
 
 		uint8_t* p, *prev;
-
+	
 		for(int m = 0; m < 3; m++) {
 			for(int row = 0; row < rows; row++) {
 
@@ -155,74 +161,103 @@ void Predictor::predict_decode() {
 		
 				p = bgr[m].ptr<uint8_t>(row);
 
-
 				for(int col = 0; col < cols; col++) {
 
-					if(predMode == 1) {
-						uint8_t x;
-						predict_aux(col, row, &x, p, prev, predMode);
-
-						int16_t residue = (int16_t) g->decode(pend);
-						//cout << "Residue: " << (int) residue << "\n";
-
-
-						p[col] = (uint8_t) (residue + x);
-						cout << "Residue: " << (int) residue << "\n";
-						cout << "Value: " << (int) p[col] << "\n";
-
-						if(*pend && !(col == cols-1 && rows == rows-1 && f == nFrames-1)) {
-							fprintf(stderr, "Error occurred decoding. Reached end of file.\n");
-							return;
-						}
+					uint8_t x;
+					predict_aux(col, row, &x, p, prev);
+					
+					residue = (int16_t) gd->decode();
+					counter++;
+					
+					if(residue %2 == 0) { // even
+						residue = residue/2;
 					}
+					else {	// odd	
+						residue = -(residue+1)/2;
+					}
+					
+					cout << "Residue: " << residue << "\n";
+					p[col] = (uint8_t) (residue + x);
+				
 				}
 			}
 		}
+		
+		merge(bgr, frame);
 
-		merge(bgr, img);
-		output << img;
+		outputStream->write((char*) frame.data, frame.cols * frame.rows * frame.channels());
 	}
+
 	/*namedWindow( "Decoded image", WINDOW_AUTOSIZE );// Create a window for display.
     imshow( "Decoded image", output );                   // Show our image inside it.
 
     waitKey(0);                                          // Wait for a keystroke in the window*/
 
+	outputStream->close();
+    //displayVideo("decoded_video.rgb");
 }
 
-void Predictor::predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev, int mode) {
+void Predictor::predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev) {
 
-	if(mode != 1) {
-		fprintf(stderr, "Not implemented yet.\n");
-		return;
-	}
+
 	
 	uint8_t a,b,c;
-	switch(mode) {
-		case 1: 
-		{
-			int border = 0;
+	int border = 0;
 
-			if(col == 0) {
-				a = 0;
-				border = 1;
-			} else  a = p[col-1];
+	if(col == 0) {
+		a = 0;
+		border = 1;
+	} else  a = p[col-1];
 
-			if(row == 0)  {
-				b = 0;
-				border = 1;
-			} else b = prev[col];
+	if(row == 0)  {
+		b = 0;
+		border = 1;
+	} else b = prev[col];
 
-			c = border ? 0 : prev[col-1];
+	c = border ? 0 : prev[col-1];
 
-			if(c >= max(a, b)) {
-				*x = min(a,b);
-			} else if (c <= min(a,b)) {
-				*x = max(a,b);
-			} else {
-				*x = a + b - c;
-			}
-			break;
-		}
+	if(c >= max(a, b)) {
+		*x = min(a,b);
+	} else if (c <= min(a,b)) {
+		*x = max(a,b);
+	} else {
+		*x = a + b - c;
 	}
+			
+		
+
+}
+
+void Predictor::displayVideo(string inputFileName) {
+	ifstream myfile;
+
+	myfile.open(inputFileName);
+	if (!myfile.is_open())
+	{
+		cerr << "Error opening file\n";
+		return;
+	}
+
+	string line;
+	int nCols, nRows, type, fps;
+	getline (myfile,line);
+
+	istringstream(line) >> nCols >> nRows >> fps >> type;
+	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
+	
+
+	while(true)
+	{
+
+		if(!myfile.read((char*)frame.data, frame.cols * frame.rows * frame.channels())) break;
+
+		if (frame.empty()) break;         // check if at end
+
+		imshow("Display frame", frame);
+
+		if(waitKey((int)(1.0 / fps * 1000)) >= 0) break;
+	}
+	
+	if(myfile.is_open()) myfile.close();
 
 }
