@@ -15,7 +15,8 @@ class Predictor {
 		void spatialDecode();
 	private:
 
-		void calcEntropy();
+		//void calcEntropy();
+		BitStream* bs;
 		void encodeIntraframe(Mat frame);
 
 		void predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev);

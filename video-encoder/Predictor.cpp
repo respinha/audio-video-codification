@@ -14,7 +14,7 @@ Predictor::Predictor(string encodedFile, int M, int decodeFlag) {
 	counter = 0;
 	string mode = decodeFlag ? "r" : "w";
 
-	BitStream* bs = new BitStream(encodedFile, mode);
+	/*BitStream**/ bs = new BitStream(encodedFile, mode);
 	if(mode == "w") 
 		ge = new GolombEncoder(bs, M);
 	else 
@@ -48,15 +48,15 @@ void Predictor::spatialPredict(string filename) {
 	while(true) {
 		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
 		nFrames++;
-		if(nFrames == 1) break;
+		//if(nFrames == 1) break;
 	}
 
 
 	stream->clear();
 	stream->seekg(0, ios::beg);
 
-	//ge->encode(nFrames);
-	ge->encode(1);
+	ge->encode(nFrames);
+	//ge->encode(1);
 	ge->encode(nRows);
 	ge->encode(nCols);
 	ge->encode(fps);
@@ -67,8 +67,13 @@ void Predictor::spatialPredict(string filename) {
 		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
 		encodeIntraframe(frame);
 		nFrames++;
-		if(nFrames == 1) break;
+
+		cout << "Frame: " << nFrames << "\n";
+		//if(nFrames == 1) break;
 	}
+
+	bs->close();
+
 
 	// building dataset for histogram
 	for(map<int,int>::iterator it = occurrences.begin(); it != occurrences.end(); it++) {
@@ -116,8 +121,6 @@ void Predictor::encodeIntraframe(Mat frame) {
 
 
 				counter++;
-				if(counter < 3128734)
-					cout << "Residue: " << residue << "\n";
 
 			
 				if(residue < 0) {
@@ -128,11 +131,15 @@ void Predictor::encodeIntraframe(Mat frame) {
 					residue = 2*residue;
 				}
 
-				ge->encode((int) residue);
+				//if(counter <= 3128734) {
+					ge->encode((int) residue);
+					//cout << "Residue: " << residue << "\n";
+				//}
 			}
 		}
 	}
 }
+
 void Predictor::spatialDecode() {
 
 	int nFrames = gd->decode();
@@ -154,6 +161,7 @@ void Predictor::spatialDecode() {
 	int16_t residue;
 	for(int f = 0; f < nFrames; f++) {
 
+		cout << "Frame: " << f << "\n";
 		uint8_t* p, *prev;
 	
 		for(int m = 0; m < 3; m++) {
@@ -166,11 +174,13 @@ void Predictor::spatialDecode() {
 
 				for(int col = 0; col < cols; col++) {
 
+					counter++;
 					uint8_t x;
 					predict_aux(col, row, &x, p, prev);
 					
 					residue = (int16_t) gd->decode();
-					counter++;
+
+					//cout << "Residue: " << (int) residue << "\n";
 					
 					if(residue %2 == 0) { 	// even
 						residue = residue/2;
@@ -178,10 +188,6 @@ void Predictor::spatialDecode() {
 					else {					// odd	
 						residue = -(residue+1)/2;
 					}
-
-					//if(counter < 3128734)
-					cout << "X: " << (int) x << "\n";
-					cout << "Residue: " << (int) residue << "\n";
 
 					p[col] = (uint8_t) (residue + x);
 				}
@@ -197,7 +203,7 @@ void Predictor::spatialDecode() {
     imshow( "Decoded image", output );                   // Show our image inside it.
 
     waitKey(0);                                          // Wait for a keystroke in the window*/
-
+	bs->close();
 	outputStream->close();
     //displayVideo("decoded_video.rgb");
 }

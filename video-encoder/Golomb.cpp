@@ -87,7 +87,7 @@ int GolombDecoder::decode() {
 
 	int tmp;
 	while ((tmp = bs->readBit() == 1)) {
-		q ++;
+		q++;
 	}
 
 	if(tmp == -1)
