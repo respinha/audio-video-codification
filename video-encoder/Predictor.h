@@ -21,7 +21,7 @@ class Predictor {
 
 		void predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev);
 
-		void displayVideo(string filename);
+		void displayVideo(string filename);	
 
 		GolombEncoder* ge;
 		GolombDecoder* gd;

@@ -51,12 +51,10 @@ void Predictor::spatialPredict(string filename) {
 		//if(nFrames == 1) break;
 	}
 
-
 	stream->clear();
 	stream->seekg(0, ios::beg);
 
 	ge->encode(nFrames);
-	//ge->encode(1);
 	ge->encode(nRows);
 	ge->encode(nCols);
 	ge->encode(fps);
@@ -86,16 +84,18 @@ void Predictor::spatialPredict(string filename) {
 
 void Predictor::encodeIntraframe(Mat frame) {
 
-	if ( !frame.data )
+/*	if ( !frame.data )
     {
     	printf("No image data \n");
         return;
-    }
-	Mat bgr[3];
-
-	split(frame, bgr);
-
+    }*/
+	
 	uint8_t* p, *prev;
+
+
+
+	Mat bgr[3];
+	split(frame, bgr);
 
 	for(int m = 0; m < 3; m++) {
 
@@ -114,6 +114,10 @@ void Predictor::encodeIntraframe(Mat frame) {
 
 				int16_t residue = (int16_t) (p[col] - x);
 
+				
+				/*if(m == 2)*/
+				 //cout <<  "Value: " << (int) p[col] << "\n";
+
 				if(occurrences.find((int) residue) != occurrences.end()) 
 					occurrences[(int) residue]++;
 				else
@@ -131,10 +135,7 @@ void Predictor::encodeIntraframe(Mat frame) {
 					residue = 2*residue;
 				}
 
-				//if(counter <= 3128734) {
-					ge->encode((int) residue);
-					//cout << "Residue: " << residue << "\n";
-				//}
+				ge->encode((int) residue);
 			}
 		}
 	}
@@ -147,7 +148,6 @@ void Predictor::spatialDecode() {
 	int cols = gd->decode();	// width
 	int fps = gd->decode();
 
-	counter += 4;
 	ofstream* outputStream = new ofstream("decoded_video.rgb", 
 											ios::binary | ios::out);
 
@@ -156,15 +156,16 @@ void Predictor::spatialDecode() {
 	for(unsigned int i = 0; i < bgr.size(); i++) 
 		bgr[i] = Mat(Size(rows, cols), CV_8UC1);
 
-	*outputStream << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
+	//*outputStream << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
 
 	int16_t residue;
 	for(int f = 0; f < nFrames; f++) {
 
 		cout << "Frame: " << f << "\n";
-		uint8_t* p, *prev;
 	
 		for(int m = 0; m < 3; m++) {
+
+			uint8_t* p, *prev;
 			for(int row = 0; row < rows; row++) {
 
 				if(row > 0) 
@@ -174,14 +175,11 @@ void Predictor::spatialDecode() {
 
 				for(int col = 0; col < cols; col++) {
 
-					counter++;
 					uint8_t x;
 					predict_aux(col, row, &x, p, prev);
 					
 					residue = (int16_t) gd->decode();
 
-					//cout << "Residue: " << (int) residue << "\n";
-					
 					if(residue %2 == 0) { 	// even
 						residue = residue/2;
 					}
@@ -190,22 +188,20 @@ void Predictor::spatialDecode() {
 					}
 
 					p[col] = (uint8_t) (residue + x);
+					//cout << "Residue: " << (int) residue << "\n";
+					//cout <<  "Value: " << (int) p[col] << "\n";
 				}
 			}
 		}
 		
 		merge(bgr, frame);
-
 		outputStream->write((char*) frame.data, frame.cols * frame.rows * frame.channels());
 	}
 
-	/*namedWindow( "Decoded image", WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "Decoded image", output );                   // Show our image inside it.
 
-    waitKey(0);                                          // Wait for a keystroke in the window*/
 	bs->close();
 	outputStream->close();
-    //displayVideo("decoded_video.rgb");
+    displayVideo("decoded_video.rgb");
 }
 
 void Predictor::predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev) {
@@ -215,7 +211,7 @@ void Predictor::predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* p
 
 	if(col == 0) {
 		a = 0;
-		border = 1;
+	border = 1;
 	} else  a = p[col-1];
 
 	if(row == 0)  {
@@ -237,8 +233,10 @@ void Predictor::predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* p
 
 }
 
+
 void Predictor::displayVideo(string inputFileName) {
 	ifstream myfile;
+	ofstream os;
 
 	myfile.open(inputFileName);
 	if (!myfile.is_open())
@@ -247,26 +245,33 @@ void Predictor::displayVideo(string inputFileName) {
 		return;
 	}
 
+	os.open("out2");
+
 	string line;
 	int nCols, nRows, type, fps;
 	getline (myfile,line);
+	cout << line << endl;
 
 	istringstream(line) >> nCols >> nRows >> fps >> type;
 	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
 	
-
 	while(true)
 	{
 
 		if(!myfile.read((char*)frame.data, frame.cols * frame.rows * frame.channels())) break;
 
+		Mat bgr[3];
+		split(frame, bgr);
+
+		
 		if (frame.empty()) break;         // check if at end
 
 		imshow("Display frame", frame);
 
 		if(waitKey((int)(1.0 / fps * 1000)) >= 0) break;
-	}
-	
-	if(myfile.is_open()) myfile.close();
 
+	}
+
+	if(myfile.is_open()) myfile.close();
+	os.close();
 }

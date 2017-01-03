@@ -39,6 +39,7 @@
 /*/*.jpg
 /*/*.jpeg
 /*/*.rgb
+/*/hist*
 /*/build/*
 /*/backup/*
 /*/backup/
