@@ -29,7 +29,10 @@
 /*/saved_LUT
 /*/sample_file
 /*/encode*
-/*/decoded
+/*/decoded*
+/*/wav_files/
+/*/wav_files/*
+
 
 /*/CMakeFiles*
 /*/CMakeFiles/*
