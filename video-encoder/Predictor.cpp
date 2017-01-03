@@ -48,15 +48,13 @@ void Predictor::spatialPredict(string filename) {
 	while(true) {
 		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
 		nFrames++;
-		//if(nFrames == 1) break;
+		//if(nFrames == 2) break;
 	}
-
 
 	stream->clear();
 	stream->seekg(0, ios::beg);
 
 	ge->encode(nFrames);
-	//ge->encode(1);
 	ge->encode(nRows);
 	ge->encode(nCols);
 	ge->encode(fps);
@@ -69,7 +67,7 @@ void Predictor::spatialPredict(string filename) {
 		nFrames++;
 
 		cout << "Frame: " << nFrames << "\n";
-		//if(nFrames == 1) break;
+		//if(nFrames == 2) break;
 	}
 
 	bs->close();
@@ -86,16 +84,28 @@ void Predictor::spatialPredict(string filename) {
 
 void Predictor::encodeIntraframe(Mat frame) {
 
-	if ( !frame.data )
+/*	if ( !frame.data )
     {
     	printf("No image data \n");
         return;
-    }
-	Mat bgr[3];
-
-	split(frame, bgr);
-
+    }*/
+	
 	uint8_t* p, *prev;
+
+	/*for(int row = 0;  row < frame.rows; row++) {
+
+		if(row > 0) 
+			prev = p;
+
+		p = frame.ptr<uint8_t>(row);
+
+		for(int col = 0;  col < frame.cols; col++) {
+			cout <<  "Value: " << (int) p[col] << "\n";
+		}
+	}*/
+
+	Mat bgr[3];
+	split(frame, bgr);
 
 	for(int m = 0; m < 3; m++) {
 
@@ -114,6 +124,9 @@ void Predictor::encodeIntraframe(Mat frame) {
 
 				int16_t residue = (int16_t) (p[col] - x);
 
+				
+				//if(m == 2) cout <<  "Value: " << (int) p[col] << "\n";
+
 				if(occurrences.find((int) residue) != occurrences.end()) 
 					occurrences[(int) residue]++;
 				else
@@ -131,10 +144,7 @@ void Predictor::encodeIntraframe(Mat frame) {
 					residue = 2*residue;
 				}
 
-				//if(counter <= 3128734) {
-					ge->encode((int) residue);
-					//cout << "Residue: " << residue << "\n";
-				//}
+				ge->encode((int) residue);
 			}
 		}
 	}
@@ -181,7 +191,6 @@ void Predictor::spatialDecode() {
 					residue = (int16_t) gd->decode();
 
 					//cout << "Residue: " << (int) residue << "\n";
-					
 					if(residue %2 == 0) { 	// even
 						residue = residue/2;
 					}
@@ -190,19 +199,32 @@ void Predictor::spatialDecode() {
 					}
 
 					p[col] = (uint8_t) (residue + x);
+					//cout <<  "Value: " << (int) p[col] << "\n";
 				}
 			}
 		}
 		
 		merge(bgr, frame);
 
+		/*Mat tmp[3];
+		split(frame, tmp);
+
+		for(int row = 0;  row < frame.rows; row++) {
+
+			if(row > 0) 
+				prev = p;
+
+			p = frame.ptr<uint8_t>(row);
+
+			for(int col = 0;  col < frame.cols; col++) {
+				cout <<  "Value: " << (int) p[col] << "\n";
+			}
+		}*/
+
 		outputStream->write((char*) frame.data, frame.cols * frame.rows * frame.channels());
 	}
 
-	/*namedWindow( "Decoded image", WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "Decoded image", output );                   // Show our image inside it.
 
-    waitKey(0);                                          // Wait for a keystroke in the window*/
 	bs->close();
 	outputStream->close();
     //displayVideo("decoded_video.rgb");
