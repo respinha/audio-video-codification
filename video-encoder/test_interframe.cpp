@@ -9,9 +9,8 @@ int main(int argc, char** argv) {
 	}
 
 	Predictor* p = new Predictor(argv[2], atoi(argv[3]), 0);
-	p->predict_block_encode(argv[1], 50, 50);
+	p->temporalPredict(argv[1], 50, 50);
 	cout << "done\n"; 
-
 	
 	return 0;
 }

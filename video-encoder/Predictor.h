@@ -12,15 +12,18 @@ class Predictor {
 		Predictor(string encoded, int M, int decodeFlag=0);
 		void spatialPredict(string filename);
 		void spatialDecode();
-		void predict_block_encode(string filename, int blockHeight, int blockWidth);
+		void temporalPredict(string filename, int blockHeight, int blockWidth);
 
 	private:
 		void encodeIntraframe(Mat frame);
-		int encodeInterFrame(Mat frame, int isLastFrame, int height, int width, std::vector<Mat>* smallImages,std::vector<Mat> blocks,int m);
+		int encodeInterFrame(Mat frame, std::vector<Mat>* smallImages,std::vector<Mat> blocks);
+
 		void displayVideo(string filename);	
-		int aux_block_encode(Mat image, int isLastFrame, int blockHeight, int blockWidth,std::vector<Mat>* smallImages);
+
+		int blockSplit(Mat image, int blockHeight, int blockWidth, vector<Mat>* smallImages);
 		//void calcEntropy();
-		void predict_aux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev);
+		void spatialPredictAux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev);
+
 		GolombEncoder* ge;
 		GolombDecoder* gd;
 
