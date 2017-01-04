@@ -42,7 +42,10 @@
 /*/*.jpg
 /*/*.jpeg
 /*/*.rgb
+<<<<<<< Updated upstream
 /*/hist*
+=======
+>>>>>>> Stashed changes
 /*/build/*
 /*/backup/*
 /*/backup/

@@ -20,11 +20,14 @@ INCLUDE_DIRECTORIES(
 	${OpenCV_INCLUDE_DIR}
 )
 
-add_executable( SpatialEncoder test_spatial_encoder.cpp )
-target_link_libraries( SpatialEncoder ${OpenCV_LIBS} )
+add_executable( Encoder test_spatial_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( Encoder ${OpenCV_LIBS} )
 
-add_executable( SpatialDecoder test_spatial_decoder.cpp )
-target_link_libraries( SpatialDecoder ${OpenCV_LIBS} )
+add_executable( Decoder test_spatial_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( Decoder ${OpenCV_LIBS} )
 
-add_executable( BlockEncoder test_interframe.cpp )
+add_executable( LoadVideo LoadRawVideo.cpp )
+target_link_libraries( LoadVideo ${OpenCV_LIBS} )
+
+add_executable( BlockEncoder test_interframe.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
 target_link_libraries( BlockEncoder ${OpenCV_LIBS} ) 

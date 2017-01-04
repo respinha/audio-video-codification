@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Predictor.cpp"
+#include "Predictor.h"
 
 int main(int argc, char** argv) {
 
