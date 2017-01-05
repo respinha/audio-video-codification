@@ -15,8 +15,8 @@ class Predictor {
 		void temporalPredict(string filename, int blockHeight, int blockWidth);
 
 	private:
-		void encodeIntraframe(Mat frame);
-		int encodeInterFrame(Mat frame, std::vector<Mat>* smallImages,std::vector<Mat> blocks);
+		void encodeIntraframe(Mat frame, Mat bgr[]);
+		int encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks);
 
 		void displayVideo(string filename);	
 
@@ -31,7 +31,6 @@ class Predictor {
 		map<int, int> occurrences;
 		BitStream* bs;
 		string* file;
-
 };
 
 

@@ -23,7 +23,6 @@ Predictor::Predictor(string encodedFile, int M, int decodeFlag) {
 	histogramFile->open("hist.txt", ios::out | ios::app);
 }
 
-
 void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth){
 
 	ifstream* stream = new ifstream();
@@ -87,10 +86,10 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 		if(i==0){
 			//cout << "encoding first frame..\n";
 
-			encodeIntraframe(frame); 
+			encodeIntraframe(frame, bgr); 
 
 			// todo: return splitted frame on intraframe
-			split(frame, bgr);
+			//split(frame, bgr);
 
 			// splitting the first frame by blocks
 			// to compare with next frame
@@ -170,74 +169,6 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 	}
 	
 	*prevBlocks = currBlocks;
-/*
-	for(vector<Mat>::size_type idx = 0; idx != currBlocks.size(); idx++){
-		//int8_t *current = new int8_t[currBlocks[idx].cols];
-		
-		for(int c = 0; c < currBlocks[idx].cols; c++) {
-			current[c] = 0;
-		}
-
-			
-		
-	}
-
-
-	for(vector<Mat>::size_type idx = 0; idx != prevBlocks->size(); idx++){
-		int8_t *previous = new int8_t[(*prevBlocks)[idx].cols];
-		for(int c = 0; c < (*prevBlocks)[idx].cols; c++) {
-			previous[c] = 0;
-		}
-
-	}*/
-
-
-/*	
- 		//cout << currBlocks[idx].cols << " " << (*prevBlocks)[idx].cols << "\n";
-		//cout << currBlocks[idx].rows << " " << (*prevBlocks)[idx].rows << "\n";
-
-			
-
-					
-			for(int c = 0; c < (*prevBlocks)[idx].cols; c++) {
-				previous[c] = 0;
-			}
-
-
-		//Mat matrixDiff = Mat::zeros(currBlocks[idx].rows, currBlocks[idx].cols, CV_8UC1);
-		// differences between prev and current block
-
-			//previous = current;
-		
-		}
-
-		delete [] previous;
-		delete [] current;
-	}*/
-
-	/*for(int row = 0; row < diff.rows; row++) {
-
-			
-		p = diff.ptr<int8_t>(row);
-		
-		for(int col = 0; col < diff.cols; col++) {
-				
-			//redict_aux(col, row, &x, p, prev, mode);
-
-			int16_t residue = (int16_t) p[col];
-
-			//cout << "IResidue: " << (int) residue << "\n";
-			//cout << "IResidue: " << (int) residue << "; value " << (int) p[col] << "\n";
-			//cout << "IValue: " << (int) p[col] << "\n";
-			
-
-			//int end = (row == diff.rows-1 && col == diff.cols-1 && m == 2 && isLastFrame && idx == smallImages->size()-1);
-
-			ge->encode((int) residue);
-
-		}
-	}
-	}*/
 
 	return 0;
 
@@ -318,9 +249,11 @@ void Predictor::spatialPredict(string filename) {
 	ge->encode(fps);
 
 	nFrames = 0;
+
+	Mat bgr[3];
 	while(true) {
 		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
-		encodeIntraframe(frame);
+		encodeIntraframe(frame, bgr);
 		nFrames++;
 		//if(nFrames == 2) break;
 		//cout << "Frame: " << nFrames << "\n";
@@ -339,7 +272,8 @@ void Predictor::spatialPredict(string filename) {
 	histogramFile->close();
 }
 
-void Predictor::encodeIntraframe(Mat frame) {
+void Predictor::encodeIntraframe(Mat frame, Mat bgr[]) {
+
 
 /*	if ( !frame.data )
     {
@@ -349,7 +283,7 @@ void Predictor::encodeIntraframe(Mat frame) {
 	
 	uint8_t* p, *prev;
 
-	Mat bgr[3];
+	//Mat bgr[3];
 	split(frame, bgr);
 
 	for(int m = 0; m < 3; m++) {
