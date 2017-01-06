@@ -114,6 +114,9 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 					stream->close();	
 					return;
 				}
+				for(unsigned int v = 0; v < prevBlocks[j].size(); v++) {
+                       prevBlocks[j][v] = currBlocks[j][v].clone();
+                     }
 				currBlocks[j].clear();
 			}
 		}
@@ -154,7 +157,7 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 				//cout << "Current: " << (int) current[c] << "\n";	
 				//cout << "Previous: " << (int) previous[c] << "\n";	
 				//
-				cout << (int) residue << "\n";
+				//cout << (int) residue << "\n";
 
 				if(residue < 0) {
 					residue = -2*(residue)-1;	
@@ -170,11 +173,42 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 	
 	*prevBlocks = currBlocks;
 
+	/*for ( int k = 0 ; k<currBlocks.size() ; k++){
+		prevBlocks[k] = currBlocks[k].clone(); 
+	}*/
+
 	return 0;
 
 
 }
 
+int Predictor::mergeBlock(Mat image, int blockHeight, int blockWidth, vector<Mat> blocks) {
+
+	int W = 0, H = 0; 
+
+	uint8_t* prev, *blockRow, *p;
+
+	for( int b=0 ; b<blocks.size(); b++){
+		for(int row =0 ; row < blocks[b].rows ; row++){
+
+			p = image.ptr<uint8_t>(row + H);
+			blockRow = blocks[b].ptr<uint8_t>(row);
+
+			for(int col =0 ; col < blocks[b].cols; col++){
+				//image[row + H][col + W]  = blocks[b][row][col]
+				p[col + W]  = blockRow[col];
+				
+			
+				W+=blocks[b].cols;
+				if( W >= image.cols){
+					H += blocks[b].rows;
+					W=0;
+				}
+			}
+		}
+	}
+
+}
 // block division
 int Predictor::blockSplit(Mat image, int blockHeight, int blockWidth,vector<Mat>* smallImages) {
 
@@ -203,11 +237,11 @@ int Predictor::blockSplit(Mat image, int blockHeight, int blockWidth,vector<Mat>
 			else
 				smallH = reducedSize.height; 
 
-        		Rect rect =   Rect ( x , y , smallW , smallH );
-        		smallImages->push_back (Mat (image , rect));
-    			//imshow( "smallImages", cv::Mat ( image, rect ));
-       			//waitKey(0);
-    		}
+    		Rect rect =   Rect ( x , y , smallW , smallH );
+    		smallImages->push_back (Mat (image , rect));
+			//imshow( "smallImages", cv::Mat ( image, rect ));
+   			//waitKey(0);
+    	}
 	}
 
 	return 0;	
@@ -325,6 +359,116 @@ void Predictor::encodeIntraframe(Mat frame, Mat bgr[]) {
 			}
 		}
 	}
+
+}
+
+void Predictor::temporalDecode(int blockHeight, int blockWidth) {
+	
+	int nFrames = gd->decode();
+	int rows = gd->decode();	// height
+	int cols = gd->decode();	// width
+	int fps = gd->decode();
+
+	ofstream* outputStream = new ofstream("decoded_video.rgb", 
+											ios::binary | ios::out);
+
+	Mat frame = Mat(Size(rows, cols), CV_8UC3);
+	vector<Mat> bgr(3);
+	for(unsigned int i = 0; i < bgr.size(); i++) 
+		bgr[i] = Mat(Size(rows, cols), CV_8UC1);
+
+	//*outputStream << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
+
+	vector <Mat> prevBlocks[3]; 
+    vector <Mat> currBlocks[3];
+
+	int16_t residue;
+
+	int8_t *previous,*current; 
+
+	for(int f = 0; f < nFrames; f++) {
+
+		cout << "Frame: " << f << "\n";
+
+		if(f == 0){ //intraframe decoding 
+			for(int m = 0; m < 3; m++) {
+
+				uint8_t* p, *prev;
+				for(int row = 0; row < rows; row++) {
+
+					if(row > 0) 
+						prev = p;
+			
+					p = bgr[m].ptr<uint8_t>(row);
+
+					for(int col = 0; col < cols; col++) {
+
+						uint8_t x;
+						spatialPredictAux(col, row, &x, p, prev);
+						
+						residue = (int16_t) gd->decode();
+
+						//cout << residue << "\n";
+
+						if(residue %2 == 0) { 	// even
+							residue = residue/2;
+						}
+						else {					// odd	
+							residue = -(residue+1)/2;
+						}
+
+						p[col] = (uint8_t) (residue + x);
+						//cout << "Residue: " << (int) residue << "\n";
+						//cout <<  "Value: " << (int) p[col] << "\n";
+					}
+				}
+			}
+			
+			
+			//blockMerge(image, blockHeight, blockWidth, &prevBlocks);
+		}
+		else{
+
+			for(int m = 0; m < 3; m++) {
+
+				for(int i = 0; i < prevBlocks[m].size(); i++) {
+					Mat block = Mat::zeros(Size(blockHeight, blockWidth), CV_8UC1);
+					
+					for( int h=0; h<blockHeight ; h++){
+						
+						//current = currBlocks[idx].ptr<int8_t>(h);
+						previous = (*prevBlocks)[m].ptr<int8_t>(h);
+						
+						current = block.ptr<int8_t>(h);
+						for(int w=0; w<blockWidth ; w++){
+
+							residue = (int16_t) gd->decode();	
+							//cout << residue << "\n";
+							current[w] = previous[w] + residue;
+						}
+					}
+
+					currBlocks[m].push_back(block);
+				}
+
+				mergeBlock(frame, blockHeight, blockWidth, prevBlocks[m]);
+
+			}
+			
+			for(int k = 0; k< 3; k++){
+				prevBlocks[k] = currBlocks[k]; 
+			}	
+		}
+
+		merge(bgr, frame);
+		outputStream->write((char*) frame.data, frame.cols * frame.rows * frame.channels());		
+	}
+
+
+	bs->close();
+	outputStream->close();
+	cout << "displaying video... ";
+    displayVideo("decoded_video.rgb");
 
 }
 
