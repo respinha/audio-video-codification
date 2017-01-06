@@ -118,9 +118,11 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 					stream->close();	
 					return;
 				}
+
 				for(unsigned int v = 0; v < prevBlocks[j].size(); v++) {
                        prevBlocks[j][v] = currBlocks[j][v].clone();
-                     }
+                 }
+
 				currBlocks[j].clear();
 			}
 		}
@@ -192,34 +194,50 @@ int Predictor::mergeBlock(Mat image, int blockHeight, int blockWidth, vector<Mat
 
 	int W = 0, H = 0; 
 
-	uint8_t* prev, *blockRow, *p;
+	uint8_t *blockRow, *p;
 
 	for( int b=0 ; b<blocks.size(); b++){
 
+		cout << blocks[b].rows << " " << blocks[b].cols << "\n";
+	}
+	for( int b=0 ; b<blocks.size(); b++){
+
+		//cout << "B: " << b << "\n";
+
+		if( W >= image.cols){
+			//cout << "H: " << H << "\n";
+			H += blocks[b].rows;
+			W=0;
+		} 
+
+
+
 		for(int row =0 ; row < blocks[b].rows ; row++){
 
-			cout << "H--"<<H<<"\n";
+			//cout << "H--"<<H<<"\n";
 			p = image.ptr<uint8_t>(row + H);
 			blockRow = blocks[b].ptr<uint8_t>(row);
 
+			//cout << row + H << " " << " " << image.rows <<  "\n";
 
 			for(int col =0 ; col < blocks[b].cols; col++){
 				//image[row + H][col + W]  = blocks[b][row][col]
 				p[col + W]  = blockRow[col];
 				
 				//cout << "r "<<row<<" c "<<col<<"\n"; 
-			
-				W+=blocks[b].cols;
-				if( W >= image.cols){
-
-					H += blocks[b].rows;
-					W=0;
-				}
 			}
+
+			
 		}
+
+		
+		W+=blocks[b].cols;
+
+		
 	}
 
 }
+
 // block division
 int Predictor::blockSplit(Mat image, int blockHeight, int blockWidth,vector<Mat>* smallImages) {
 
@@ -455,18 +473,24 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 
 			for(int m = 0; m < 3; m++) {
-				cout << "m: "<<m<<"\n";
-
+		
 				for(int i = 0; i < prevBlocks[m].size(); i++) {
-					Mat block = Mat::zeros(Size(blockHeight, blockWidth), CV_8UC1);
-					
-					for( int h=0; h<blockHeight ; h++){
+
+					int rows = prevBlocks[m][i].rows;
+					int cols = prevBlocks[m][i].cols;
+
+					cout << i << "\n";
+
+					Mat block = Mat::zeros(Size(rows, cols), CV_8UC1);
+
+					for( int h=0; h< rows; h++){
 						
 						//current = currBlocks[idx].ptr<int8_t>(h);
-						previous = (*prevBlocks)[m].ptr<int8_t>(h);
-						
+						previous = prevBlocks[m][i].ptr<int8_t>(h);
+					
 						current = block.ptr<int8_t>(h);
-						for(int w=0; w<blockWidth ; w++){
+
+						for(int w=0; w < cols; w++){
 							
 							residue = (int16_t) gd->decode();	
 							
@@ -493,11 +517,11 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 				mergeBlock(frame, blockHeight, blockWidth, currBlocks[m]);
 
+				for(int v = 0; v < currBlocks[m].size(); v++)
+					prevBlocks[m][v] = currBlocks[m][v].clone();
 			}
+
 			
-			for(int k = 0; k< 3; k++){
-				prevBlocks[k] = currBlocks[k]; 
-			}	
 		}
 
 		merge(bgr, frame);
