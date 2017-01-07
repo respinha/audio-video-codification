@@ -77,11 +77,11 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
     while(true){
 
 		//cout << i << "\n";
-		fprintf(stderr, "Frame: %d\n",i);
-
-		if(i>1){
+		/*if(i > 3){
 			break; 
-		}
+		}*/
+
+		fprintf(stderr, "Frame: %d\n",i);
 
 		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
 		if (frame.empty()) break;         // check if at end
@@ -91,9 +91,6 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 			//cout << "encoding first frame..\n";
 
 			encodeIntraframe(frame, bgr); 
-
-			// todo: return splitted frame on intraframe
-			//split(frame, bgr);
 
 			// splitting the first frame by blocks
 			// to compare with next frame
@@ -112,12 +109,7 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 			for(int j=0; j<3;j++){
 
 				blockSplit(bgr[j],blockHeight,blockWidth,&currBlocks[j]);
-
-				if((encodeInterFrame(frame,&prevBlocks[j],currBlocks[j])) != 0) {
-					bs->close();
-					stream->close();	
-					return;
-				}
+				encodeInterFrame(frame,&prevBlocks[j],currBlocks[j]);
 
 				for(unsigned int v = 0; v < prevBlocks[j].size(); v++) {
                        prevBlocks[j][v] = currBlocks[j][v].clone();
@@ -162,9 +154,7 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 
 				//cout << "Current: " << (int) current[c] << "\n";	
 				//cout << "Previous: " << (int) previous[c] << "\n";	
-				//
-				if (c < 10 && r == 0 && idx == 0)
-					cout << (int)residue << "\n"; 
+				if(residue != 0) cout << "R: " << residue << "\n";
 
 				if(residue < 0) {
 					residue = -2*(residue)-1;	
@@ -190,17 +180,13 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 
 }
 
-int Predictor::mergeBlock(Mat image, int blockHeight, int blockWidth, vector<Mat> blocks) {
+int Predictor::mergeBlock(Mat image, vector<Mat> blocks) {
 
 	int W = 0, H = 0; 
 
 	uint8_t *blockRow, *p;
 
-	for( int b=0 ; b<blocks.size(); b++){
-
-		cout << blocks[b].rows << " " << blocks[b].cols << "\n";
-	}
-	for( int b=0 ; b<blocks.size(); b++){
+	for( unsigned int b=0 ; b<blocks.size(); b++){
 
 		//cout << "B: " << b << "\n";
 
@@ -209,8 +195,6 @@ int Predictor::mergeBlock(Mat image, int blockHeight, int blockWidth, vector<Mat
 			H += blocks[b].rows;
 			W=0;
 		} 
-
-
 
 		for(int row =0 ; row < blocks[b].rows ; row++){
 
@@ -236,6 +220,7 @@ int Predictor::mergeBlock(Mat image, int blockHeight, int blockWidth, vector<Mat
 		
 	}
 
+	return 0;
 }
 
 // block division
@@ -336,13 +321,6 @@ void Predictor::spatialPredict(string filename) {
 }
 
 void Predictor::encodeIntraframe(Mat frame, Mat bgr[]) {
-
-
-/*	if ( !frame.data )
-    {
-    	printf("No image data \n");
-        return;
-    }*/
 	
 	uint8_t* p, *prev;
 
@@ -421,10 +399,10 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 	for(int f = 0; f < nFrames; f++) {
 
-		if ( f > 1)
-			break; 
-
-		cout << "Frame: " << f << "\n";
+		/*if ( f > 1)
+			break; */
+		fprintf(stderr, "f: %d\n", f);
+		//cout << "Frame: " << f << "\n";
 
 		if(f == 0){ //intraframe decoding 
 			for(int m = 0; m < 3; m++) {
@@ -444,8 +422,6 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 						
 						residue = (int16_t) gd->decode();
 
-						
-
 						if(residue %2 == 0) { 	// even
 							residue = residue/2;
 						}
@@ -464,9 +440,7 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 				blockSplit(bgr[m],blockHeight,blockWidth,&prevBlocks[m]);
 			}
-			
-			
-			//blockMerge(image, blockHeight, blockWidth, &prevBlocks);
+		
 		}
 		else{
 
@@ -474,27 +448,26 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 			for(int m = 0; m < 3; m++) {
 		
-				for(int i = 0; i < prevBlocks[m].size(); i++) {
+				for(unsigned int i = 0; i < prevBlocks[m].size(); i++) {
 
-					int rows = prevBlocks[m][i].rows;
-					int cols = prevBlocks[m][i].cols;
+					Mat prevBlock = prevBlocks[m][i];
+			
+					int rows = prevBlock.rows;
+					int cols = prevBlock.cols;
 
 					cout << i << "\n";
 
-					Mat block = Mat::zeros(Size(rows, cols), CV_8UC1);
+					Mat block = Mat::zeros(Size(cols, rows), CV_8UC1);
 
 					for( int h=0; h< rows; h++){
-						
-						//current = currBlocks[idx].ptr<int8_t>(h);
-						previous = prevBlocks[m][i].ptr<int8_t>(h);
-					
-						current = block.ptr<int8_t>(h);
 
+						previous = prevBlock.ptr<int8_t>(h);
+						current = block.ptr<int8_t>(h);
+						
 						for(int w=0; w < cols; w++){
-							
+
 							residue = (int16_t) gd->decode();	
 							
-
 							if(residue %2 == 0) { 	// even
 								residue = residue/2;
 							}
@@ -502,37 +475,33 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 								residue = -(residue+1)/2;
 							}
 
-							//if (w < 10 && h == 0 && m == 0 && i==0)
-								//cout << residue << "\n";
-							//cout << "w: "<<w<<" h: "<<h<<" i: "<<i<<"\n";
-
 							current[w] = previous[w] + residue;
 						}
-
-
 					}
 
 					currBlocks[m].push_back(block);
 				}
 
-				mergeBlock(frame, blockHeight, blockWidth, currBlocks[m]);
-
 				for(int v = 0; v < currBlocks[m].size(); v++)
 					prevBlocks[m][v] = currBlocks[m][v].clone();
-			}
 
-			
+				currBlocks[m].clear();
+
+				mergeBlock(bgr[m], currBlocks[m]);
+
+			}
+	
 		}
 
 		merge(bgr, frame);
-		outputStream->write((char*) frame.data, frame.cols * frame.rows * frame.channels());		
+		outputStream->write((char*) frame.data, frame.cols * frame.rows * frame.channels());
 	}
 
 
 	bs->close();
 	outputStream->close();
-	cout << "displaying video... ";
-    displayVideo("decoded_video.rgb");
+	//cout << "displaying video... ";
+    //displayVideo("decoded_video.rgb");
 
 }
 
