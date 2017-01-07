@@ -29,21 +29,23 @@
 /*/saved_LUT
 /*/sample_file
 /*/encode*
-/*/decoded
+/*/decoded*
+/*/wav_files/
+/*/wav_files/*
+
 
 /*/CMakeFiles*
 /*/CMakeFiles/*
-/*/CMakeCache*
-/video-encoder/Makefile
-/video-encoder/cmake_*
-
-
 /*/bin/
 /*/bin/*
 /*/build/
 /*/*.jpg
 /*/*.jpeg
-/*/build/*
 /*/*.rgb
-/*/*.jpg
-/*/*.jpeg
+<<<<<<< Updated upstream
+/*/hist*
+=======
+>>>>>>> Stashed changes
+/*/build/*
+/*/backup/*
+/*/backup/
