@@ -17,7 +17,7 @@ class Predictor {
 
 	private:
 		void encodeIntraframe(Mat frame, Mat bgr[]);
-		int encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks);
+		int encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks, int nFrame);
 
 		void displayVideo(string filename);	
 

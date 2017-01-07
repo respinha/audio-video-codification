@@ -77,9 +77,9 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
     while(true){
 
 		//cout << i << "\n";
-		if(i > 65){
+		/*if(i > 30){
 			break; 
-		}
+		}*/
 
 		fprintf(stderr, "Frame: %d\n",i);
 
@@ -109,7 +109,7 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 			for(int j=0; j<3;j++){
 
 				blockSplit(bgr[j],blockHeight,blockWidth,&currBlocks[j]);
-				encodeInterFrame(frame,&prevBlocks[j],currBlocks[j]);
+				encodeInterFrame(frame,&prevBlocks[j],currBlocks[j], i);
 
 				for(unsigned int v = 0; v < prevBlocks[j].size(); v++) {
                        prevBlocks[j][v] = currBlocks[j][v].clone();
@@ -127,7 +127,7 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 	stream->close();	
 }
 
-int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks){
+int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks, int nFrame){
 
 	if ( !frame.data )
     {
@@ -147,14 +147,12 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 
 			for(int c = 0; c < currBlocks[idx].cols; c++) {
 
-				//ptrDiff[c] = current[c] - previous[c];
-				//
 				// diff between two block values
 				int16_t residue = (int16_t) current[c] - previous[c];
 
-				//cout << "Current: " << (int) current[c] << "\n";	
-				//cout << "Previous: " << (int) previous[c] << "\n";	
-				cout << residue << "\n";
+				if(nFrame == 1)
+					cout << (int) previous[c] << "\n";
+				//cout << (int) residue << "\n";
 
 				if(residue < 0) {
 					residue = -2*(residue)-1;	
@@ -184,9 +182,7 @@ int Predictor::mergeBlock(Mat image, vector<Mat> blocks) {
 
 	int W = 0, H = 0; 
 
-	uint8_t *blockRow, *p;
-
-	for( int b=0 ; b<blocks.size(); b++){
+	for( unsigned int b=0 ; b<blocks.size(); b++){
 
 
 		if( W >= image.cols){
@@ -202,19 +198,19 @@ int Predictor::mergeBlock(Mat image, vector<Mat> blocks) {
 		W+=blocks[b].cols;
 
 	}
+
+	return 0;
 }
 
 // block division
 int Predictor::blockSplit(Mat image, int blockHeight, int blockWidth,vector<Mat>* smallImages) {
 
 	// get the image data
- 	//int height = image.rows;
-	//int width = image.cols;
 
 	Size reducedSize ( blockHeight , blockWidth );
 
 	//namedWindow("smallImages ", CV_WINDOW_AUTOSIZE );
-
+	//
 	for  ( int y =  0 ; y < image.rows ; y += reducedSize.height )
 	{
 		for  ( int x =  0 ; x < image.cols ; x += reducedSize.width )
@@ -233,7 +229,13 @@ int Predictor::blockSplit(Mat image, int blockHeight, int blockWidth,vector<Mat>
 				smallH = reducedSize.height; 
 
     		Rect rect =   Rect ( x , y , smallW , smallH );
-    		smallImages->push_back (Mat (image , rect));
+
+			Mat pic = Mat (image , rect).clone();
+			pic.convertTo(pic, CV_8UC1);
+
+    		smallImages->push_back (pic);
+    		//smallImages->push_back (Mat (image , rect));
+
 			//imshow( "smallImages", cv::Mat ( image, rect ));
    			//waitKey(0);
     	}
@@ -285,7 +287,6 @@ void Predictor::spatialPredict(string filename) {
 		encodeIntraframe(frame, bgr);
 		nFrames++;
 		//if(nFrames == 2) break;
-		//cout << "Frame: " << nFrames << "\n";
 		if(nFrames == 1) break;
 	}
 
@@ -326,18 +327,11 @@ void Predictor::encodeIntraframe(Mat frame, Mat bgr[]) {
 				int16_t residue = (int16_t) (p[col] - x);
 
 				
-				/*if(m == 2)*/
-				 //cout <<  "Value: " << (int) p[col] << "\n";
-
 				if(occurrences.find((int) residue) != occurrences.end()) 
 					occurrences[(int) residue]++;
 				else
 					occurrences.insert(make_pair((int) residue, 1));
 
-				//if (col < 10 && row == 0 && m == 0)
-					//cout << "Intra: " << (int) residue << "\n";
-
-				cout << (int)residue<<"\n"; 
 				if(residue < 0) {
 	
 					residue = -2*(residue)-1;	
@@ -367,12 +361,11 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 	*outputStream << cols << " " << rows << " " << fps << " rgb" << endl;
 
-	Mat frame = Mat(Size(cols, rows), CV_8UC3);
+	Mat frame = Mat::zeros(Size(cols, rows), CV_8UC3);
 	vector<Mat> bgr(3);
 	for(unsigned int i = 0; i < bgr.size(); i++) 
-		bgr[i] = Mat(Size(rows, cols), CV_8UC1);
+		bgr[i] = Mat::zeros(Size(rows, cols), CV_8UC1);
 
-	//cout << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
 
 	vector <Mat> prevBlocks[3]; 
     vector <Mat> currBlocks[3];
@@ -383,13 +376,13 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 	for(int f = 0; f < nFrames; f++) {
 
-		if ( f > 65)
-			break; 
+		/*if ( f > 30)
+			break;*/ 
 		fprintf(stderr, "f: %d\n", f);
-		//cout << "Frame: " << f << "\n";
 
 		//intraframe decoding 
-
+		//
+		int tmp = 0;
 		if(f == 0) { 
 
 			for(int m = 0; m < 3; m++) {
@@ -417,17 +410,20 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 						}
 
 						
-						cout << (int)residue << "\n";
-
 						p[col] = (uint8_t) (residue + x);
-						//cout << "Residue: " << (int) residue << "\n";
-						//cout <<  "Value: " << (int) p[col] << "\n";
+
+						if(m ==0 && tmp++ < 50*50) 	
+							cout << (int)p[col] << "\n";
+
 					}
 				}
 
+
 				blockSplit(bgr[m],blockHeight,blockWidth,&prevBlocks[m]);
 			}
-		
+
+			
+	
 		}
 		else{
 
@@ -441,8 +437,6 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 			
 					int rows = prevBlock.rows;
 					int cols = prevBlock.cols;
-
-					//cout << i << "\n";
 
 					Mat block = Mat::zeros(Size(cols, rows), CV_8UC1);
 
@@ -463,15 +457,14 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 							}
 
 							current[w] = previous[w] + residue;
-							cout << residue << "\n";
-							/*if(residue != 0)*/ 
+							//if(f == 1)	cout << (int) previous[w] << "\n";
 						}
 					}
 
 					currBlocks[m].push_back(block);
 				}
 
-				for(int v = 0; v < currBlocks[m].size(); v++)
+				for(unsigned int v = 0; v < currBlocks[m].size(); v++)
 					prevBlocks[m][v] = currBlocks[m][v].clone();
 
 				
@@ -514,7 +507,7 @@ void Predictor::spatialDecode() {
 	for(unsigned int i = 0; i < bgr.size(); i++) 
 		bgr[i] = Mat(Size(rows, cols), CV_8UC1);
 
-	//*outputStream << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
+	*outputStream << frame.cols << " " << frame.rows << " " << fps << " rgb" << endl;
 
 	int16_t residue;
 	for(int f = 0; f < nFrames; f++) {
@@ -546,8 +539,6 @@ void Predictor::spatialDecode() {
 					}
 
 					p[col] = (uint8_t) (residue + x);
-					//cout << "Residue: " << (int) residue << "\n";
-					//cout <<  "Value: " << (int) p[col] << "\n";
 				}
 			}
 		}
