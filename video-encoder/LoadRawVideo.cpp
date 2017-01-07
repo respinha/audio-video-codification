@@ -11,9 +11,14 @@ void displayVideo(string);
 
 int main(int argc, char **argv)
 {
+	if(argc < 2) {
+		cerr << "Invalid argc\n";
+		return -1;
+	}
+
 	string inputFileName = argv[1];
 	displayVideo(inputFileName);
-	
+
 	return 0;
 }
 
@@ -35,17 +40,20 @@ void displayVideo(string inputFileName) {
 	istringstream(line) >> nCols >> nRows >> fps >> type;
 	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
 	
-
 	while(true)
 	{
 
 		if(!myfile.read((char*)frame.data, frame.cols * frame.rows * frame.channels())) break;
+
+		Mat bgr[3];
+		split(frame, bgr);
 
 		if (frame.empty()) break;         // check if at end
 
 		imshow("Display frame", frame);
 
 		if(waitKey((int)(1.0 / fps * 1000)) >= 0) break;
+
 	}
 
 	if(myfile.is_open()) myfile.close();
