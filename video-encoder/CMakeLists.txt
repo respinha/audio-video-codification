@@ -34,3 +34,6 @@ target_link_libraries( BlockEncoder ${OpenCV_LIBS} )
 
 add_executable( TemporalDecoder test_temporal_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
 target_link_libraries( TemporalDecoder ${OpenCV_LIBS} ) 
+
+add_executable( TestSM test_split_merge.cpp )
+target_link_libraries( TestSM ${OpenCV_LIBS} ) 

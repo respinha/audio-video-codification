@@ -40,7 +40,6 @@ void displayVideo(string inputFileName) {
 	istringstream(line) >> nCols >> nRows >> fps >> type;
 	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
 	
-	int count = 0;
 	while(true)
 	{
 
@@ -55,8 +54,6 @@ void displayVideo(string inputFileName) {
 
 		if(waitKey((int)(1.0 / fps * 1000)) >= 0) break;
 
-		count++;
-		//if(count == 1) break;
 	}
 
 	if(myfile.is_open()) myfile.close();

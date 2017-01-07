@@ -77,9 +77,9 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
     while(true){
 
 		//cout << i << "\n";
-		/*if(i > 3){
+		if(i > 65){
 			break; 
-		}*/
+		}
 
 		fprintf(stderr, "Frame: %d\n",i);
 
@@ -154,7 +154,7 @@ int Predictor::encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vec
 
 				//cout << "Current: " << (int) current[c] << "\n";	
 				//cout << "Previous: " << (int) previous[c] << "\n";	
-				if(residue != 0) cout << "R: " << residue << "\n";
+				cout << residue << "\n";
 
 				if(residue < 0) {
 					residue = -2*(residue)-1;	
@@ -186,41 +186,22 @@ int Predictor::mergeBlock(Mat image, vector<Mat> blocks) {
 
 	uint8_t *blockRow, *p;
 
-	for( unsigned int b=0 ; b<blocks.size(); b++){
+	for( int b=0 ; b<blocks.size(); b++){
 
-		//cout << "B: " << b << "\n";
 
 		if( W >= image.cols){
 			//cout << "H: " << H << "\n";
 			H += blocks[b].rows;
 			W=0;
-		} 
-
-		for(int row =0 ; row < blocks[b].rows ; row++){
-
-			//cout << "H--"<<H<<"\n";
-			p = image.ptr<uint8_t>(row + H);
-			blockRow = blocks[b].ptr<uint8_t>(row);
-
-			//cout << row + H << " " << " " << image.rows <<  "\n";
-
-			for(int col =0 ; col < blocks[b].cols; col++){
-				//image[row + H][col + W]  = blocks[b][row][col]
-				p[col + W]  = blockRow[col];
-				
-				//cout << "r "<<row<<" c "<<col<<"\n"; 
-			}
-
-			
 		}
 
+		Mat block = blocks[b]; 
+
+		block.copyTo(image(cv::Rect(W,H,block.cols, block.rows))); 
 		
 		W+=blocks[b].cols;
 
-		
 	}
-
-	return 0;
 }
 
 // block division
@@ -356,6 +337,7 @@ void Predictor::encodeIntraframe(Mat frame, Mat bgr[]) {
 				//if (col < 10 && row == 0 && m == 0)
 					//cout << "Intra: " << (int) residue << "\n";
 
+				cout << (int)residue<<"\n"; 
 				if(residue < 0) {
 	
 					residue = -2*(residue)-1;	
@@ -383,7 +365,9 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 	ofstream* outputStream = new ofstream("decoded_video.rgb", 
 											ios::binary | ios::out);
 
-	Mat frame = Mat(Size(rows, cols), CV_8UC3);
+	*outputStream << cols << " " << rows << " " << fps << " rgb" << endl;
+
+	Mat frame = Mat(Size(cols, rows), CV_8UC3);
 	vector<Mat> bgr(3);
 	for(unsigned int i = 0; i < bgr.size(); i++) 
 		bgr[i] = Mat(Size(rows, cols), CV_8UC1);
@@ -399,12 +383,15 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 
 	for(int f = 0; f < nFrames; f++) {
 
-		/*if ( f > 1)
-			break; */
+		if ( f > 65)
+			break; 
 		fprintf(stderr, "f: %d\n", f);
 		//cout << "Frame: " << f << "\n";
 
-		if(f == 0){ //intraframe decoding 
+		//intraframe decoding 
+
+		if(f == 0) { 
+
 			for(int m = 0; m < 3; m++) {
 
 				uint8_t* p, *prev;
@@ -421,7 +408,7 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 						spatialPredictAux(col, row, &x, p, prev);
 						
 						residue = (int16_t) gd->decode();
-
+						
 						if(residue %2 == 0) { 	// even
 							residue = residue/2;
 						}
@@ -429,8 +416,8 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 							residue = -(residue+1)/2;
 						}
 
-						if (col < 10 && row == 0 && m == 0)
-						//	cout << (int)residue << "\n";
+						
+						cout << (int)residue << "\n";
 
 						p[col] = (uint8_t) (residue + x);
 						//cout << "Residue: " << (int) residue << "\n";
@@ -455,7 +442,7 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 					int rows = prevBlock.rows;
 					int cols = prevBlock.cols;
 
-					cout << i << "\n";
+					//cout << i << "\n";
 
 					Mat block = Mat::zeros(Size(cols, rows), CV_8UC1);
 
@@ -476,6 +463,8 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 							}
 
 							current[w] = previous[w] + residue;
+							cout << residue << "\n";
+							/*if(residue != 0)*/ 
 						}
 					}
 
@@ -485,9 +474,10 @@ void Predictor::temporalDecode(int blockHeight, int blockWidth) {
 				for(int v = 0; v < currBlocks[m].size(); v++)
 					prevBlocks[m][v] = currBlocks[m][v].clone();
 
-				currBlocks[m].clear();
-
+				
 				mergeBlock(bgr[m], currBlocks[m]);
+
+				currBlocks[m].clear();
 
 			}
 	
