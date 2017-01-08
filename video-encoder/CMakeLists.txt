@@ -31,3 +31,6 @@ target_link_libraries( LoadVideo ${OpenCV_LIBS} )
 
 add_executable( BlockEncoder test_interframe.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
 target_link_libraries( BlockEncoder ${OpenCV_LIBS} ) 
+
+add_executable( HybEncoder test_hybrid_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( HybEncoder ${OpenCV_LIBS} ) 

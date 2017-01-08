@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <cmath> 
 
 #include "Predictor.h"
 
@@ -21,6 +22,152 @@ Predictor::Predictor(string encodedFile, int M, int decodeFlag) {
 
 	histogramFile = new ofstream();
 	histogramFile->open("hist.txt", ios::out | ios::app);
+}
+
+
+void Predictor::hybridEncode(string filename, int blockHeight, int blockWidth){
+
+	ifstream* stream = new ifstream();
+	stream->open(filename);
+
+	if (!stream->is_open())
+	{
+		cerr << "Error opening file\n";
+		return;
+	}
+
+	// reading metadata
+	string line;
+	int nCols, nRows, type, fps;
+	getline (*stream,line);
+
+	istringstream(line) >> nCols >> nRows >> fps >> type;
+	/*cout << "nCols "<<nCols<<"\n";
+	cout << "nRows "<<nRows<<"\n";
+	cout << "fps "<<fps<<"\n";*/
+
+	Mat frame = Mat(Size(nCols, nRows), CV_8UC3);
+	
+	int nFrames = 0;
+
+	while(true) {
+		nFrames++;
+		//cout << nFrames << "\n";
+
+		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
+		if (frame.empty()) break;         // check if at end
+	}
+
+	stream->clear();
+	stream->seekg(0, ios::beg);
+
+	// writing metadata
+	ge->encode(nFrames);
+	ge->encode(nRows);
+	ge->encode(nCols);
+	ge->encode(fps);
+
+	// initializing buffers    
+    vector <Mat> prevBlocks[3]; 
+    vector <Mat> currBlocks[3];
+    int i = 0;
+
+	Mat bgr[3];	// frame channels
+
+	getline (*stream,line);
+    while(true){
+
+		//cout << i << "\n";
+		/*if(i > 30){
+			break; 
+		}*/
+
+		fprintf(stderr, "Frame: %d\n",i);
+
+		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
+		if (frame.empty()) break;         // check if at end
+
+
+		if(i==0){
+			//cout << "encoding first frame..\n";
+			float err = 0.0f;
+			encodeIntraframe(frame, bgr,1,&err); 
+
+			// splitting the first frame by blocks
+			// to compare with next frame
+			for(int j=0; j<3;j++){
+				blockSplit(bgr[j],blockHeight,blockWidth,&prevBlocks[j]);
+			}
+					
+		}
+		else{
+
+			float avg_error_inter_a[3]= {};
+			float avg_error_inter=0.0f; 
+			float avg_error_intra=0.0f;
+
+			split(frame, bgr);
+
+			//cout << "testing intraframe\n";
+			encodeIntraframe(frame,bgr,0,&avg_error_intra);
+			
+			for(int j=0; j<3;j++){
+
+				blockSplit(bgr[j],blockHeight,blockWidth,&currBlocks[j]);
+				//cout << "testing interframe\n";
+				encodeInterframe(&prevBlocks[j],currBlocks[j], 0,&avg_error_inter_a[j]); //evaluate interframe average residue 
+				
+
+				//cout.precision(20);
+				//cout << "inter error: "<<fixed<< avg_error_inter<<"\n"; 
+				//cout << "intra error: "<<fixed<< avg_error_intra<<"\n"; 
+				
+			}
+
+			float sum = 0.0f; 
+			for(int k=0; k<3;k++){
+				sum+=avg_error_inter_a[k];
+			}
+			avg_error_inter = sum / 3.0f;
+
+			//cout.precision(20);
+				//cout << "inter error: "<<fixed<< avg_error_inter<<"\n"; 
+				//cout << "intra error: "<<fixed<< avg_error_intra<<"\n"; 
+
+			if(abs(avg_error_inter) < abs(avg_error_intra)){
+				cout << "intra\n";
+				//WriteBit(1)
+				encodeIntraframe(frame,bgr,1,&avg_error_intra);
+				
+				for(int j=0; j<3;j++){
+					blockSplit(bgr[j],blockHeight,blockWidth,&prevBlocks[j]);
+				}
+
+			}
+			else{
+				cout << "inter\n";
+				//WriteBit(0)
+				for(int j=0; j<3;j++){
+					
+					encodeInterframe(&prevBlocks[j],currBlocks[j], 1,&avg_error_inter);
+					
+					for(unsigned int v = 0; v < prevBlocks[j].size(); v++) {
+                   		prevBlocks[j][v] = currBlocks[j][v].clone();
+            		}
+
+					currBlocks[j].clear();
+				}
+			}
+
+		}
+		i++;
+	}
+
+	bs->close();
+	stream->close();
+
+
+
 }
 
 float Predictor::calcEntropy(int total) {
@@ -104,7 +251,7 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 		if(i==0){
 			//cout << "encoding first frame..\n";
 
-			encodeIntraframe(frame, bgr,1); 
+			encodeIntraframe(frame, bgr,1,0); 
 
 			// splitting the first frame by blocks
 			// to compare with next frame
@@ -123,7 +270,7 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 			for(int j=0; j<3;j++){
 
 				blockSplit(bgr[j],blockHeight,blockWidth,&currBlocks[j]);
-				encodeInterframe(&prevBlocks[j],currBlocks[j], 1);
+				encodeInterframe(&prevBlocks[j],currBlocks[j], 1,0);
 
 				for(unsigned int v = 0; v < prevBlocks[j].size(); v++) {
                        prevBlocks[j][v] = currBlocks[j][v].clone();
@@ -143,7 +290,7 @@ void Predictor::temporalPredict(string filename, int blockHeight, int blockWidth
 
 
 //int Predictor::encodeInterframe(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks){
-int Predictor::encodeInterframe(vector<Mat> *prevBlocks, vector<Mat> currBlocks, int toEncode){
+int Predictor::encodeInterframe(vector<Mat> *prevBlocks, vector<Mat> currBlocks, int toEncode,float* avg_error){
 
 	/*if ( !frame.data )
     {
@@ -153,6 +300,10 @@ int Predictor::encodeInterframe(vector<Mat> *prevBlocks, vector<Mat> currBlocks,
 
 	//cout << prevBlocks->size() << " " << currBlocks.size() << "\n";
 
+	int16_t total_error = 0;
+	int count = 0; 
+	
+
 	int8_t *current, *previous;
 	for(vector<Mat>::size_type idx = 0; idx != currBlocks.size(); idx++){
 
@@ -160,29 +311,40 @@ int Predictor::encodeInterframe(vector<Mat> *prevBlocks, vector<Mat> currBlocks,
 
 			current = currBlocks[idx].ptr<int8_t>(r);
 			previous = (*prevBlocks)[idx].ptr<int8_t>(r);
+			//cout << "R: "<< r << "\n"; 
 
 			for(int c = 0; c < currBlocks[idx].cols; c++) {
 
 				// diff between two block values
 				int16_t residue = (int16_t) current[c] - previous[c];
 
+				total_error += abs(residue); 
+				//cout << "residue :"<< residue <<"\n"; 
+				count++; 
+
 				/*if(nFrame == 1)
 					cout << (int) previous[c] << "\n";*/
 				//cout << (int) residue << "\n";
+				if(toEncode){
+					if(residue < 0) {
+						residue = -2*(residue)-1;	
+					}
+					else {
+						residue = 2*residue;
+					}
 
-				if(residue < 0) {
-					residue = -2*(residue)-1;	
+					
+					ge->encode((int) residue);
 				}
-				else {
-					residue = 2*residue;
-				}
-
-				
-				ge->encode((int) residue);
 			}
 		}
 	}
 	
+	*avg_error = (float)total_error / (float)count; 
+	
+	//cout << "total error: "<<total_error<<"\n"; 
+	//cout << "count: "<<count<<"\n";
+	//cout << "avg error: "<<*avg_error<<"\n";
 	*prevBlocks = currBlocks;
 
 	/*for ( int k = 0 ; k<currBlocks.size() ; k++){
@@ -299,7 +461,7 @@ void Predictor::spatialPredict(string filename) {
 	Mat bgr[3];
 	while(true) {
 		if(!stream->read((char*) frame.data, frame.cols * frame.rows * frame.channels())) break; 
-		encodeIntraframe(frame, bgr,1);
+		encodeIntraframe(frame, bgr,1,0);
 		nFrames++;
 		//if(nFrames == 2) break;
 		if(nFrames == 1) break;
@@ -318,15 +480,18 @@ void Predictor::spatialPredict(string filename) {
 }
 
 // returns entropy
-void Predictor::encodeIntraframe(Mat frame, Mat bgr[], int toEncode) {
+void Predictor::encodeIntraframe(Mat frame, Mat bgr[], int toEncode, float* avg_error) {
 	
-	if(toEncode) cout << "Intra" << "\n";
+	//if(toEncode) cout << "Intra" << "\n";
 	uint8_t* p, *prev;
+	int16_t total_error = 0; 
+	int count = 0; 
 
 	//Mat bgr[3];
 	split(frame, bgr);
 
 	for(int m = 0; m < 3; m++) {
+
 
 		for(int row = 0; row < bgr[m].rows; row++) {
 
@@ -343,7 +508,9 @@ void Predictor::encodeIntraframe(Mat frame, Mat bgr[], int toEncode) {
 
 				int16_t residue = (int16_t) (p[col] - x);
 
-				
+				total_error += residue; 
+				count++; 
+
 				if(occurrences.find((int) residue) != occurrences.end()) 
 					occurrences[(int) residue]++;
 				else
@@ -365,6 +532,10 @@ void Predictor::encodeIntraframe(Mat frame, Mat bgr[], int toEncode) {
 			}
 		}
 	}
+
+	//cout <<"out!!\n"; 
+
+	*avg_error = (float)total_error / (float)count; 
 }
 
 void Predictor::temporalDecode(int blockHeight, int blockWidth) {

@@ -14,10 +14,11 @@ class Predictor {
 		void spatialDecode();
 		void temporalDecode(int blockHeight, int blockWidth);
 		void temporalPredict(string filename, int blockHeight, int blockWidth);
+		void hybridEncode(string filename, int blockHeight, int blockWidth); 
 
 	private:
-		void encodeIntraframe(Mat frame, Mat bgr[],int toEncode);
-		int encodeInterframe(vector<Mat>* prevBlocks, vector<Mat> currBlocks, int toEncode);
+		void encodeIntraframe(Mat frame, Mat bgr[],int toEncode,float* avg_error);
+		int encodeInterframe(vector<Mat>* prevBlocks, vector<Mat> currBlocks, int toEncode,float* avg_error);
 
 		void displayVideo(string filename);	
 
