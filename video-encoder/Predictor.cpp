@@ -134,7 +134,7 @@ void Predictor::hybridEncode(string filename, int blockHeight, int blockWidth){
 				//cout << "inter error: "<<fixed<< avg_error_inter<<"\n"; 
 				//cout << "intra error: "<<fixed<< avg_error_intra<<"\n"; 
 
-			if(abs(avg_error_inter) < abs(avg_error_intra)){
+			if(/*abs(avg_error_inter) < abs(avg_error_intra)*/0){
 				cout << "intra\n";
 				//WriteBit(1)
 				encodeIntraframe(frame,bgr,1,&avg_error_intra);
@@ -345,7 +345,9 @@ int Predictor::encodeInterframe(vector<Mat> *prevBlocks, vector<Mat> currBlocks,
 	//cout << "total error: "<<total_error<<"\n"; 
 	//cout << "count: "<<count<<"\n";
 	//cout << "avg error: "<<*avg_error<<"\n";
-	*prevBlocks = currBlocks;
+	if(toEncode){
+		*prevBlocks = currBlocks;
+	}
 
 	/*for ( int k = 0 ; k<currBlocks.size() ; k++){
 		prevBlocks[k] = currBlocks[k].clone(); 
