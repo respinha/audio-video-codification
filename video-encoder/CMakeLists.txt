@@ -29,8 +29,15 @@ target_link_libraries( Decoder ${OpenCV_LIBS} )
 add_executable( LoadVideo LoadRawVideo.cpp )
 target_link_libraries( LoadVideo ${OpenCV_LIBS} )
 
+add_executable( SaveVideo SaveVideo.cpp )
+target_link_libraries( SaveVideo ${OpenCV_LIBS} )
+
+
 add_executable( BlockEncoder test_interframe.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
 target_link_libraries( BlockEncoder ${OpenCV_LIBS} ) 
 
 add_executable( HybEncoder test_hybrid_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
 target_link_libraries( HybEncoder ${OpenCV_LIBS} ) 
+
+add_executable( HybDecoder test_hybrid_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( HybDecoder ${OpenCV_LIBS} ) 
