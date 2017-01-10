@@ -1,0 +1,11 @@
+Run: 
+- ./bin/SpatialEncoder <rgb packed file> <compressed file name> <M parameter (Golomb)>
+- ./bin/SpatialDecoder  <compressed file name> <M parameter (Golomb)>
+
+- ./bin/TemporalEncoder <rgb packed file> <compressed file name> <M parameter (Golomb)>
+- ./bin/TemporalDecoder  <compressed file name> <M parameter (Golomb)>
+
+- ./bin/HybEncoder <rgb packed file> <compressed file name> <M parameter (Golomb)> <block dim>
+- ./bin/HybDecoder  <compressed file name> <M parameter (Golomb)> <block dim>
+
+Code can be compiled by running build.sh.

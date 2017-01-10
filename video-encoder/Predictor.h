@@ -14,17 +14,23 @@ class Predictor {
 		void spatialDecode();
 		void temporalDecode(int blockHeight, int blockWidth);
 		void temporalPredict(string filename, int blockHeight, int blockWidth);
+		void hybridEncode(string filename, int blockHeight, int blockWidth); 
+
+		void hybridDecode(int blockHeight, int blockWidth);
 
 	private:
-		void encodeIntraframe(Mat frame, Mat bgr[]);
-		int encodeInterFrame(Mat frame, std::vector<Mat>* prevBlocks,std::vector<Mat> currBlocks, int nFrame);
+		void encodeIntraframe(Mat frame, Mat bgr[],int toEncode,float* avg_error);
+		int encodeInterframe(vector<Mat>* prevBlocks, vector<Mat> currBlocks, int toEncode,float* avg_error);
 
 		void displayVideo(string filename);	
 
 		int blockSplit(Mat image, int blockHeight, int blockWidth, vector<Mat>* smallImages);
 		int mergeBlock(Mat image, vector<Mat> blocks);
-		//void calcEntropy();
+
+		float calcEntropy(int total);
+
 		void spatialPredictAux(int col, int row, uint8_t* x, uint8_t* p, uint8_t* prev);
+		void spatialDecodeAux(Mat bgr, int rows, int cols);
 
 		GolombEncoder* ge;
 		GolombDecoder* gd;
@@ -33,6 +39,7 @@ class Predictor {
 		map<int, int> occurrences;
 		BitStream* bs;
 		string* file;
+
 };
 
 

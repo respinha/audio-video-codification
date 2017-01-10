@@ -20,20 +20,23 @@ INCLUDE_DIRECTORIES(
 	${OpenCV_INCLUDE_DIR}
 )
 
-add_executable( Encoder test_spatial_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
-target_link_libraries( Encoder ${OpenCV_LIBS} )
+add_executable( SpatialEncoder spatial_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( SpatialEncoder ${OpenCV_LIBS} )
 
-add_executable( Decoder test_spatial_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
-target_link_libraries( Decoder ${OpenCV_LIBS} )
+add_executable( SpatialDecoder spatial_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( SpatialDecoder ${OpenCV_LIBS} )
 
 add_executable( LoadVideo LoadRawVideo.cpp )
 target_link_libraries( LoadVideo ${OpenCV_LIBS} )
 
-add_executable( BlockEncoder test_interframe.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
-target_link_libraries( BlockEncoder ${OpenCV_LIBS} ) 
+add_executable( TemporalEncoder temporal_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( TemporalEncoder ${OpenCV_LIBS} ) 
 
-add_executable( TemporalDecoder test_temporal_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+add_executable( TemporalDecoder temporal_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
 target_link_libraries( TemporalDecoder ${OpenCV_LIBS} ) 
 
-add_executable( TestSM test_split_merge.cpp )
-target_link_libraries( TestSM ${OpenCV_LIBS} ) 
+add_executable( HybEncoder hybrid_encoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( HybEncoder ${OpenCV_LIBS} ) 
+
+add_executable( HybDecoder hybrid_decoder.cpp BitStream.cpp Golomb.cpp Predictor.cpp )
+target_link_libraries( HybDecoder ${OpenCV_LIBS} ) 
